@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>HỆ THỐNG QUẢN LÝ CẤP PHÁT THIẾT BỊ</title>
-    <!-- Font Plus Jakarta Sans -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -16,8 +16,29 @@
     <!-- Firebase SDK v9 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, getDoc, updateDoc, deleteDoc, query, where, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import {
+            getFirestore,
+            collection,
+            onSnapshot,
+            addDoc,
+            doc,
+            getDoc,
+            updateDoc,
+            deleteDoc,
+            query,
+            where,
+            getDocs,
+            writeBatch,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        import {
+            getAuth,
+            signInWithPopup,
+            GoogleAuthProvider,
+            signOut,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBWhqoCmf75jljLewbh6h-4aQEBPIydgYE",
@@ -36,12 +57,33 @@
         window.db = db;
         window.auth = auth;
         window.googleProvider = googleProvider;
-        window.authMethods = { signInWithPopup, signOut, onAuthStateChanged };
-        window.fs = { collection, onSnapshot, addDoc, doc, getDoc, updateDoc, deleteDoc, query, where, getDocs, writeBatch, serverTimestamp };
+
+        window.authMethods = {
+            signInWithPopup,
+            signOut,
+            onAuthStateChanged
+        };
+
+        window.fs = {
+            collection,
+            onSnapshot,
+            addDoc,
+            doc,
+            getDoc,
+            updateDoc,
+            deleteDoc,
+            query,
+            where,
+            getDocs,
+            writeBatch,
+            serverTimestamp
+        };
+
+        window.firebaseInitializationReady = true;
+        window.dispatchEvent(new Event('firebase-initialized'));
     </script>
 
     <style>
-        /* Khóa kích thước font chữ nâng nhẹ lên 15px */
         html {
             font-size: 15px !important;
             -webkit-text-size-adjust: 100% !important;
@@ -60,7 +102,7 @@
 
         body {
             font-size: 15px !important;
-            min-width: 1200px; /* Lock base layout structure */
+            min-width: 1200px;
             overflow-x: auto;
             touch-action: manipulation;
         }
@@ -69,32 +111,58 @@
             font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
         }
 
-        .radar-box { position: relative; width: 70px; height: 70px; border-radius: 50%; background: rgba(255,247,237,0.8); display: flex; align-items: center; justify-content: center; }
-        .radar-circle { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px solid rgba(249,115,22,0.4); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.4); opacity: 0; } }
-        
+        .radar-box {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255,247,237,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .radar-circle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(249,115,22,0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
         @keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        .toast-animate { animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        .toast-animate {
+            animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
+
 <body class="bg-[#f4f6f8] text-gray-800 text-sm flex h-screen overflow-hidden select-none">
 
-    <!-- CONTAINER THÔNG BÁO TOAST GÓC BÊN PHẢI MÀN HÌNH -->
     <div id="toastContainer" class="fixed top-4 right-4 z-[200] flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
-    <!-- CUSTOM DIALOG XÁC NHẬN -->
+    <!-- CUSTOM DIALOG -->
     <div id="customConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100 transition-all transform scale-100">
             <div id="confirmHeader" class="p-4 bg-slate-900 text-white flex items-center gap-3">
                 <i id="confirmIcon" class="fa-solid fa-circle-question text-xl text-orange-400"></i>
                 <h3 id="confirmTitle" class="font-extrabold text-base">Xác nhận thao tác</h3>
             </div>
+
             <div class="p-5">
                 <p id="confirmMessage" class="text-xs font-semibold text-gray-700 leading-relaxed"></p>
             </div>
+
             <div class="bg-gray-50 px-5 py-3 border-t flex justify-end gap-2" id="confirmActions">
                 <button id="btnConfirmCancel" onclick="closeCustomConfirm(false)" class="px-4 py-2 rounded-xl border border-gray-300 font-bold text-gray-600 hover:bg-gray-100 text-xs transition-all">Hủy bỏ</button>
                 <button id="btnConfirmOk" onclick="closeCustomConfirm(true)" class="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-sm transition-all">Đồng ý</button>
@@ -102,37 +170,45 @@
         </div>
     </div>
 
-    <!-- CỬA SỔ CẢNH BÁO BỘ GÕ TIẾNG VIỆT KHẨN CẤP -->
+    <!-- CẢNH BÁO BỘ GÕ TIẾNG VIỆT -->
     <div id="vietnameseWarningModal" class="fixed inset-0 bg-red-950/80 backdrop-blur-md z-[180] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full text-center p-6 space-y-4 border-2 border-red-500 animate-bounce-short">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full text-center p-6 space-y-4 border-2 border-red-500">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
                 <i class="fa-solid fa-keyboard"></i>
             </div>
+
             <div>
                 <h2 class="text-base font-extrabold text-red-600 uppercase tracking-wide">PHÁT HIỆN BỘ GÕ TIẾNG VIỆT!</h2>
                 <p class="text-xs font-bold text-gray-700 mt-2">Hệ thống đã từ chối ký tự vừa nhập để tránh sai lệch mã PDA / Mã NV.</p>
+
                 <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-left mt-3 text-xs space-y-1">
                     <p class="font-bold text-red-800"><i class="fa-solid fa-circle-info mr-1"></i> Hướng dẫn khắc phục:</p>
                     <p class="text-red-700">• Bấm phím <kbd class="bg-white border px-1 rounded text-[10px] font-bold">Ctrl + Shift</kbd> hoặc <kbd class="bg-white border px-1 rounded text-[10px] font-bold">Alt + Z</kbd> để chuyển Unikey/EVKey sang chế độ <b>Tiếng Anh (E)</b>.</p>
                 </div>
             </div>
+
             <button onclick="closeVietnameseModal()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md text-xs transition-all">
-                ĐÃ TẮT TIẾNG VIỆT - TẾP TỤC QUÉT
+                ĐÃ TẮT TIẾNG VIỆT - TIẾP TỤC QUÉT
             </button>
         </div>
     </div>
 
-    <!-- MODAL BẮT BUỘC ĐĂNG NHẬP GOOGLE -->
+    <!-- LOGIN OVERLAY -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center space-y-5 border border-gray-100">
             <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
                 <i class="fa-solid fa-shield-halved"></i>
             </div>
+
             <div>
                 <h2 class="text-xl font-extrabold text-gray-800">HỆ THỐNG QUẢN LÝ CẤP PHÁT</h2>
                 <p class="text-xs text-orange-600 font-bold mt-0.5">BN B Mega SOC</p>
-                <p class="text-xs text-gray-500 mt-2">Vui lòng đăng nhập bằng tài khoản Google để xác thực quyền truy cập vào hệ thống.</p>
+
+                <p id="loginStatus" class="text-xs text-gray-500 mt-2">
+                    Vui lòng đăng nhập bằng tài khoản Google để xác thực quyền truy cập vào hệ thống.
+                </p>
             </div>
+
             <button onclick="loginWithGoogle()" class="w-full bg-white hover:bg-gray-50 text-gray-700 font-bold py-2.5 px-4 border border-gray-300 rounded-xl shadow-sm flex items-center justify-center gap-3 transition-all hover:shadow text-sm">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="Google">
                 <span>Đăng nhập với Google</span>
@@ -140,7 +216,7 @@
         </div>
     </div>
 
-    <!-- 1. SIDEBAR BÊN TRÁI -->
+    <!-- SIDEBAR -->
     <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 shadow-lg">
         <div>
             <div class="p-4 bg-orange-600 text-white flex items-center gap-3">
@@ -153,22 +229,27 @@
 
             <nav class="p-2.5 space-y-1">
                 <p class="text-xs font-bold text-slate-500 uppercase px-3 py-1.5">Danh mục hệ thống</p>
+
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold bg-orange-500 text-white transition-all text-sm">
                     <i class="fa-solid fa-house text-base w-5"></i> Cấp Phát Thiết Bị
                 </button>
+
                 <button onclick="switchTab('unreturned')" id="nav-unreturned" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold hover:bg-slate-800 hover:text-white transition-all text-sm">
                     <i class="fa-solid fa-clock-rotate-left text-base w-5 text-amber-400"></i> Unreturned List
                 </button>
+
                 <button onclick="switchTab('pivot')" id="nav-pivot" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold hover:bg-slate-800 hover:text-white transition-all text-sm">
                     <i class="fa-solid fa-chart-pie text-base w-5 text-purple-400"></i> Pivot Theo Sup
                 </button>
+
                 <button onclick="switchTab('logs')" id="nav-logs" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold hover:bg-slate-800 hover:text-white transition-all text-sm">
                     <i class="fa-solid fa-list-check text-base w-5 text-blue-400"></i> Logs Nhật Ký
                 </button>
+
                 <button onclick="switchTab('employees')" id="nav-employees" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold hover:bg-slate-800 hover:text-white transition-all text-sm">
                     <i class="fa-solid fa-users text-base w-5 text-emerald-400"></i> Danh Sách Nhân Viên
                 </button>
-                
+
                 <button onclick="switchTab('admin')" id="nav-admin" class="hidden w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold hover:bg-slate-800 hover:text-white transition-all text-red-400 text-sm">
                     <i class="fa-solid fa-user-shield text-base w-5"></i> Bảo Mật & Quyền Admin
                 </button>
@@ -181,15 +262,17 @@
                     <p class="text-[10px] text-gray-500 uppercase font-bold">Người Thực Hiện</p>
                     <p id="currentAdminName" class="text-slate-200 font-bold truncate max-w-[130px]">Đang tải...</p>
                 </div>
+
                 <button onclick="logout()" class="text-red-400 hover:text-red-300 font-bold text-xs bg-slate-800 p-1.5 rounded-lg border border-slate-700" title="Đăng xuất">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
-            <p id="userRoleBadge" class="inline-block bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] font-bold">Role: Loading...</p>
+
+            <p id="userRoleBadge" class="inline-block bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] font-bold">Role: Đang xác minh...</p>
         </div>
     </aside>
 
-    <!-- MAIN CONTENT AREA -->
+    <!-- MAIN CONTENT -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="bg-white border-b border-gray-200 px-5 py-3 flex justify-between items-center shrink-0">
             <div class="flex items-center gap-3">
@@ -197,6 +280,7 @@
                 <span class="text-gray-300">|</span>
                 <span class="text-gray-500 text-xs">Hệ thống cấp phát thiết bị</span>
             </div>
+
             <div class="text-right text-gray-600 text-xs">
                 <span id="currentDay" class="font-semibold mr-2">Thứ tư – Ngày 05/08/2026</span>
                 <span id="currentTime" class="font-bold text-orange-600 text-base">15:25:00</span>
@@ -204,30 +288,28 @@
         </header>
 
         <div class="p-4 space-y-4 flex-1 flex flex-col overflow-y-auto">
-            <!-- THÔNG BÁO KHÓA CHỨC NĂNG DÀNH CHO KHÁCH -->
             <div id="readOnlyWarning" class="hidden bg-amber-50 border-l-4 border-amber-500 p-2.5 rounded-lg text-amber-800 text-xs font-bold flex items-center justify-between shrink-0">
                 <span><i class="fa-solid fa-lock mr-2"></i> Tài khoản Google của bạn chưa được phân quyền thực hiện. Các chức năng Thêm/Sửa/Xóa/Cấp phát đã bị khóa!</span>
             </div>
 
-            <!-- TAB 1: CẤP PHÁT MÁY (DASHBOARD) -->
+            <!-- DASHBOARD -->
             <div id="tab-dashboard" class="tab-content flex-1 flex flex-col space-y-4 min-h-0">
-                
-                <!-- HÀNG CÁC THẺ PHÍA TRÊN -->
                 <div class="grid grid-cols-12 gap-4 items-stretch">
-                    
-                    <!-- THẺ 1: TRẠNG THÁI KHO (CÓ THỂ CLICK CHỈNH SỬA TỔNG MÁY) -->
+
                     <div class="col-span-12 lg:col-span-2 bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex flex-col justify-between">
                         <div class="flex justify-between items-center border-b pb-2.5">
                             <span class="font-extrabold text-gray-800 uppercase text-xs tracking-wide">Trạng Thái Kho</span>
                             <span class="bg-orange-100 text-orange-600 font-bold px-2 py-0.5 rounded-full text-[10px]">Realtime</span>
                         </div>
 
-                        <!-- KHO MT93 (MÁY MỚI) -->
                         <div class="space-y-2 my-2">
                             <div class="flex justify-between font-extrabold text-sm">
                                 <span>MT93 (Máy mới)</span>
                                 <span class="text-orange-600">
-                                    Còn: <span id="mt93AvailableText">4</span>/<button onclick="editTotalDevices('mt93')" title="Click để chỉnh sửa tổng máy MT93" class="hover:underline font-extrabold text-orange-700 bg-orange-50 px-1 rounded border border-orange-200"><span id="mt93TotalText">54</span> <i class="fa-solid fa-pen text-[9px]"></i></button>
+                                    Còn: <span id="mt93AvailableText">4</span>/
+                                    <button onclick="editTotalDevices('mt93')" title="Click để chỉnh sửa tổng máy MT93" class="hover:underline font-extrabold text-orange-700 bg-orange-50 px-1 rounded border border-orange-200">
+                                        <span id="mt93TotalText">54</span> <i class="fa-solid fa-pen text-[9px]"></i>
+                                    </button>
                                 </span>
                             </div>
                             <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
@@ -242,12 +324,14 @@
                             </div>
                         </div>
 
-                        <!-- KHO MT90 (MÁY CŨ) -->
                         <div class="space-y-2 my-2">
                             <div class="flex justify-between font-extrabold text-sm">
                                 <span>MT90 (Máy cũ)</span>
                                 <span class="text-blue-600">
-                                    Còn: <span id="mt90AvailableText">19</span>/<button onclick="editTotalDevices('mt90')" title="Click để chỉnh sửa tổng máy MT90" class="hover:underline font-extrabold text-blue-700 bg-blue-50 px-1 rounded border border-blue-200"><span id="mt90TotalText">23</span> <i class="fa-solid fa-pen text-[9px]"></i></button>
+                                    Còn: <span id="mt90AvailableText">19</span>/
+                                    <button onclick="editTotalDevices('mt90')" title="Click để chỉnh sửa tổng máy MT90" class="hover:underline font-extrabold text-blue-700 bg-blue-50 px-1 rounded border border-blue-200">
+                                        <span id="mt90TotalText">23</span> <i class="fa-solid fa-pen text-[9px]"></i>
+                                    </button>
                                 </span>
                             </div>
                             <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
@@ -256,7 +340,6 @@
                         </div>
                     </div>
 
-                    <!-- THẺ 2: OPS ID NHÂN VIÊN (4/12 CỘT) -->
                     <div class="col-span-12 lg:col-span-4 bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex flex-col justify-between space-y-3">
                         <div class="flex items-center gap-2 border-b pb-2.5">
                             <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 font-extrabold flex items-center justify-center text-xs">1</span>
@@ -278,6 +361,7 @@
                                     <option value="">-- Chọn Team --</option>
                                 </select>
                             </div>
+
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1">SUPERVISOR</label>
                                 <select id="displayEmpSup" class="w-full p-2.5 border border-orange-300 rounded-lg bg-white font-bold text-gray-800 outline-none text-xs focus:border-orange-600 cursor-pointer">
@@ -287,18 +371,18 @@
                         </div>
                     </div>
 
-                    <!-- THẺ 3: QUÉT NHIỀU PDA CÙNG LÚC (6/12 CỘT) -->
                     <div class="col-span-12 lg:col-span-6 bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex flex-col justify-between space-y-3">
                         <div class="flex items-center gap-2 border-b pb-2.5">
                             <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 font-extrabold flex items-center justify-center text-xs">2</span>
                             <h2 class="font-extrabold uppercase text-xs text-gray-800 tracking-wide">QUÉT MÃ THIẾT BỊ</h2>
                         </div>
-                        
+
                         <div class="grid grid-cols-2 gap-3">
                             <div class="border-2 border-emerald-400 border-dashed rounded-xl p-3 bg-emerald-50/30">
                                 <span class="font-extrabold text-emerald-800 block mb-1 text-xs uppercase"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> MƯỢN</span>
                                 <input type="text" id="borrowPdaInput" placeholder="Quét mã thiết bị mượn..." class="w-full p-2.5 border rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-emerald-500">
                             </div>
+
                             <div class="border-2 border-amber-400 border-dashed rounded-xl p-3 bg-amber-50/30">
                                 <span class="font-extrabold text-amber-800 block mb-1 text-xs uppercase"><i class="fa-solid fa-arrow-down-to-bracket mr-1"></i> TRẢ</span>
                                 <input type="text" id="returnPdaInput" placeholder="Quét mã thiết bị trả..." class="w-full p-2.5 border rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-amber-500">
@@ -310,6 +394,7 @@
                                 <span>Danh sách thiết bị vừa quét (<span id="pendingCount" class="text-orange-600 font-extrabold">0</span>):</span>
                                 <button onclick="clearPendingList()" class="text-red-500 hover:underline">Xóa tất cả</button>
                             </div>
+
                             <div id="pendingPdaList" class="flex flex-col gap-1.5 min-h-[70px] max-h-[110px] overflow-y-auto p-2.5 border rounded-xl bg-gray-50">
                                 <span class="text-gray-400 text-xs italic font-medium">Chưa quét mã thiết bị nào...</span>
                             </div>
@@ -321,7 +406,6 @@
                     </div>
                 </div>
 
-                <!-- THẺ BÊN DƯỚI: PDA CHƯA TRẢ REALTIME TRACKER -->
                 <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex-1 flex flex-col min-h-0">
                     <div class="flex justify-between items-center mb-3 pb-2 border-b">
                         <h3 class="font-extrabold text-gray-800 uppercase flex items-center gap-2 text-xs tracking-wide">
@@ -329,7 +413,7 @@
                         </h3>
                         <span class="text-xs font-bold text-gray-400">Bấm trả nhanh tại cột thao tác bên dưới</span>
                     </div>
-                    
+
                     <div class="overflow-x-auto flex-1 max-h-[320px] overflow-y-auto rounded-xl border border-gray-100">
                         <table class="w-full text-left border-collapse relative">
                             <thead class="bg-slate-900 text-white font-bold text-xs uppercase sticky top-0 z-10 shadow-sm">
@@ -342,18 +426,19 @@
                                     <th class="p-3 text-right">THAO TÁC</th>
                                 </tr>
                             </thead>
-                            <tbody id="unreturnedMiniTable" class="divide-y divide-gray-100 text-xs font-medium"></tbody>
+                            <tbody id="unreturnedMiniTable" class="divide-y divide-gray-100 text-xs"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 2: UNRETURNED LIST -->
+            <!-- UNRETURNED LIST -->
             <div id="tab-unreturned" class="tab-content hidden bg-white rounded-xl p-4 shadow-sm border border-gray-200">
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="text-base font-bold text-gray-800 uppercase">Unreturned List (Danh Sách Chưa Trả)</h2>
                     <input type="text" id="searchUnreturned" placeholder="Tìm theo mã máy, tên NV, Ops ID..." class="p-2 border rounded-lg w-72 text-xs">
                 </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-800 text-white font-bold text-xs">
@@ -374,7 +459,7 @@
                 </div>
             </div>
 
-            <!-- TAB PIVOT TABLE THEO SUPERVISOR -->
+            <!-- PIVOT -->
             <div id="tab-pivot" class="tab-content hidden space-y-3">
                 <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
                     <div class="flex justify-between items-center mb-3 border-b pb-2">
@@ -384,6 +469,7 @@
                             </h2>
                             <p class="text-xs text-gray-500 mt-0.5">Nhấp vào tên nhân viên để xem chi tiết danh sách máy đang giữ</p>
                         </div>
+
                         <div class="bg-purple-50 text-purple-700 font-bold px-2.5 py-1 rounded-lg border border-purple-200 text-xs">
                             Tổng PDA Chưa Trả: <span id="pivotTotalPdas" class="text-purple-900 text-sm font-bold">0</span>
                         </div>
@@ -392,12 +478,13 @@
                 </div>
             </div>
 
-            <!-- TAB 3: LOGS NHẬT KÝ -->
+            <!-- LOGS -->
             <div id="tab-logs" class="tab-content hidden bg-white rounded-xl p-4 shadow-sm border border-gray-200">
                 <div class="flex justify-between items-center mb-3 border-b pb-2">
                     <h2 class="text-base font-bold text-gray-800 uppercase">LOGS NHẬT KÝ MƯỢN / TRẢ</h2>
                     <span class="text-xs text-gray-500 font-semibold"><i class="fa-solid fa-arrow-down-wide-short text-orange-500 mr-1"></i> Sắp xếp: Mới nhất ➔ Cũ nhất</span>
                 </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-100 text-gray-700 font-bold border-b text-xs">
@@ -417,7 +504,7 @@
                 </div>
             </div>
 
-            <!-- TAB 4: DANH SÁCH NHÂN VIÊN -->
+            <!-- EMPLOYEES -->
             <div id="tab-employees" class="tab-content hidden flex-1 flex flex-col space-y-3 h-full min-h-0 overflow-hidden">
                 <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 flex items-center justify-between shrink-0">
                     <div class="flex items-center gap-2">
@@ -427,6 +514,7 @@
                             <span class="text-[11px] text-emerald-700 ml-1 hidden sm:inline">(Tải file Excel .xlsx, .csv)</span>
                         </div>
                     </div>
+
                     <label class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs cursor-pointer transition-all flex items-center gap-1.5 shadow-sm">
                         <i class="fa-solid fa-file-import"></i> Chọn File Excel
                         <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden">
@@ -435,29 +523,35 @@
 
                 <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-200 shrink-0">
                     <h2 class="text-xs font-bold text-gray-800 uppercase mb-2">Thêm / Cập Nhật Lẻ Nhân Viên</h2>
+
                     <form id="empForm" onsubmit="saveEmployee(event)" class="grid grid-cols-6 gap-2">
                         <div>
                             <label class="block font-semibold text-gray-600 mb-0.5 text-[11px]">Ops ID / Mã NV</label>
                             <input type="text" id="empOpsId" required placeholder="Ops5509" class="w-full p-1.5 border rounded-lg outline-none focus:border-orange-500 bg-orange-50 font-bold text-xs">
                         </div>
+
                         <div>
                             <label class="block font-semibold text-gray-600 mb-0.5 text-[11px]">Họ và Tên</label>
                             <input type="text" id="empName" required placeholder="HÀ VIỆT HÙNG" class="w-full p-1.5 border rounded-lg outline-none focus:border-orange-500 font-semibold text-xs">
                         </div>
+
                         <div>
                             <label class="block font-semibold text-gray-600 mb-0.5 text-[11px]">Email</label>
                             <input type="email" id="empEmail" placeholder="hung.haviet@spxexpress.com" class="w-full p-1.5 border rounded-lg outline-none focus:border-orange-500 text-xs">
                         </div>
+
                         <div>
                             <label class="block font-semibold text-gray-600 mb-0.5 text-[11px]">Team</label>
                             <input type="text" id="empTeam" list="teamOptions" placeholder="Chọn / Nhập Team..." class="w-full p-1.5 border border-orange-300 rounded-lg outline-none focus:border-orange-600 bg-white font-semibold text-xs">
                             <datalist id="teamOptions"></datalist>
                         </div>
+
                         <div>
                             <label class="block font-semibold text-gray-600 mb-0.5 text-[11px]">Supervisor Direct</label>
                             <input type="text" id="empSup" list="supOptions" required placeholder="Chọn / Nhập Sup..." class="w-full p-1.5 border border-orange-300 rounded-lg outline-none focus:border-orange-600 bg-white font-semibold text-xs">
                             <datalist id="supOptions"></datalist>
                         </div>
+
                         <div class="flex items-end">
                             <button type="submit" id="btnSaveEmp" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold p-2 rounded-lg transition-all shadow-md disabled:opacity-50 text-xs">
                                 <i class="fa-solid fa-floppy-disk mr-1"></i> Lưu Nhân Viên
@@ -470,13 +564,16 @@
                     <div class="flex flex-wrap justify-between items-center gap-2 mb-2 shrink-0">
                         <div class="flex items-center gap-2">
                             <h2 class="text-xs font-bold text-gray-800 uppercase">Danh Sách Nhân Viên (<span id="empCount">0</span>)</h2>
+
                             <button id="btnDeleteSelectedEmp" onclick="deleteSelectedEmployees()" class="bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 font-bold px-2 py-0.5 rounded-lg text-xs transition-all flex items-center gap-1 disabled:opacity-50">
                                 <i class="fa-solid fa-trash-can"></i> Xóa Các Nhân Viên Đã Chọn
                             </button>
+
                             <button id="btnDeleteAllEmp" onclick="deleteAllEmployees()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-2 py-0.5 rounded-lg text-xs transition-all flex items-center gap-1 shadow-sm disabled:opacity-50">
                                 <i class="fa-solid fa-triangle-exclamation"></i> Xóa Tất Cả CSDL
                             </button>
                         </div>
+
                         <div class="relative">
                             <i class="fa-solid fa-search absolute left-2.5 top-2 text-gray-400 text-xs"></i>
                             <input type="text" id="searchEmp" placeholder="Tìm theo Tên, Ops ID, Team, Sup..." class="pl-8 p-1 border border-orange-300 focus:border-orange-600 outline-none rounded-lg w-72 text-xs font-semibold">
@@ -504,7 +601,7 @@
                 </div>
             </div>
 
-            <!-- TAB 5: BẢO MẬT & QUẢN LÝ ADMIN -->
+            <!-- ADMIN MANAGEMENT -->
             <div id="tab-admin" class="tab-content hidden space-y-4">
                 <div class="bg-white rounded-xl p-4 shadow-sm border border-red-200">
                     <div class="flex items-center gap-2 mb-2.5 border-b pb-2 text-red-700">
@@ -517,10 +614,12 @@
                             <label class="block font-semibold text-gray-600 mb-1 text-xs">Email Google được phép</label>
                             <input type="email" id="adminEmail" required placeholder="hung.ha@spxexpress.com" class="w-full p-2 border rounded-lg outline-none focus:border-red-500 font-semibold text-xs">
                         </div>
+
                         <div>
                             <label class="block font-semibold text-gray-600 mb-1 text-xs">Tên Người Thực Hiện (Hiển thị Logs)</label>
                             <input type="text" id="adminDisplayName" required placeholder="HÀ VIỆT HÙNG" class="w-full p-2 border rounded-lg outline-none focus:border-red-500 font-bold text-xs">
                         </div>
+
                         <div>
                             <label class="block font-semibold text-gray-600 mb-1 text-xs">Cấp Quyền Super Admin?</label>
                             <select id="adminIsSuper" class="w-full p-2 border rounded-lg outline-none focus:border-red-500 font-semibold bg-white text-xs">
@@ -528,6 +627,7 @@
                                 <option value="true">Có (Xem thẻ Quyền Admin)</option>
                             </select>
                         </div>
+
                         <div class="flex items-end">
                             <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold p-2.5 rounded-lg transition-all shadow-md text-xs">
                                 <i class="fa-solid fa-plus mr-1"></i> Cấp Quyền Cho Email
@@ -554,7 +654,7 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP CHI TIẾT MÁY -->
+    <!-- MODAL CHI TIẾT THIẾT BỊ -->
     <div id="empDetailsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-gray-200 transition-all">
             <div class="bg-slate-900 text-white px-6 py-3.5 flex justify-between items-center">
@@ -564,6 +664,7 @@
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl font-bold transition-all">✕</button>
             </div>
+
             <div class="p-5 space-y-3">
                 <div class="flex justify-between items-center">
                     <p class="text-xs font-bold text-gray-500 uppercase">Danh sách thiết bị PDA đang giữ:</p>
@@ -571,9 +672,10 @@
                         <i class="fa-solid fa-copy"></i> Sao chép tất cả mã PDA
                     </button>
                 </div>
-                
+
                 <div id="modalPdaList" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
             </div>
+
             <div class="bg-gray-50 px-5 py-3 border-t text-right">
                 <button onclick="closeModal()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-sm">
                     Đóng Bảng
@@ -582,12 +684,12 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC XỬ LÝ -->
+    <!-- JAVASCRIPT LOGIC -->
     <script type="module">
         let currentUser = null;
-        let currentUserRole = 'guest'; 
+        let currentUserRole = 'guest';
         let currentAdminDisplayName = 'HÀ VIỆT HÙNG';
-        
+
         let adminUsersCache = [];
         let selectedEmployee = null;
         let pendingBorrowPdaList = [];
@@ -597,45 +699,48 @@
         let currentModalPdaCodes = [];
         let customConfirmResolver = null;
 
-        // BIẾN Cấu hình tổng số máy kho
-        let totalMt93 = parseInt(localStorage.getItem('totalMt93')) || 54;
-        let totalMt90 = parseInt(localStorage.getItem('totalMt90')) || 23;
+        // Tránh khởi tạo listener nhiều lần.
+        let dataListenersStarted = false;
+
+        // Tổng số máy; hiện đang lưu cục bộ trên từng trình duyệt.
+        let totalMt93 = parseInt(localStorage.getItem('totalMt93'), 10) || 54;
+        let totalMt90 = parseInt(localStorage.getItem('totalMt90'), 10) || 23;
 
         const { signInWithPopup, signOut, onAuthStateChanged } = window.authMethods;
         const auth = window.auth;
         const provider = window.googleProvider;
 
         window.loginWithGoogle = async function() {
+            const status = document.getElementById('loginStatus');
+
             try {
+                if (status) status.innerText = 'Đang mở cửa sổ đăng nhập Google...';
                 await signInWithPopup(auth, provider);
             } catch (err) {
-                console.error("Lỗi đăng nhập:", err);
-                showToast(`Đăng nhập thất bại: ${err.message}`, 'error');
+                console.error('Lỗi đăng nhập:', err);
+
+                if (status) {
+                    status.innerText = 'Đăng nhập thất bại: ' + (err.message || String(err));
+                }
+
+                showToast('Đăng nhập thất bại: ' + (err.message || String(err)), 'error');
             }
         };
 
-        window.logout = function() {
-            signOut(auth).then(() => {
+        window.logout = async function() {
+            try {
+                await signOut(auth);
                 location.reload();
-            });
-        };
-
-        onAuthStateChanged(auth, async (user) => {
-            const loginOverlay = document.getElementById('loginOverlay');
-            if (user) {
-                currentUser = user;
-                loginOverlay.classList.add('hidden');
-                await checkUserPermissions(user.email);
-            } else {
-                currentUser = null;
-                loginOverlay.classList.remove('hidden');
+            } catch (err) {
+                console.error('Lỗi đăng xuất:', err);
+                showToast('Không thể đăng xuất: ' + (err.message || String(err)), 'error');
             }
-        });
+        };
 
         window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            
+
             let bgStyle = 'bg-slate-900 text-white border-slate-700';
             let icon = '<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>';
 
@@ -651,30 +756,43 @@
             }
 
             toast.className = `${bgStyle} border p-3.5 rounded-xl shadow-2xl flex items-center gap-3 text-xs font-semibold toast-animate pointer-events-auto`;
-            toast.innerHTML = `
-                ${icon}
-                <span class="flex-1 leading-tight">${message}</span>
-                <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-white font-bold ml-2">✕</button>
-            `;
+
+            // Dùng textContent để thông báo không được diễn giải thành HTML.
+            const iconHolder = document.createElement('span');
+            iconHolder.innerHTML = icon;
+
+            const messageHolder = document.createElement('span');
+            messageHolder.className = 'flex-1 leading-tight';
+            messageHolder.textContent = String(message ?? '');
+
+            const closeButton = document.createElement('button');
+            closeButton.className = 'text-gray-400 hover:text-white font-bold ml-2';
+            closeButton.textContent = '✕';
+            closeButton.onclick = () => toast.remove();
+
+            toast.appendChild(iconHolder);
+            toast.appendChild(messageHolder);
+            toast.appendChild(closeButton);
 
             container.appendChild(toast);
+
             setTimeout(() => {
                 if (toast.parentElement) toast.remove();
-            }, 3500);
+            }, 5000);
         };
 
         window.showCustomConfirm = function(title, message, isDanger = false) {
             return new Promise((resolve) => {
                 customConfirmResolver = resolve;
+
                 document.getElementById('confirmTitle').innerText = title;
                 document.getElementById('confirmMessage').innerText = message;
-                
+
                 const btnOk = document.getElementById('btnConfirmOk');
-                if (isDanger) {
-                    btnOk.className = 'px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-sm transition-all';
-                } else {
-                    btnOk.className = 'px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-sm transition-all';
-                }
+
+                btnOk.className = isDanger
+                    ? 'px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-sm transition-all'
+                    : 'px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-sm transition-all';
 
                 document.getElementById('customConfirmModal').classList.remove('hidden');
             });
@@ -682,31 +800,234 @@
 
         window.closeCustomConfirm = function(result) {
             document.getElementById('customConfirmModal').classList.add('hidden');
+
             if (customConfirmResolver) {
                 customConfirmResolver(result);
                 customConfirmResolver = null;
             }
         };
 
-        // HÀM CHỈNH SỬA TỔNG SỐ LƯỢNG MÁY TRONG KHO
+        window.closeVietnameseModal = function() {
+            document.getElementById('vietnameseWarningModal').classList.add('hidden');
+
+            const scanInput = document.getElementById('scanEmpInput');
+            if (scanInput) scanInput.focus();
+        };
+
+        function setFormControlsState(enabled) {
+            const btnConfirm = document.getElementById('btnConfirm');
+            const btnSaveEmp = document.getElementById('btnSaveEmp');
+            const btnDeleteSelectedEmp = document.getElementById('btnDeleteSelectedEmp');
+            const btnDeleteAllEmp = document.getElementById('btnDeleteAllEmp');
+            const excelFileInput = document.getElementById('excelFileInput');
+
+            if (btnConfirm) btnConfirm.disabled = !enabled;
+            if (btnSaveEmp) btnSaveEmp.disabled = !enabled;
+            if (btnDeleteSelectedEmp) btnDeleteSelectedEmp.disabled = !enabled;
+            if (btnDeleteAllEmp) btnDeleteAllEmp.disabled = !enabled;
+            if (excelFileInput) excelFileInput.disabled = !enabled;
+        }
+
+        // Chỉ truy vấn đúng document user_access/{email}.
+        // Không tự tạo Super Admin khi danh sách quản trị trống.
+        async function checkUserPermissions(email) {
+            const { doc, getDoc } = window.fs;
+            const db = window.db;
+
+            const lowerEmail = String(email || '').trim().toLowerCase();
+
+            if (!lowerEmail) {
+                currentUserRole = 'guest';
+                return false;
+            }
+
+            const accessRef = doc(db, 'user_access', lowerEmail);
+            const accessSnap = await getDoc(accessRef);
+
+            if (!accessSnap.exists()) {
+                currentUserRole = 'guest';
+                return false;
+            }
+
+            const access = accessSnap.data();
+
+            if (
+                access.enabled !== true ||
+                String(access.email || '').trim().toLowerCase() !== lowerEmail
+            ) {
+                currentUserRole = 'guest';
+                return false;
+            }
+
+            const isSuper = access.isSuper === true;
+            const canWrite = isSuper || access.canWrite === true;
+
+            if (isSuper) {
+                currentUserRole = 'superadmin';
+            } else if (canWrite) {
+                currentUserRole = 'executor';
+            } else {
+                // Tài khoản chỉ xem vẫn được đăng nhập và đọc dữ liệu.
+                currentUserRole = 'guest';
+            }
+
+            currentAdminDisplayName =
+                access.displayName ||
+                currentUser.displayName ||
+                lowerEmail;
+
+            const navAdminBtn = document.getElementById('nav-admin');
+            const readOnlyWarning = document.getElementById('readOnlyWarning');
+            const currentAdminNameEl = document.getElementById('currentAdminName');
+            const userRoleBadge = document.getElementById('userRoleBadge');
+
+            currentAdminNameEl.innerText = currentAdminDisplayName;
+            navAdminBtn.classList.toggle('hidden', !isSuper);
+            readOnlyWarning.classList.toggle('hidden', canWrite);
+
+            if (isSuper) {
+                userRoleBadge.innerText = 'Role: Super Admin';
+                userRoleBadge.className =
+                    'inline-block bg-red-900 text-red-200 px-2 py-0.5 rounded text-[10px] font-bold';
+            } else if (canWrite) {
+                userRoleBadge.innerText = 'Role: Người Thực Hiện';
+                userRoleBadge.className =
+                    'inline-block bg-emerald-900 text-emerald-200 px-2 py-0.5 rounded text-[10px] font-bold';
+            } else {
+                userRoleBadge.innerText = 'Role: Khách (Chỉ Xem)';
+                userRoleBadge.className =
+                    'inline-block bg-amber-900 text-amber-200 px-2 py-0.5 rounded text-[10px] font-bold';
+            }
+
+            setFormControlsState(canWrite);
+
+            // Không tải danh sách quản trị đối với người không phải Super Admin.
+            if (!isSuper) {
+                adminUsersCache = [];
+                renderAdminUsers([]);
+            }
+
+            renderUnreturned(unreturnedCache);
+            renderEmployees(employeeCache);
+
+            return true;
+        }
+
+        // Đợi Firebase SDK khởi tạo xong trước khi đăng ký listener xác thực.
+        async function initializeAuthentication() {
+            if (!window.firebaseInitializationReady) {
+                await new Promise((resolve) => {
+                    window.addEventListener('firebase-initialized', resolve, { once: true });
+                });
+            }
+
+            const { onAuthStateChanged } = window.authMethods;
+            const auth = window.auth;
+
+            onAuthStateChanged(auth, async (user) => {
+                const loginOverlay = document.getElementById('loginOverlay');
+                const loginStatus = document.getElementById('loginStatus');
+
+                if (!user) {
+                    currentUser = null;
+                    currentUserRole = 'guest';
+
+                    loginOverlay.classList.remove('hidden');
+
+                    if (loginStatus) {
+                        loginStatus.innerText =
+                            'Vui lòng đăng nhập bằng tài khoản Google để xác thực quyền truy cập vào hệ thống.';
+                    }
+
+                    setFormControlsState(false);
+                    return;
+                }
+
+                currentUser = user;
+                loginOverlay.classList.remove('hidden');
+
+                if (loginStatus) {
+                    loginStatus.innerText = 'Đang xác minh quyền truy cập...';
+                }
+
+                try {
+                    const allowed = await checkUserPermissions(user.email);
+
+                    if (!allowed) {
+                        if (loginStatus) {
+                            loginStatus.innerText =
+                                'Tài khoản này chưa được cấp quyền truy cập. ' +
+                                'Vui lòng liên hệ Super Admin.';
+                        }
+
+                        setFormControlsState(false);
+
+                        showToast(
+                            'Tài khoản chưa được cấp quyền truy cập hệ thống.',
+                            'warning'
+                        );
+
+                        return;
+                    }
+
+                    loginOverlay.classList.add('hidden');
+                    startDataListeners();
+
+                } catch (err) {
+                    console.error('Lỗi xác minh quyền truy cập:', err);
+
+                    if (loginStatus) {
+                        loginStatus.innerText =
+                            'Không thể xác minh quyền truy cập (' +
+                            (err.code || 'unknown') +
+                            '). Vui lòng kiểm tra cấu hình Firestore Rules.';
+                    }
+
+                    setFormControlsState(false);
+
+                    showToast(
+                        'Không thể tải quyền truy cập: ' +
+                        (err.message || String(err)),
+                        'error'
+                    );
+                }
+            });
+        }
+
+        initializeAuthentication().catch((err) => {
+            console.error('Lỗi khởi tạo xác thực Firebase:', err);
+
+            const loginStatus = document.getElementById('loginStatus');
+
+            if (loginStatus) {
+                loginStatus.innerText =
+                    'Không thể khởi tạo Firebase. Vui lòng tải lại trang và kiểm tra cấu hình.';
+            }
+
+            showToast('Lỗi khởi tạo Firebase: ' + (err.message || String(err)), 'error');
+        });
+
+        // Chỉnh tổng số thiết bị. Giá trị này vẫn lưu trên trình duyệt hiện tại.
         window.editTotalDevices = function(type) {
             if (currentUserRole === 'guest') {
-                showToast("Bạn không có quyền chỉnh sửa thông số kho!", 'warning');
+                showToast('Bạn không có quyền chỉnh sửa thông số kho!', 'warning');
                 return;
             }
 
             if (type === 'mt93') {
-                const input = prompt("Nhập TỔNG SỐ LƯỢNG máy MT93 (Máy mới):", totalMt93);
-                if (input !== null && !isNaN(input) && parseInt(input) > 0) {
-                    totalMt93 = parseInt(input);
+                const input = prompt('Nhập TỔNG SỐ LƯỢNG máy MT93 (Máy mới):', totalMt93);
+
+                if (input !== null && !isNaN(input) && parseInt(input, 10) > 0) {
+                    totalMt93 = parseInt(input, 10);
                     localStorage.setItem('totalMt93', totalMt93);
                     updateInventoryStats();
                     showToast(`Đã cập nhật tổng máy MT93 thành ${totalMt93}`);
                 }
             } else if (type === 'mt90') {
-                const input = prompt("Nhập TỔNG SỐ LƯỢNG máy MT90 (Máy cũ):", totalMt90);
-                if (input !== null && !isNaN(input) && parseInt(input) > 0) {
-                    totalMt90 = parseInt(input);
+                const input = prompt('Nhập TỔNG SỐ LƯỢNG máy MT90 (Máy cũ):', totalMt90);
+
+                if (input !== null && !isNaN(input) && parseInt(input, 10) > 0) {
+                    totalMt90 = parseInt(input, 10);
                     localStorage.setItem('totalMt90', totalMt90);
                     updateInventoryStats();
                     showToast(`Đã cập nhật tổng máy MT90 thành ${totalMt90}`);
@@ -723,6 +1044,7 @@
 
             unreturnedCache.forEach(item => {
                 const devType = detectDeviceType(item.pdaCode);
+
                 if (devType === 'Máy mới') borrowedMt93++;
                 else if (devType === 'Máy cũ') borrowedMt90++;
             });
@@ -748,9 +1070,15 @@
                 triggerVietnameseBlock(inputElement);
             });
 
+            inputElement.addEventListener('compositionend', () => {
+                isComposing = false;
+            });
+
             inputElement.addEventListener('input', () => {
                 const val = inputElement.value;
-                const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ]/i.test(val);
+                const hasVietnamese =
+                    /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũỳýỵỷỹưừứựửữđĐ]/i.test(val);
+
                 if (hasVietnamese || isComposing) {
                     triggerVietnameseBlock(inputElement);
                 }
@@ -763,258 +1091,210 @@
             document.getElementById('vietnameseWarningModal').classList.remove('hidden');
         }
 
-        window.closeVietnameseModal = function() {
-            document.getElementById('vietnameseWarningModal').classList.add('hidden');
-            const scanInput = document.getElementById('scanEmpInput');
-            if (scanInput) scanInput.focus();
-        };
-
         window.addEventListener('DOMContentLoaded', () => {
             ['scanEmpInput', 'borrowPdaInput', 'returnPdaInput'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) setupVietnameseDetector(el);
             });
+
             updateInventoryStats();
         });
 
-        async function checkUserPermissions(email) {
-            const { collection, getDocs } = window.fs;
-            const db = window.db;
-
-            const lowerEmail = email.toLowerCase();
-
-            const snap = await getDocs(collection(db, "admin_users"));
-            adminUsersCache = [];
-            snap.forEach(doc => adminUsersCache.push({ id: doc.id, ...doc.data() }));
-
-            if (adminUsersCache.length === 0) {
-                const { addDoc } = window.fs;
-                const defaultSuper = { email: lowerEmail, displayName: "HÀ VIỆT HÙNG", isSuper: true };
-                await addDoc(collection(db, "admin_users"), defaultSuper);
-                adminUsersCache.push(defaultSuper);
-            }
-
-            const matchedUser = adminUsersCache.find(u => u.email.toLowerCase() === lowerEmail);
-
-            const navAdminBtn = document.getElementById('nav-admin');
-            const readOnlyWarning = document.getElementById('readOnlyWarning');
-            const currentAdminNameEl = document.getElementById('currentAdminName');
-            const userRoleBadge = document.getElementById('userRoleBadge');
-
-            if (matchedUser) {
-                currentAdminDisplayName = matchedUser.displayName || currentUser.displayName || lowerEmail;
-                currentAdminNameEl.innerText = currentAdminDisplayName;
-
-                if (matchedUser.isSuper === true || matchedUser.isSuper === "true") {
-                    currentUserRole = 'superadmin';
-                    navAdminBtn.classList.remove('hidden');
-                    userRoleBadge.innerText = 'Role: Super Admin';
-                    userRoleBadge.className = 'inline-block bg-red-900 text-red-200 px-2 py-0.5 rounded text-[10px] font-bold';
-                } else {
-                    currentUserRole = 'executor';
-                    navAdminBtn.classList.add('hidden');
-                    userRoleBadge.innerText = 'Role: Người Thực Hiện';
-                    userRoleBadge.className = 'inline-block bg-emerald-900 text-emerald-200 px-2 py-0.5 rounded text-[10px] font-bold';
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('customConfirmModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    closeCustomConfirm(false);
                 }
-
-                readOnlyWarning.classList.add('hidden');
-                setFormControlsState(true);
-            } else {
-                currentUserRole = 'guest';
-                currentAdminDisplayName = currentUser.displayName || lowerEmail;
-                currentAdminNameEl.innerText = currentAdminDisplayName;
-                navAdminBtn.classList.add('hidden');
-
-                userRoleBadge.innerText = 'Role: Khách (Chỉ Xem)';
-                userRoleBadge.className = 'inline-block bg-amber-900 text-amber-200 px-2 py-0.5 rounded text-[10px] font-bold';
-
-                readOnlyWarning.classList.remove('hidden');
-                setFormControlsState(false);
             }
-
-            renderAdminUsers(adminUsersCache);
-            renderUnreturned(unreturnedCache);
-            renderEmployees(employeeCache);
-        }
-
-        function setFormControlsState(enabled) {
-            const btnConfirm = document.getElementById('btnConfirm');
-            const btnSaveEmp = document.getElementById('btnSaveEmp');
-            const btnDeleteSelectedEmp = document.getElementById('btnDeleteSelectedEmp');
-            const btnDeleteAllEmp = document.getElementById('btnDeleteAllEmp');
-            const excelFileInput = document.getElementById('excelFileInput');
-
-            if (btnConfirm) btnConfirm.disabled = !enabled;
-            if (btnSaveEmp) btnSaveEmp.disabled = !enabled;
-            if (btnDeleteSelectedEmp) btnDeleteSelectedEmp.disabled = !enabled;
-            if (btnDeleteAllEmp) btnDeleteAllEmp.disabled = !enabled;
-            if (excelFileInput) excelFileInput.disabled = !enabled;
-        }
-
-        window.saveAdminUser = async function(e) {
-            e.preventDefault();
-            if (currentUserRole !== 'superadmin') return;
-
-            const { collection, addDoc } = window.fs;
-            const db = window.db;
-
-            const email = document.getElementById('adminEmail').value.trim().toLowerCase();
-            const displayName = document.getElementById('adminDisplayName').value.trim();
-            const isSuper = document.getElementById('adminIsSuper').value === "true";
-
-            try {
-                await addDoc(collection(db, "admin_users"), { email, displayName, isSuper });
-                showToast(`Đã cấp quyền thành công cho [${email}]!`);
-                document.getElementById('adminForm').reset();
-            } catch (err) {
-                console.error(err);
-                showToast("Lỗi khi thêm admin!", 'error');
-            }
-        };
-
-        function renderAdminUsers(list) {
-            const tbody = document.getElementById('adminsTable');
-            if(!tbody) return;
-
-            tbody.innerHTML = list.map(item => `
-                <tr class="hover:bg-gray-50 border-b border-gray-100">
-                    <td class="p-2.5 font-bold text-gray-800">${item.email}</td>
-                    <td class="p-2.5 font-bold text-orange-600">${item.displayName}</td>
-                    <td class="p-2.5">${(item.isSuper === true || item.isSuper === "true") ? '<span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-xs">Super Admin</span>' : '<span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">Người Thực Hiện</span>'}</td>
-                    <td class="p-2.5 text-center">
-                        <button onclick="deleteAdminUser('${item.id}', '${item.email}')" class="bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1 rounded font-bold text-xs transition-all">Xóa Quyền</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        window.deleteAdminUser = async function(id, email) {
-            if (currentUserRole !== 'superadmin') return;
-            const confirmDelete = await showCustomConfirm("Xóa quyền Admin", `Bạn có chắc muốn xóa quyền của email [${email}]?`, true);
-            if (!confirmDelete) return;
-
-            const { doc, deleteDoc } = window.fs;
-            const db = window.db;
-
-            try {
-                await deleteDoc(doc(db, "admin_users", id));
-                showToast("Đã xóa quyền admin thành công!");
-            } catch (err) {
-                console.error(err);
-                showToast("Có lỗi xảy ra khi xóa quyền!", 'error');
-            }
-        };
-
-        window.switchTab = function(tabName) {
-            if (tabName === 'admin' && currentUserRole !== 'superadmin') {
-                showToast("Bạn không có quyền truy cập vào khu vực Bảo Mật!", 'warning');
-                return;
-            }
-
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold hover:bg-slate-800 hover:text-white transition-all text-sm";
-            });
-            document.getElementById(`nav-${tabName}`).className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold bg-orange-500 text-white transition-all text-sm";
-        };
+        });
 
         function detectDeviceType(code) {
             if (!code) return 'Máy mới';
+
             const upperCode = String(code).toUpperCase().trim();
-            if (upperCode.startsWith('VN2EQS0067') || upperCode.startsWith('VN2EQS0012')) {
+
+            if (
+                upperCode.startsWith('VN2EQS0067') ||
+                upperCode.startsWith('VN2EQS0012')
+            ) {
                 return 'Súng Scan';
             } else if (upperCode.startsWith('MT93')) {
                 return 'Máy mới';
-            } else if (upperCode.startsWith('MT9055') || upperCode.startsWith('MT90')) {
+            } else if (
+                upperCode.startsWith('MT9055') ||
+                upperCode.startsWith('MT90')
+            ) {
                 return 'Máy cũ';
             }
+
             return 'Máy mới';
         }
 
         function renderDeviceBadge(type) {
             if (type === 'Súng Scan') {
-                return `<span class="bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-full text-xs">Súng Scan</span>`;
+                return '<span class="bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-full text-xs">Súng Scan</span>';
             } else if (type === 'Máy cũ') {
-                return `<span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full text-xs">Máy cũ</span>`;
+                return '<span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full text-xs">Máy cũ</span>';
             }
-            return `<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xs">Máy mới</span>`;
+
+            return '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xs">Máy mới</span>';
         }
 
         setInterval(() => {
             const now = new Date();
-            document.getElementById('currentTime').innerText = now.toTimeString().split(' ')[0];
+
+            document.getElementById('currentTime').innerText =
+                now.toTimeString().split(' ')[0];
         }, 1000);
 
         function parseCustomDate(str, timeSec = 0) {
             if (!str) return timeSec ? timeSec * 1000 : 0;
             if (typeof str === 'number') return str;
+
             const parts = str.split(' ');
+
             if (parts.length === 2) {
-                let datePart = parts[0].includes('/') ? parts[0] : parts[1];
-                let timePart = parts[0].includes(':') ? parts[0] : parts[1];
+                const datePart = parts[0].includes('/') ? parts[0] : parts[1];
+                const timePart = parts[0].includes(':') ? parts[0] : parts[1];
+
                 const [d, m, y] = datePart.split('/');
                 const [h, min, s] = timePart.split(':');
+
                 if (d && m && y) {
-                    return new Date(y, m - 1, d, h || 0, min || 0, s || 0).getTime();
+                    return new Date(
+                        Number(y), Number(m) - 1, Number(d),
+                        Number(h || 0), Number(min || 0), Number(s || 0)
+                    ).getTime();
                 }
             }
+
             const t = Date.parse(str);
             return isNaN(t) ? (timeSec ? timeSec * 1000 : 0) : t;
         }
 
         function cleanOptionString(str) {
             if (!str) return '';
-            return str.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+
+            return String(str)
+                .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
+                .trim();
         }
 
-        window.addEventListener('load', () => {
+        // Khởi tạo listener chỉ sau khi tài khoản đã được xác minh.
+        function startDataListeners() {
+            if (dataListenersStarted) return;
+
+            dataListenersStarted = true;
+
             const { collection, onSnapshot } = window.fs;
             const db = window.db;
 
-            onSnapshot(collection(db, "unreturned"), (snapshot) => {
-                unreturnedCache = [];
-                snapshot.forEach(doc => unreturnedCache.push({ id: doc.id, ...doc.data() }));
-                renderUnreturned(unreturnedCache);
-                renderPivotTable(unreturnedCache);
-                updateInventoryStats();
-            });
+            const listenerError = (label) => (error) => {
+                console.error(`Lỗi tải ${label}:`, error);
 
-            onSnapshot(collection(db, "logs"), (snapshot) => {
-                const logs = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    let rawTime = 0;
-                    if (data.createdAt && data.createdAt.seconds) {
-                        rawTime = data.createdAt.seconds * 1000;
-                    } else {
-                        rawTime = parseCustomDate(data.timestamp);
-                    }
-                    logs.push({ ...data, _rawTime: rawTime });
-                });
+                showToast(
+                    `Không tải được ${label}: ${error.message || error.code || String(error)}`,
+                    'error'
+                );
+            };
 
-                logs.sort((a, b) => b._rawTime - a._rawTime);
-                renderLogs(logs);
-            });
+            onSnapshot(
+                collection(db, 'unreturned'),
+                (snapshot) => {
+                    unreturnedCache = [];
 
-            onSnapshot(collection(db, "employees"), (snapshot) => {
-                employeeCache = [];
-                snapshot.forEach(doc => employeeCache.push({ id: doc.id, ...doc.data() }));
-                renderEmployees(employeeCache);
-                updateDropdownOptions(employeeCache);
-            });
+                    snapshot.forEach(item => {
+                        unreturnedCache.push({
+                            id: item.id,
+                            ...item.data()
+                        });
+                    });
 
-            onSnapshot(collection(db, "admin_users"), (snapshot) => {
-                adminUsersCache = [];
-                snapshot.forEach(doc => adminUsersCache.push({ id: doc.id, ...doc.data() }));
-                renderAdminUsers(adminUsersCache);
-            });
-        });
+                    renderUnreturned(unreturnedCache);
+                    renderPivotTable(unreturnedCache);
+                    updateInventoryStats();
+                },
+                listenerError('danh sách thiết bị chưa trả')
+            );
+
+            onSnapshot(
+                collection(db, 'logs'),
+                (snapshot) => {
+                    const logs = [];
+
+                    snapshot.forEach(item => {
+                        const data = item.data();
+
+                        let rawTime = 0;
+
+                        if (data.createdAt && data.createdAt.seconds) {
+                            rawTime = data.createdAt.seconds * 1000;
+                        } else {
+                            rawTime = parseCustomDate(data.timestamp);
+                        }
+
+                        logs.push({
+                            ...data,
+                            _rawTime: rawTime
+                        });
+                    });
+
+                    logs.sort((a, b) => b._rawTime - a._rawTime);
+                    renderLogs(logs);
+                },
+                listenerError('nhật ký mượn trả')
+            );
+
+            onSnapshot(
+                collection(db, 'employees'),
+                (snapshot) => {
+                    employeeCache = [];
+
+                    snapshot.forEach(item => {
+                        employeeCache.push({
+                            id: item.id,
+                            ...item.data()
+                        });
+                    });
+
+                    renderEmployees(employeeCache);
+                    updateDropdownOptions(employeeCache);
+                },
+                listenerError('danh sách nhân viên')
+            );
+
+            // Chỉ Super Admin được tải danh sách admin.
+            if (currentUserRole === 'superadmin') {
+                onSnapshot(
+                    collection(db, 'admin_users'),
+                    (snapshot) => {
+                        adminUsersCache = [];
+
+                        snapshot.forEach(item => {
+                            adminUsersCache.push({
+                                id: item.id,
+                                ...item.data()
+                            });
+                        });
+
+                        renderAdminUsers(adminUsersCache);
+                    },
+                    listenerError('danh sách quyền quản trị')
+                );
+            }
+        }
 
         function updateDropdownOptions(emps) {
-            const rawTeamList = ["Admin", "ASM", "Cache", "GTC", "Inbound", "Manual", "OB North B1", "OB North B2", "OB Xmetro", "TBS", "Ops Support"];
-            const rawSupList = ["Mgr. Phạm Tiến", "Sup Xuân Huy", "Sup Tuấn Anh", "Sup Anh Sơn", "AM Hồng Đăng"];
+            const rawTeamList = [
+                'Admin', 'ASM', 'Cache', 'GTC', 'Inbound', 'Manual',
+                'OB North B1', 'OB North B2', 'OB Xmetro', 'TBS', 'Ops Support'
+            ];
+
+            const rawSupList = [
+                'Mgr. Phạm Tiến', 'Sup Xuân Huy', 'Sup Tuấn Anh',
+                'Sup Anh Sơn', 'AM Hồng Đăng'
+            ];
 
             const teamSet = new Set(rawTeamList.map(cleanOptionString));
             const supSet = new Set(rawSupList.map(cleanOptionString));
@@ -1024,6 +1304,7 @@
                     const cleaned = cleanOptionString(e.team);
                     if (cleaned) teamSet.add(cleaned);
                 }
+
                 if (e.supervisor) {
                     const cleaned = cleanOptionString(e.supervisor);
                     if (cleaned) supSet.add(cleaned);
@@ -1034,36 +1315,49 @@
             const sortedSups = Array.from(supSet).sort();
 
             const teamDatalist = document.getElementById('teamOptions');
+
             if (teamDatalist) {
-                teamDatalist.innerHTML = sortedTeams.map(t => `<option value="${t}">`).join('');
+                teamDatalist.innerHTML =
+                    sortedTeams.map(t => `<option value="${t}">`).join('');
             }
 
             const supDatalist = document.getElementById('supOptions');
+
             if (supDatalist) {
-                supDatalist.innerHTML = sortedSups.map(s => `<option value="${s}">`).join('');
+                supDatalist.innerHTML =
+                    sortedSups.map(s => `<option value="${s}">`).join('');
             }
 
             const displayTeamSelect = document.getElementById('displayEmpTeam');
+
             if (displayTeamSelect) {
                 const currentVal = displayTeamSelect.value;
-                displayTeamSelect.innerHTML = `<option value="">-- Chọn Team --</option>` + 
+
+                displayTeamSelect.innerHTML =
+                    '<option value="">-- Chọn Team --</option>' +
                     sortedTeams.map(t => `<option value="${t}">${t}</option>`).join('');
+
                 displayTeamSelect.value = currentVal;
             }
 
             const displaySupSelect = document.getElementById('displayEmpSup');
+
             if (displaySupSelect) {
                 const currentVal = displaySupSelect.value;
-                displaySupSelect.innerHTML = `<option value="">-- Chọn Sup --</option>` + 
+
+                displaySupSelect.innerHTML =
+                    '<option value="">-- Chọn Sup --</option>' +
                     sortedSups.map(s => `<option value="${s}">${s}</option>`).join('');
+
                 displaySupSelect.value = currentVal;
             }
         }
 
         const scanEmpInput = document.getElementById('scanEmpInput');
-        
+
         async function checkAndFillEmployee() {
             if (!scanEmpInput) return false;
+
             const opsId = scanEmpInput.value.trim();
             const empTeamSelect = document.getElementById('displayEmpTeam');
             const empSupSelect = document.getElementById('displayEmpSup');
@@ -1071,35 +1365,50 @@
 
             if (!opsId) {
                 selectedEmployee = null;
-                empBox.innerHTML = `<p class="text-gray-400 font-semibold text-xs">Chưa quét thông tin nhân viên</p>`;
+                empBox.innerHTML =
+                    '<p class="text-gray-400 font-semibold text-xs">Chưa quét thông tin nhân viên</p>';
+
                 empTeamSelect.value = '';
                 empSupSelect.value = '';
+
                 return false;
             }
 
-            let empData = employeeCache.find(e => e.opsId && e.opsId.toLowerCase() === opsId.toLowerCase());
+            let empData = employeeCache.find(
+                e => e.opsId && e.opsId.toLowerCase() === opsId.toLowerCase()
+            );
 
             if (!empData) {
                 try {
                     const { collection, query, where, getDocs } = window.fs;
                     const db = window.db;
-                    const q = query(collection(db, "employees"), where("opsId", "==", opsId));
+
+                    const q = query(
+                        collection(db, 'employees'),
+                        where('opsId', '==', opsId)
+                    );
+
                     const snap = await getDocs(q);
+
                     if (!snap.empty) {
                         empData = snap.docs[0].data();
                     }
                 } catch (e) {
-                    console.error("Lỗi tìm kiếm NV:", e);
+                    console.error('Lỗi tìm kiếm NV:', e);
+                    showToast('Không thể tra cứu nhân viên. Kiểm tra kết nối Firebase.', 'error');
                 }
             }
 
             if (empData) {
                 selectedEmployee = { ...empData };
+
                 empBox.innerHTML = `
                     <div class="flex justify-between items-center w-full">
                         <div>
-                            <p class="font-extrabold text-gray-800 text-sm">${empData.empName}</p>
-                            <p class="text-gray-500 font-bold text-xs mt-0.5">Mã NV: <span class="text-orange-600 font-extrabold">${empData.opsId}</span></p>
+                            <p class="font-extrabold text-gray-800 text-sm">${empData.empName || ''}</p>
+                            <p class="text-gray-500 font-bold text-xs mt-0.5">
+                                Mã NV: <span class="text-orange-600 font-extrabold">${empData.opsId || ''}</span>
+                            </p>
                         </div>
                         <span class="bg-emerald-100 text-emerald-700 font-extrabold px-3 py-1 rounded-lg text-xs">✓ Đã chọn NV</span>
                     </div>
@@ -1110,20 +1419,28 @@
 
                 if (cleanedTeam) empTeamSelect.value = cleanedTeam;
                 if (cleanedSup) empSupSelect.value = cleanedSup;
-                return true;
-            } else {
-                selectedEmployee = { opsId: opsId, empName: opsId, team: '', supervisor: '' };
-                empBox.innerHTML = `
-                    <div class="flex justify-between items-center w-full">
-                        <div>
-                            <p class="font-extrabold text-amber-800 text-sm">NV Mới / Vãng Lai: ${opsId}</p>
-                            <p class="text-xs text-amber-600 font-bold mt-0.5">⚠️ Chưa có trong danh sách CSDL (Vẫn có thể cấp/trả)</p>
-                        </div>
-                        <span class="bg-amber-100 text-amber-800 font-extrabold px-2.5 py-1 rounded-lg text-xs">Mã Tạm</span>
-                    </div>
-                `;
+
                 return true;
             }
+
+            selectedEmployee = {
+                opsId,
+                empName: opsId,
+                team: '',
+                supervisor: ''
+            };
+
+            empBox.innerHTML = `
+                <div class="flex justify-between items-center w-full">
+                    <div>
+                        <p class="font-extrabold text-amber-800 text-sm">NV Mới / Vãng Lai: ${opsId}</p>
+                        <p class="text-xs text-amber-600 font-bold mt-0.5">⚠️ Chưa có trong danh sách CSDL (Vẫn có thể cấp/trả)</p>
+                    </div>
+                    <span class="bg-amber-100 text-amber-800 font-extrabold px-2.5 py-1 rounded-lg text-xs">Mã Tạm</span>
+                </div>
+            `;
+
+            return true;
         }
 
         if (scanEmpInput) {
@@ -1131,14 +1448,17 @@
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     await checkAndFillEmployee();
+
                     const borrowInput = document.getElementById('borrowPdaInput');
                     if (borrowInput) borrowInput.focus();
                 }
             });
 
             let empInputTimer = null;
+
             scanEmpInput.addEventListener('input', () => {
                 clearTimeout(empInputTimer);
+
                 empInputTimer = setTimeout(() => {
                     if (scanEmpInput.value.trim().length >= 4) {
                         checkAndFillEmployee();
@@ -1148,96 +1468,123 @@
         }
 
         const borrowPdaInput = document.getElementById('borrowPdaInput');
+
         if (borrowPdaInput) {
             borrowPdaInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const code = borrowPdaInput.value.trim();
-                    if (code && !pendingBorrowPdaList.includes(code)) {
-                        pendingBorrowPdaList.push(code);
-                        renderPendingList();
-                    }
-                    borrowPdaInput.value = '';
+                if (e.key !== 'Enter') return;
+
+                e.preventDefault();
+
+                const code = borrowPdaInput.value.trim();
+
+                if (code && !pendingBorrowPdaList.includes(code)) {
+                    pendingBorrowPdaList.push(code);
+                    renderPendingList();
                 }
+
+                borrowPdaInput.value = '';
             });
         }
 
         const returnPdaInput = document.getElementById('returnPdaInput');
+
         if (returnPdaInput) {
             returnPdaInput.addEventListener('keypress', async (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const code = returnPdaInput.value.trim();
-                    if (!code) return;
+                if (e.key !== 'Enter') return;
 
-                    const activeRecord = unreturnedCache.find(item => item.pdaCode.toLowerCase() === code.toLowerCase());
+                e.preventDefault();
 
-                    if (!activeRecord) {
-                        showToast(`Mã ${code} KHÔNG nằm trong danh sách đang mượn!`, 'warning');
-                        returnPdaInput.value = '';
-                        return;
-                    }
+                const code = returnPdaInput.value.trim();
+                if (!code) return;
 
-                    if (!pendingReturnPdaList.some(item => item.code.toLowerCase() === code.toLowerCase())) {
-                        pendingReturnPdaList.push({
-                            code: activeRecord.pdaCode,
-                            originalData: activeRecord
-                        });
+                const activeRecord = unreturnedCache.find(
+                    item => String(item.pdaCode || '').toLowerCase() === code.toLowerCase()
+                );
 
-                        const empBox = document.getElementById('selectedEmpBox');
-                        const empTeamSelect = document.getElementById('displayEmpTeam');
-                        const empSupSelect = document.getElementById('displayEmpSup');
-
-                        if (!selectedEmployee) {
-                            empBox.innerHTML = `
-                                <div class="flex justify-between items-center w-full">
-                                    <div>
-                                        <p class="font-extrabold text-amber-800 text-sm"><i class="fa-solid fa-arrow-rotate-left mr-1"></i> ${activeRecord.empName}</p>
-                                        <p class="text-gray-500 font-bold text-xs mt-0.5">Mã NV: <span class="text-orange-600 font-extrabold">${activeRecord.opsId}</span></p>
-                                    </div>
-                                    <span class="bg-amber-100 text-amber-700 font-extrabold px-3 py-1 rounded-lg text-xs">Auto Người Trả</span>
-                                </div>
-                            `;
-                            
-                            const cleanedTeam = cleanOptionString(activeRecord.team);
-                            const cleanedSup = cleanOptionString(activeRecord.supervisor);
-
-                            if (cleanedTeam) empTeamSelect.value = cleanedTeam;
-                            if (cleanedSup) empSupSelect.value = cleanedSup;
-                        }
-
-                        renderPendingList();
-                    }
+                if (!activeRecord) {
+                    showToast(`Mã ${code} KHÔNG nằm trong danh sách đang mượn!`, 'warning');
                     returnPdaInput.value = '';
+                    return;
                 }
+
+                if (!pendingReturnPdaList.some(
+                    item => item.code.toLowerCase() === code.toLowerCase()
+                )) {
+                    pendingReturnPdaList.push({
+                        code: activeRecord.pdaCode,
+                        originalData: activeRecord
+                    });
+
+                    const empBox = document.getElementById('selectedEmpBox');
+                    const empTeamSelect = document.getElementById('displayEmpTeam');
+                    const empSupSelect = document.getElementById('displayEmpSup');
+
+                    if (!selectedEmployee) {
+                        empBox.innerHTML = `
+                            <div class="flex justify-between items-center w-full">
+                                <div>
+                                    <p class="font-extrabold text-amber-800 text-sm">
+                                        <i class="fa-solid fa-arrow-rotate-left mr-1"></i>${activeRecord.empName || ''}
+                                    </p>
+                                    <p class="text-gray-500 font-bold text-xs mt-0.5">
+                                        Mã NV: <span class="text-orange-600 font-extrabold">${activeRecord.opsId || ''}</span>
+                                    </p>
+                                </div>
+                                <span class="bg-amber-100 text-amber-700 font-extrabold px-3 py-1 rounded-lg text-xs">Auto Người Trả</span>
+                            </div>
+                        `;
+
+                        const cleanedTeam = cleanOptionString(activeRecord.team);
+                        const cleanedSup = cleanOptionString(activeRecord.supervisor);
+
+                        if (cleanedTeam) empTeamSelect.value = cleanedTeam;
+                        if (cleanedSup) empSupSelect.value = cleanedSup;
+                    }
+
+                    renderPendingList();
+                }
+
+                returnPdaInput.value = '';
             });
         }
 
         function renderPendingList() {
             const container = document.getElementById('pendingPdaList');
             const totalCount = pendingBorrowPdaList.length + pendingReturnPdaList.length;
+
             document.getElementById('pendingCount').innerText = totalCount;
 
             if (totalCount === 0) {
-                container.innerHTML = `<span class="text-gray-400 text-xs italic font-medium">Chưa quét mã PDA nào...</span>`;
+                container.innerHTML =
+                    '<span class="text-gray-400 text-xs italic font-medium">Chưa quét mã PDA nào...</span>';
                 return;
             }
 
             let html = '';
+
             pendingBorrowPdaList.forEach((code, index) => {
                 const devType = detectDeviceType(code);
+
                 html += `
                     <div class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1.5 rounded-lg flex justify-between items-center">
-                        <span>[MƯỢN] ${code} <span class="text-[10px] bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded ml-1">${devType}</span></span>
+                        <span>[MƯỢN] ${code}
+                            <span class="text-[10px] bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded ml-1">${devType}</span>
+                        </span>
                         <button onclick="removePending('borrow', ${index})" class="text-emerald-600 hover:text-red-600 font-extrabold text-sm ml-2">×</button>
                     </div>
                 `;
             });
 
             pendingReturnPdaList.forEach((item, index) => {
-                let extraInfo = `Người trả: <b class="text-amber-900">${item.originalData.empName} (${item.originalData.opsId})</b>`;
-                if (selectedEmployee && selectedEmployee.opsId.toLowerCase() !== item.originalData.opsId.toLowerCase()) {
-                    extraInfo = `<span class="text-red-600 font-bold">[TRẢ HỘ]</span> bởi ${selectedEmployee.empName} ➔ cho ${item.originalData.empName}`;
+                let extraInfo =
+                    `Người trả: <b class="text-amber-900">${item.originalData.empName} (${item.originalData.opsId})</b>`;
+
+                if (
+                    selectedEmployee &&
+                    selectedEmployee.opsId.toLowerCase() !== item.originalData.opsId.toLowerCase()
+                ) {
+                    extraInfo =
+                        `<span class="text-red-600 font-bold">[TRẢ HỘ]</span> bởi ${selectedEmployee.empName} ➔ cho ${item.originalData.empName}`;
                 }
 
                 html += `
@@ -1255,8 +1602,12 @@
         }
 
         window.removePending = function(type, index) {
-            if (type === 'borrow') pendingBorrowPdaList.splice(index, 1);
-            else pendingReturnPdaList.splice(index, 1);
+            if (type === 'borrow') {
+                pendingBorrowPdaList.splice(index, 1);
+            } else {
+                pendingReturnPdaList.splice(index, 1);
+            }
+
             renderPendingList();
         };
 
@@ -1268,29 +1619,38 @@
 
         window.processBatchTransaction = async function() {
             if (currentUserRole === 'guest') {
-                showToast("Tài khoản của bạn chưa được cấp quyền thao tác!", 'warning');
+                showToast('Tài khoản của bạn chưa được cấp quyền thao tác!', 'warning');
                 return;
             }
 
             if (pendingBorrowPdaList.length === 0 && pendingReturnPdaList.length === 0) {
-                showToast("Hãy quét ít nhất 1 mã PDA để cấp mượn hoặc thu hồi!", 'warning');
+                showToast('Hãy quét ít nhất 1 mã PDA để cấp mượn hoặc thu hồi!', 'warning');
                 return;
             }
 
             if (pendingBorrowPdaList.length > 0 && !selectedEmployee) {
-                showToast("Vui lòng quét Ops ID nhân viên mượn máy trước khi cấp!", 'warning');
+                showToast('Vui lòng quét Ops ID nhân viên mượn máy trước khi cấp!', 'warning');
                 return;
             }
 
             const btnConfirm = document.getElementById('btnConfirm');
+
             btnConfirm.disabled = true;
-            btnConfirm.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang ghi nhận...`;
+            btnConfirm.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang ghi nhận...';
 
             const { collection, writeBatch, doc, query, where, getDocs, serverTimestamp } = window.fs;
             const db = window.db;
-            
+
             const nowObj = new Date();
-            const timeStr = `${nowObj.getHours().toString().padStart(2,'0')}:${nowObj.getMinutes().toString().padStart(2,'0')}:${nowObj.getSeconds().toString().padStart(2,'0')} ${nowObj.getDate().toString().padStart(2,'0')}/${(nowObj.getMonth()+1).toString().padStart(2,'0')}/${nowObj.getFullYear()}`;
+
+            const timeStr =
+                `${String(nowObj.getHours()).padStart(2, '0')}:` +
+                `${String(nowObj.getMinutes()).padStart(2, '0')}:` +
+                `${String(nowObj.getSeconds()).padStart(2, '0')} ` +
+                `${String(nowObj.getDate()).padStart(2, '0')}/` +
+                `${String(nowObj.getMonth() + 1).padStart(2, '0')}/` +
+                `${nowObj.getFullYear()}`;
+
             const adminName = currentAdminDisplayName;
 
             const overrideTeam = document.getElementById('displayEmpTeam').value.trim();
@@ -1301,105 +1661,130 @@
 
             const batch = writeBatch(db);
 
-            if (pendingBorrowPdaList.length > 0) {
-                for (const borrowPda of pendingBorrowPdaList) {
-                    const qCheck = query(collection(db, "unreturned"), where("pdaCode", "==", borrowPda));
-                    const snapCheck = await getDocs(qCheck);
-                    if (!snapCheck.empty) {
-                        showToast(`Mã ${borrowPda} đang ở trạng thái CHƯA TRẢ! Bỏ qua mã này.`, 'warning');
-                        continue;
-                    }
+            try {
+                if (pendingBorrowPdaList.length > 0) {
+                    for (const borrowPda of pendingBorrowPdaList) {
+                        const qCheck = query(
+                            collection(db, 'unreturned'),
+                            where('pdaCode', '==', borrowPda)
+                        );
 
-                    const pdaType = detectDeviceType(borrowPda);
+                        const snapCheck = await getDocs(qCheck);
 
-                    const unreturnedRef = doc(collection(db, "unreturned"));
-                    batch.set(unreturnedRef, {
-                        pdaCode: borrowPda,
-                        pdaType: pdaType,
-                        opsId: selectedEmployee.opsId,
-                        empName: selectedEmployee.empName,
-                        team: finalTeam,
-                        supervisor: finalSup,
-                        borrowTime: timeStr,
-                        createdAt: serverTimestamp(),
-                        adminName: adminName
-                    });
-
-                    const logRef = doc(collection(db, "logs"));
-                    batch.set(logRef, {
-                        timestamp: timeStr,
-                        createdAt: serverTimestamp(),
-                        pdaCode: borrowPda,
-                        pdaType: pdaType,
-                        status: "MƯỢN",
-                        opsId: selectedEmployee.opsId,
-                        empName: selectedEmployee.empName,
-                        details: `Mượn máy từ (${finalTeam} / ${finalSup})`,
-                        adminName: adminName
-                    });
-                }
-            }
-
-            if (pendingReturnPdaList.length > 0) {
-                for (const item of pendingReturnPdaList) {
-                    const returnPda = item.code;
-                    const orig = item.originalData;
-
-                    const q = query(collection(db, "unreturned"), where("pdaCode", "==", returnPda));
-                    const snapshot = await getDocs(q);
-
-                    if (!snapshot.empty) {
-                        const unreturnedDocId = snapshot.docs[0].id;
-                        batch.delete(doc(db, "unreturned", unreturnedDocId));
-
-                        let logOpsId = orig.opsId;
-                        let logEmpName = orig.empName;
-                        let logDetails = "Người mượn trả";
-
-                        if (selectedEmployee && selectedEmployee.opsId.toLowerCase() !== orig.opsId.toLowerCase()) {
-                            logOpsId = selectedEmployee.opsId;
-                            logEmpName = selectedEmployee.empName;
-                            logDetails = `⚠️ TRẢ HỘ cho [${orig.empName} - ${orig.opsId}]`;
+                        if (!snapCheck.empty) {
+                            showToast(`Mã ${borrowPda} đang ở trạng thái CHƯA TRẢ! Bỏ qua mã này.`, 'warning');
+                            continue;
                         }
 
-                        const pdaType = detectDeviceType(returnPda);
+                        const pdaType = detectDeviceType(borrowPda);
+                        const unreturnedRef = doc(collection(db, 'unreturned'));
 
-                        const logRef = doc(collection(db, "logs"));
+                        batch.set(unreturnedRef, {
+                            pdaCode: borrowPda,
+                            pdaType,
+                            opsId: selectedEmployee.opsId,
+                            empName: selectedEmployee.empName,
+                            team: finalTeam,
+                            supervisor: finalSup,
+                            borrowTime: timeStr,
+                            createdAt: serverTimestamp(),
+                            adminName
+                        });
+
+                        const logRef = doc(collection(db, 'logs'));
+
                         batch.set(logRef, {
                             timestamp: timeStr,
                             createdAt: serverTimestamp(),
-                            pdaCode: returnPda,
-                            pdaType: pdaType,
-                            status: "TRẢ",
-                            opsId: logOpsId,
-                            empName: logEmpName,
-                            details: logDetails,
-                            adminName: adminName
+                            pdaCode: borrowPda,
+                            pdaType,
+                            status: 'MƯỢN',
+                            opsId: selectedEmployee.opsId,
+                            empName: selectedEmployee.empName,
+                            details: `Mượn máy từ (${finalTeam} / ${finalSup})`,
+                            adminName
                         });
                     }
                 }
-            }
 
-            try {
+                if (pendingReturnPdaList.length > 0) {
+                    for (const item of pendingReturnPdaList) {
+                        const returnPda = item.code;
+                        const orig = item.originalData;
+
+                        const q = query(
+                            collection(db, 'unreturned'),
+                            where('pdaCode', '==', returnPda)
+                        );
+
+                        const snapshot = await getDocs(q);
+
+                        if (!snapshot.empty) {
+                            const unreturnedDocId = snapshot.docs[0].id;
+
+                            batch.delete(doc(db, 'unreturned', unreturnedDocId));
+
+                            let logOpsId = orig.opsId;
+                            let logEmpName = orig.empName;
+                            let logDetails = 'Người mượn trả';
+
+                            if (
+                                selectedEmployee &&
+                                selectedEmployee.opsId.toLowerCase() !== orig.opsId.toLowerCase()
+                            ) {
+                                logOpsId = selectedEmployee.opsId;
+                                logEmpName = selectedEmployee.empName;
+                                logDetails = `⚠️ TRẢ HỘ cho [${orig.empName} - ${orig.opsId}]`;
+                            }
+
+                            const pdaType = detectDeviceType(returnPda);
+                            const logRef = doc(collection(db, 'logs'));
+
+                            batch.set(logRef, {
+                                timestamp: timeStr,
+                                createdAt: serverTimestamp(),
+                                pdaCode: returnPda,
+                                pdaType,
+                                status: 'TRẢ',
+                                opsId: logOpsId,
+                                empName: logEmpName,
+                                details: logDetails,
+                                adminName
+                            });
+                        }
+                    }
+                }
+
                 await batch.commit();
 
                 clearPendingList();
                 borrowPdaInput.value = '';
                 returnPdaInput.value = '';
                 scanEmpInput.value = '';
+
                 document.getElementById('displayEmpTeam').value = '';
                 document.getElementById('displayEmpSup').value = '';
+
                 selectedEmployee = null;
-                document.getElementById('selectedEmpBox').innerHTML = `<p class="text-gray-400 font-semibold text-xs">Chưa quét thông tin nhân viên</p>`;
+
+                document.getElementById('selectedEmpBox').innerHTML =
+                    '<p class="text-gray-400 font-semibold text-xs">Chưa quét thông tin nhân viên</p>';
+
                 scanEmpInput.focus();
 
-                showToast("⚡ Cấp / Thu hồi thiết bị thành công!");
+                showToast('⚡ Cấp / Thu hồi thiết bị thành công!');
+
             } catch (err) {
-                console.error("Lỗi khi ghi nhận batch: ", err);
-                showToast("Có lỗi xảy ra khi lưu dữ liệu hàng loạt!", 'error');
+                console.error('Lỗi khi ghi nhận batch:', err);
+
+                showToast(
+                    'Không thể lưu dữ liệu. Kiểm tra quyền Firestore: ' +
+                    (err.message || err.code || String(err)),
+                    'error'
+                );
             } finally {
-                btnConfirm.disabled = false;
-                btnConfirm.innerHTML = `XÁC NHẬN CẤP / TRẢ TẤT CẢ`;
+                btnConfirm.disabled = currentUserRole === 'guest';
+                btnConfirm.innerHTML = 'XÁC NHẬN CẤP / TRẢ TẤT CẢ';
             }
         };
 
@@ -1421,21 +1806,24 @@
 
             unreturnedList.forEach(item => {
                 const sup = item.supervisor || 'Chưa phân công Sup';
-                const opsId = item.opsId;
+                const opsId = item.opsId || '';
 
                 if (!pivotData[sup]) pivotData[sup] = {};
+
                 if (!pivotData[sup][opsId]) {
                     pivotData[sup][opsId] = {
                         empName: item.empName,
-                        opsId: item.opsId,
+                        opsId,
                         team: item.team,
                         items: []
                     };
                 }
+
                 pivotData[sup][opsId].items.push(item);
             });
 
             let html = '';
+
             for (const [supName, employees] of Object.entries(pivotData)) {
                 let supTotalPda = 0;
                 let empRows = '';
@@ -1447,7 +1835,7 @@
                     empRows += `
                         <tr onclick="openEmpDetailsModal('${opsId}')" class="hover:bg-purple-50/60 cursor-pointer transition-all border-b border-gray-100">
                             <td class="p-2">
-                                <div class="font-bold text-gray-800 text-xs">${emp.empName}</div>
+                                <div class="font-bold text-gray-800 text-xs">${emp.empName || ''}</div>
                                 <div class="text-[11px] font-bold text-gray-400">${emp.opsId}</div>
                             </td>
                             <td class="p-2 text-right font-bold">
@@ -1466,6 +1854,7 @@
                             </div>
                             <span class="bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded-full text-xs">${supTotalPda} Thiết Bị</span>
                         </div>
+
                         <div class="p-1.5">
                             <table class="w-full text-left border-collapse">
                                 <thead class="text-xs text-gray-400 uppercase font-bold border-b">
@@ -1474,9 +1863,7 @@
                                         <th class="p-1.5 text-right">Số lượng</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    ${empRows}
-                                </tbody>
+                                <tbody>${empRows}</tbody>
                             </table>
                         </div>
                     </div>
@@ -1487,20 +1874,26 @@
         }
 
         window.openEmpDetailsModal = function(opsId) {
-            const empItems = unreturnedCache.filter(item => item.opsId.toLowerCase() === opsId.toLowerCase());
+            const empItems = unreturnedCache.filter(
+                item => String(item.opsId || '').toLowerCase() === String(opsId || '').toLowerCase()
+            );
+
             if (empItems.length === 0) return;
 
             const sample = empItems[0];
-            document.getElementById('modalEmpName').innerText = `${sample.empName}`;
-            document.getElementById('modalEmpSub').innerText = `Ops ID: ${sample.opsId} | Team: ${sample.team || 'N/A'} | Sup: ${sample.supervisor || 'N/A'}`;
+
+            document.getElementById('modalEmpName').innerText = sample.empName || '';
+            document.getElementById('modalEmpSub').innerText =
+                `Ops ID: ${sample.opsId || ''} | Team: ${sample.team || 'N/A'} | Sup: ${sample.supervisor || 'N/A'}`;
 
             currentModalPdaCodes = empItems.map(i => i.pdaCode);
 
             const isDisabled = currentUserRole === 'guest';
             const listContainer = document.getElementById('modalPdaList');
-            
+
             listContainer.innerHTML = empItems.map(item => {
                 const devType = detectDeviceType(item.pdaCode);
+
                 return `
                     <div class="bg-orange-50/50 border border-orange-200 rounded-xl p-3 flex justify-between items-center hover:bg-orange-100/50 transition-all">
                         <div>
@@ -1511,8 +1904,13 @@
                                 </button>
                                 ${renderDeviceBadge(devType)}
                             </div>
-                            <p class="text-xs text-gray-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>Mượn lúc: <span class="font-semibold text-gray-700">${item.borrowTime}</span> | Người cấp: <span class="font-semibold text-slate-700">${item.adminName}</span></p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fa-regular fa-clock mr-1"></i>
+                                Mượn lúc: <span class="font-semibold text-gray-700">${item.borrowTime || ''}</span>
+                                | Người cấp: <span class="font-semibold text-slate-700">${item.adminName || ''}</span>
+                            </p>
                         </div>
+
                         <button onclick="returnPdaDirect('${item.id}', '${item.pdaCode}')" ${isDisabled ? 'disabled' : ''} class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs shadow-sm transition-all disabled:opacity-50 shrink-0">
                             Nhận Trả
                         </button>
@@ -1525,7 +1923,12 @@
 
         window.returnPdaDirect = async function(id, pdaCode) {
             if (currentUserRole === 'guest') return;
-            const confirmReturn = await showCustomConfirm("Nhận Trả Thiết Bị", `Xác nhận nhận trả thiết bị [${pdaCode}]?`);
+
+            const confirmReturn = await showCustomConfirm(
+                'Nhận Trả Thiết Bị',
+                `Xác nhận nhận trả thiết bị [${pdaCode}]?`
+            );
+
             if (!confirmReturn) return;
 
             const { doc, deleteDoc, collection, addDoc, serverTimestamp } = window.fs;
@@ -1535,41 +1938,57 @@
             if (!item) return;
 
             try {
-                await deleteDoc(doc(db, "unreturned", id));
+                await deleteDoc(doc(db, 'unreturned', id));
 
                 const nowObj = new Date();
-                const timeStr = `${nowObj.getHours().toString().padStart(2,'0')}:${nowObj.getMinutes().toString().padStart(2,'0')}:${nowObj.getSeconds().toString().padStart(2,'0')} ${nowObj.getDate().toString().padStart(2,'0')}/${(nowObj.getMonth()+1).toString().padStart(2,'0')}/${nowObj.getFullYear()}`;
 
-                await addDoc(collection(db, "logs"), {
+                const timeStr =
+                    `${String(nowObj.getHours()).padStart(2, '0')}:` +
+                    `${String(nowObj.getMinutes()).padStart(2, '0')}:` +
+                    `${String(nowObj.getSeconds()).padStart(2, '0')} ` +
+                    `${String(nowObj.getDate()).padStart(2, '0')}/` +
+                    `${String(nowObj.getMonth() + 1).padStart(2, '0')}/` +
+                    `${nowObj.getFullYear()}`;
+
+                await addDoc(collection(db, 'logs'), {
                     timestamp: timeStr,
                     createdAt: serverTimestamp(),
-                    pdaCode: pdaCode,
+                    pdaCode,
                     pdaType: detectDeviceType(pdaCode),
-                    status: "TRẢ",
+                    status: 'TRẢ',
                     opsId: item.opsId,
                     empName: item.empName,
-                    details: "Trả trực tiếp tại danh sách",
+                    details: 'Trả trực tiếp tại danh sách',
                     adminName: currentAdminDisplayName
                 });
 
                 showToast(`Đã nhận trả thiết bị [${pdaCode}] thành công!`);
+
             } catch (err) {
-                console.error(err);
-                showToast("Có lỗi xảy ra khi nhận trả!", 'error');
+                console.error('Lỗi nhận trả:', err);
+
+                showToast(
+                    'Có lỗi xảy ra khi nhận trả: ' +
+                    (err.message || err.code || String(err)),
+                    'error'
+                );
             }
         };
 
         function copyTextToClipboard(text) {
-            const textArea = document.createElement("textarea");
+            const textArea = document.createElement('textarea');
+
             textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.left = "-999999px";
-            textArea.style.top = "-999999px";
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
 
             let successful = false;
+
             try {
                 successful = document.execCommand('copy');
             } catch (err) {
@@ -1579,25 +1998,23 @@
             document.body.removeChild(textArea);
 
             if (!successful && navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => {
-                    showToast("Đã sao chép thành công!");
-                }).catch(() => {
-                    showToast("Không thể sao chép văn bản!", "error");
-                });
+                navigator.clipboard.writeText(text)
+                    .then(() => showToast('Đã sao chép thành công!'))
+                    .catch(() => showToast('Không thể sao chép văn bản!', 'error'));
             } else if (successful) {
-                showToast("Đã sao chép thành công!");
+                showToast('Đã sao chép thành công!');
             } else {
-                showToast("Trình duyệt chặn sao chép!", "error");
+                showToast('Trình duyệt chặn sao chép!', 'error');
             }
         }
 
         window.copyAllPdaCodes = function() {
             if (currentModalPdaCodes.length === 0) {
-                showToast("Không có mã PDA nào để sao chép!", "warning");
+                showToast('Không có mã PDA nào để sao chép!', 'warning');
                 return;
             }
-            const textToCopy = currentModalPdaCodes.join(', ');
-            copyTextToClipboard(textToCopy);
+
+            copyTextToClipboard(currentModalPdaCodes.join(', '));
         };
 
         window.copySinglePdaCode = function(code) {
@@ -1616,21 +2033,22 @@
 
             fullTbody.innerHTML = list.map(item => {
                 const devType = detectDeviceType(item.pdaCode);
+
                 return `
                     <tr class="hover:bg-orange-50/40 border-b border-gray-100">
-                        <td class="p-2.5 font-bold text-orange-600 flex items-center gap-1.5">
-                            <span class="select-all">${item.pdaCode}</span>
+                        <td class="p-2.5 font-bold text-orange-600">
+                            <span class="select-all">${item.pdaCode || ''}</span>
                             <button onclick="copySinglePdaCode('${item.pdaCode}')" title="Sao chép mã" class="text-gray-400 hover:text-orange-600 text-xs">
                                 <i class="fa-regular fa-copy"></i>
                             </button>
                         </td>
                         <td class="p-2.5">${renderDeviceBadge(devType)}</td>
-                        <td class="p-2.5 font-semibold">${item.opsId}</td>
-                        <td class="p-2.5 font-bold">${item.empName}</td>
-                        <td class="p-2.5">${item.team}</td>
-                        <td class="p-2.5">${item.supervisor}</td>
-                        <td class="p-2.5">${item.borrowTime}</td>
-                        <td class="p-2.5">${item.adminName}</td>
+                        <td class="p-2.5 font-semibold">${item.opsId || ''}</td>
+                        <td class="p-2.5 font-bold">${item.empName || ''}</td>
+                        <td class="p-2.5">${item.team || ''}</td>
+                        <td class="p-2.5">${item.supervisor || ''}</td>
+                        <td class="p-2.5">${item.borrowTime || ''}</td>
+                        <td class="p-2.5">${item.adminName || ''}</td>
                         <td class="p-2.5 text-center">
                             <button onclick="returnPdaDirect('${item.id}', '${item.pdaCode}')" ${isDisabled ? 'disabled' : ''} class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg font-bold text-xs shadow-sm disabled:opacity-50 transition-all">
                                 Nhận Trả
@@ -1642,20 +2060,23 @@
 
             miniTbody.innerHTML = list.map(item => {
                 const devType = detectDeviceType(item.pdaCode);
+
                 return `
                     <tr class="hover:bg-gray-50/80 border-b border-gray-100 transition-all">
-                        <td class="p-3 font-extrabold text-orange-600 text-xs flex items-center gap-1.5">
-                            <span class="select-all">${item.pdaCode}</span>
+                        <td class="p-3 font-extrabold text-orange-600 text-xs">
+                            <span class="select-all">${item.pdaCode || ''}</span>
                             <button onclick="copySinglePdaCode('${item.pdaCode}')" title="Sao chép" class="text-gray-400 hover:text-orange-600 text-xs">
                                 <i class="fa-regular fa-copy"></i>
                             </button>
                         </td>
                         <td class="p-3">${renderDeviceBadge(devType)}</td>
-                        <td class="p-3 font-bold text-gray-800 text-xs">${item.empName} <span class="text-gray-500 font-semibold text-xs">(${item.opsId})</span></td>
-                        <td class="p-3 text-gray-700 font-bold text-xs">${item.team} - ${item.supervisor}</td>
-                        <td class="p-3 text-gray-500 text-xs font-semibold">${item.borrowTime}</td>
+                        <td class="p-3 font-bold text-gray-800 text-xs">${item.empName || ''} <span class="text-gray-500 font-semibold text-xs">(${item.opsId || ''})</span></td>
+                        <td class="p-3 text-gray-700 font-bold text-xs">${item.team || ''} - ${item.supervisor || ''}</td>
+                        <td class="p-3 text-gray-500 text-xs font-semibold">${item.borrowTime || ''}</td>
                         <td class="p-3 text-right">
-                            <button onclick="returnPdaDirect('${item.id}', '${item.pdaCode}')" ${isDisabled ? 'disabled' : ''} class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm disabled:opacity-50 transition-all">Nhận Trả</button>
+                            <button onclick="returnPdaDirect('${item.id}', '${item.pdaCode}')" ${isDisabled ? 'disabled' : ''} class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm disabled:opacity-50 transition-all">
+                                Nhận Trả
+                            </button>
                         </td>
                     </tr>
                 `;
@@ -1665,21 +2086,24 @@
         function renderLogs(logs) {
             document.getElementById('logsTable').innerHTML = logs.map(log => {
                 const devType = detectDeviceType(log.pdaCode);
+
                 return `
                     <tr class="hover:bg-gray-50 border-b border-gray-100">
-                        <td class="p-2.5 text-gray-600 font-bold text-xs">${log.timestamp}</td>
-                        <td class="p-2.5 font-bold text-orange-600 flex items-center gap-1">
-                            <span>${log.pdaCode}</span>
+                        <td class="p-2.5 text-gray-600 font-bold text-xs">${log.timestamp || ''}</td>
+                        <td class="p-2.5 font-bold text-orange-600">
+                            <span>${log.pdaCode || ''}</span>
                             <button onclick="copySinglePdaCode('${log.pdaCode}')" title="Sao chép" class="text-gray-400 hover:text-orange-600 text-xs">
                                 <i class="fa-regular fa-copy"></i>
                             </button>
                         </td>
                         <td class="p-2.5">${renderDeviceBadge(devType)}</td>
-                        <td class="p-2.5"><span class="${log.status === 'MƯỢN' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'} font-bold px-2 py-0.5 rounded text-xs">${log.status}</span></td>
-                        <td class="p-2.5 font-semibold">${log.opsId}</td>
-                        <td class="p-2.5 font-bold">${log.empName}</td>
+                        <td class="p-2.5">
+                            <span class="${log.status === 'MƯỢN' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'} font-bold px-2 py-0.5 rounded text-xs">${log.status || ''}</span>
+                        </td>
+                        <td class="p-2.5 font-semibold">${log.opsId || ''}</td>
+                        <td class="p-2.5 font-bold">${log.empName || ''}</td>
                         <td class="p-2.5 text-xs ${log.details && log.details.includes('TRẢ HỘ') ? 'text-red-600 font-bold' : 'text-gray-600'}">${log.details || 'Chính chủ'}</td>
-                        <td class="p-2.5 text-xs font-bold text-slate-700">${log.adminName}</td>
+                        <td class="p-2.5 text-xs font-bold text-slate-700">${log.adminName || ''}</td>
                     </tr>
                 `;
             }).join('');
@@ -1687,12 +2111,15 @@
 
         function renderEmployees(emps) {
             document.getElementById('empCount').innerText = emps.length;
+
             const tbody = document.getElementById('employeesTable');
             const selectAllBox = document.getElementById('selectAllEmp');
-            if(selectAllBox) selectAllBox.checked = false;
+
+            if (selectAllBox) selectAllBox.checked = false;
 
             if (emps.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400 font-bold">Không tìm thấy nhân viên phù hợp...</td></tr>`;
+                tbody.innerHTML =
+                    '<tr><td colspan="7" class="p-6 text-center text-gray-400 font-bold">Không tìm thấy nhân viên phù hợp...</td></tr>';
                 return;
             }
 
@@ -1703,26 +2130,30 @@
                     <td class="p-2 text-center">
                         <input type="checkbox" value="${emp.id}" class="emp-checkbox w-3.5 h-3.5 rounded cursor-pointer accent-orange-600" ${isDisabled ? 'disabled' : ''}>
                     </td>
-                    <td class="p-2 font-bold text-orange-600">${emp.opsId}</td>
-                    <td class="p-2 font-bold text-gray-800">${emp.empName}</td>
+                    <td class="p-2 font-bold text-orange-600">${emp.opsId || ''}</td>
+                    <td class="p-2 font-bold text-gray-800">${emp.empName || ''}</td>
                     <td class="p-2 text-gray-500 font-medium text-xs">${emp.email || 'N/A'}</td>
                     <td class="p-2 font-semibold"><span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">${emp.team || 'N/A'}</span></td>
                     <td class="p-2 font-semibold text-gray-700">${emp.supervisor || 'N/A'}</td>
                     <td class="p-2 text-center">
-                        <button onclick="editEmployee('${emp.opsId}', '${emp.empName}', '${emp.email || ''}', '${emp.team || ''}', '${emp.supervisor || ''}')" ${isDisabled ? 'disabled' : ''} class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-2.5 py-1 rounded font-bold text-xs mr-1 transition-all disabled:opacity-50">Sửa</button>
-                        <button onclick="deleteSingleEmployee('${emp.id}', '${emp.empName}')" ${isDisabled ? 'disabled' : ''} class="bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1 rounded font-bold text-xs transition-all disabled:opacity-50">Xóa</button>
+                        <button onclick="editEmployee('${emp.opsId || ''}', '${emp.empName || ''}', '${emp.email || ''}', '${emp.team || ''}', '${emp.supervisor || ''}')" ${isDisabled ? 'disabled' : ''} class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-2.5 py-1 rounded font-bold text-xs mr-1 transition-all disabled:opacity-50">Sửa</button>
+                        <button onclick="deleteSingleEmployee('${emp.id}', '${emp.empName || ''}')" ${isDisabled ? 'disabled' : ''} class="bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1 rounded font-bold text-xs transition-all disabled:opacity-50">Xóa</button>
                     </td>
                 </tr>
             `).join('');
         }
 
         let searchTimeout = null;
+
         const searchEmpInput = document.getElementById('searchEmp');
+
         if (searchEmpInput) {
             searchEmpInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
+
                 searchTimeout = setTimeout(() => {
                     const keyword = this.value.toLowerCase().trim();
+
                     if (!keyword) {
                         renderEmployees(employeeCache);
                         return;
@@ -1735,11 +2166,13 @@
                         const supervisor = (e.supervisor || '').toLowerCase();
                         const email = (e.email || '').toLowerCase();
 
-                        return opsId.includes(keyword) || 
-                               empName.includes(keyword) || 
-                               team.includes(keyword) || 
-                               supervisor.includes(keyword) || 
-                               email.includes(keyword);
+                        return (
+                            opsId.includes(keyword) ||
+                            empName.includes(keyword) ||
+                            team.includes(keyword) ||
+                            supervisor.includes(keyword) ||
+                            email.includes(keyword)
+                        );
                     });
 
                     renderEmployees(filtered);
@@ -1748,9 +2181,8 @@
         }
 
         window.toggleSelectAllEmployees = function(master) {
-            const checkboxes = document.querySelectorAll('.emp-checkbox');
-            checkboxes.forEach(cb => {
-                if (cb.closest('tr').style.display !== 'none') {
+            document.querySelectorAll('.emp-checkbox').forEach(cb => {
+                if (cb.closest('tr').style.display !== 'none' && !cb.disabled) {
                     cb.checked = master.checked;
                 }
             });
@@ -1758,60 +2190,79 @@
 
         window.deleteSingleEmployee = async function(id, name) {
             if (currentUserRole === 'guest') return;
-            const confirmDelete = await showCustomConfirm("Xóa Nhân Viên", `Bạn có chắc chắn muốn xóa nhân viên "${name}" khỏi hệ thống?`, true);
+
+            const confirmDelete = await showCustomConfirm(
+                'Xóa Nhân Viên',
+                `Bạn có chắc chắn muốn xóa nhân viên "${name}" khỏi hệ thống?`,
+                true
+            );
+
             if (!confirmDelete) return;
 
             const { doc, deleteDoc } = window.fs;
             const db = window.db;
 
             try {
-                await deleteDoc(doc(db, "employees", id));
+                await deleteDoc(doc(db, 'employees', id));
                 showToast(`Đã xóa nhân viên "${name}"!`);
             } catch (err) {
-                console.error(err);
-                showToast("Có lỗi xảy ra khi xóa nhân viên!", 'error');
+                console.error('Lỗi xóa nhân viên:', err);
+                showToast('Có lỗi xảy ra khi xóa nhân viên: ' + (err.message || err.code), 'error');
             }
         };
 
         window.deleteSelectedEmployees = async function() {
             if (currentUserRole === 'guest') return;
+
             const selectedCheckboxes = document.querySelectorAll('.emp-checkbox:checked');
+
             if (selectedCheckboxes.length === 0) {
-                showToast("Vui lòng tích chọn ít nhất 1 nhân viên để xóa!", 'warning');
+                showToast('Vui lòng tích chọn ít nhất 1 nhân viên để xóa!', 'warning');
                 return;
             }
 
-            const confirmDelete = await showCustomConfirm("Xóa Nhiều Nhân Viên", `Bạn có chắc chắn muốn xóa ${selectedCheckboxes.length} nhân viên đã chọn?`, true);
+            const confirmDelete = await showCustomConfirm(
+                'Xóa Nhiều Nhân Viên',
+                `Bạn có chắc chắn muốn xóa ${selectedCheckboxes.length} nhân viên đã chọn?`,
+                true
+            );
+
             if (!confirmDelete) return;
 
-            const { collection, writeBatch, doc } = window.fs;
+            const { writeBatch, doc } = window.fs;
             const db = window.db;
             const batch = writeBatch(db);
 
             selectedCheckboxes.forEach(cb => {
-                batch.delete(doc(db, "employees", cb.value));
+                batch.delete(doc(db, 'employees', cb.value));
             });
 
             try {
                 await batch.commit();
                 showToast(`Đã xóa thành công ${selectedCheckboxes.length} nhân viên!`);
             } catch (err) {
-                console.error(err);
-                showToast("Có lỗi xảy ra khi xóa danh sách!", 'error');
+                console.error('Lỗi xóa danh sách nhân viên:', err);
+                showToast('Có lỗi xảy ra khi xóa danh sách: ' + (err.message || err.code), 'error');
             }
         };
 
         window.deleteAllEmployees = async function() {
             if (currentUserRole === 'guest') return;
+
             if (employeeCache.length === 0) {
-                showToast("CSDL Nhân viên hiện đang trống!", 'warning');
+                showToast('CSDL Nhân viên hiện đang trống!', 'warning');
                 return;
             }
 
-            const confirm1 = await showCustomConfirm("CẢNH BÁO NGUY HIỂM", `Bạn có chắc chắn muốn XÓA TOÀN BỘ ${employeeCache.length} nhân viên trong CSDL? Thao tác này không thể hoàn tác!`, true);
+            const confirm1 = await showCustomConfirm(
+                'CẢNH BÁO NGUY HIỂM',
+                `Bạn có chắc chắn muốn XÓA TOÀN BỘ ${employeeCache.length} nhân viên trong CSDL? Thao tác này không thể hoàn tác!`,
+                true
+            );
+
             if (!confirm1) return;
 
-            const { collection, writeBatch, doc } = window.fs;
+            const { writeBatch, doc } = window.fs;
             const db = window.db;
 
             try {
@@ -1819,7 +2270,7 @@
                 let count = 0;
 
                 for (const emp of employeeCache) {
-                    batch.delete(doc(db, "employees", emp.id));
+                    batch.delete(doc(db, 'employees', emp.id));
                     count++;
 
                     if (count % 400 === 0) {
@@ -1832,30 +2283,36 @@
                     await batch.commit();
                 }
 
-                showToast("Đã xóa sạch toàn bộ CSDL nhân viên!");
+                showToast('Đã xóa sạch toàn bộ CSDL nhân viên!');
             } catch (err) {
-                console.error(err);
-                showToast("Có lỗi xảy ra khi xóa CSDL nhân viên!", 'error');
+                console.error('Lỗi xóa CSDL nhân viên:', err);
+                showToast('Có lỗi xảy ra khi xóa CSDL nhân viên: ' + (err.message || err.code), 'error');
             }
         };
 
         window.editEmployee = function(opsId, name, email, team, sup) {
             if (currentUserRole === 'guest') return;
+
             document.getElementById('empOpsId').value = opsId;
             document.getElementById('empName').value = name;
             document.getElementById('empEmail').value = email;
             document.getElementById('empTeam').value = cleanOptionString(team);
             document.getElementById('empSup').value = cleanOptionString(sup);
-            
-            document.getElementById('empForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            document.getElementById('empForm').scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+
             document.getElementById('empTeam').focus();
         };
 
         window.saveEmployee = async function(e) {
             e.preventDefault();
+
             if (currentUserRole === 'guest') return;
 
-            const { collection, addDoc, query, where, getDocs, updateDoc } = window.fs;
+            const { collection, addDoc, query, where, getDocs, updateDoc, doc } = window.fs;
             const db = window.db;
 
             const opsId = document.getElementById('empOpsId').value.trim();
@@ -1865,35 +2322,53 @@
             const supervisor = cleanOptionString(document.getElementById('empSup').value);
 
             try {
-                const q = query(collection(db, "employees"), where("opsId", "==", opsId));
+                const q = query(collection(db, 'employees'), where('opsId', '==', opsId));
                 const querySnapshot = await getDocs(q);
 
                 if (!querySnapshot.empty) {
                     const docId = querySnapshot.docs[0].id;
-                    await updateDoc(doc(db, "employees", docId), { empName, email, team, supervisor });
+
+                    await updateDoc(doc(db, 'employees', docId), {
+                        empName,
+                        email,
+                        team,
+                        supervisor
+                    });
+
                     showToast(`Đã cập nhật thông tin cho [${opsId}]!`);
                 } else {
-                    await addDoc(collection(db, "employees"), { opsId, empName, email, team, supervisor });
+                    await addDoc(collection(db, 'employees'), {
+                        opsId,
+                        empName,
+                        email,
+                        team,
+                        supervisor
+                    });
+
                     showToast(`Đã thêm nhân viên mới [${opsId}]!`);
                 }
 
                 document.getElementById('empForm').reset();
+
             } catch (error) {
-                console.error("Lỗi khi lưu nhân viên: ", error);
-                showToast("Có lỗi xảy ra khi lưu nhân viên!", 'error');
+                console.error('Lỗi lưu nhân viên:', error);
+                showToast('Có lỗi xảy ra khi lưu nhân viên: ' + (error.message || error.code), 'error');
             }
         };
 
         async function saveBatchEmployees(dataArray) {
             if (currentUserRole === 'guest') return;
+
             const { collection, writeBatch, doc } = window.fs;
             const db = window.db;
-            let batch = writeBatch(db);
 
+            let batch = writeBatch(db);
             let count = 0;
+
             for (const item of dataArray) {
                 if (item.opsId && item.empName) {
-                    const docRef = doc(collection(db, "employees"));
+                    const docRef = doc(collection(db, 'employees'));
+
                     batch.set(docRef, {
                         opsId: String(item.opsId).trim(),
                         empName: String(item.empName).trim(),
@@ -1901,6 +2376,7 @@
                         team: cleanOptionString(item.team),
                         supervisor: cleanOptionString(item.supervisor)
                     });
+
                     count++;
 
                     if (count % 400 === 0) {
@@ -1918,12 +2394,14 @@
         }
 
         const excelFileInput = document.getElementById('excelFileInput');
+
         if (excelFileInput) {
             excelFileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
 
                 const reader = new FileReader();
+
                 reader.onload = async (evt) => {
                     try {
                         const data = new Uint8Array(evt.target.result);
@@ -1933,26 +2411,259 @@
                         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
                         const formattedData = jsonData.map(row => ({
-                            opsId: row['Mã NV'] || row['Ops ID'] || row['OpsId'] || row['OPS ID'] || row['Mã nhân viên'] || row['opsId'] || '',
-                            empName: row['Họ tên'] || row['Họ Tên'] || row['Tên'] || row['Name'] || row['empName'] || '',
+                            opsId:
+                                row['Mã NV'] ||
+                                row['Ops ID'] ||
+                                row['OpsId'] ||
+                                row['OPS ID'] ||
+                                row['Mã nhân viên'] ||
+                                row['opsId'] ||
+                                '',
+
+                            empName:
+                                row['Họ tên'] ||
+                                row['Họ Tên'] ||
+                                row['Tên'] ||
+                                row['Name'] ||
+                                row['empName'] ||
+                                '',
+
                             email: row['Email'] || row['email'] || '',
                             team: row['Team'] || row['Bộ phận'] || row['team'] || '',
-                            supervisor: row['Supervisor'] || row['Sup'] || row['Quản lý'] || row['supervisor'] || ''
+                            supervisor:
+                                row['Supervisor'] ||
+                                row['Sup'] ||
+                                row['Quản lý'] ||
+                                row['supervisor'] ||
+                                ''
                         })).filter(item => item.opsId && item.empName);
 
                         if (formattedData.length === 0) {
-                            showToast("File Excel không chứa đúng định dạng cột (Mã NV, Họ tên, Team, Supervisor)!", "warning");
+                            showToast(
+                                'File Excel không chứa đúng định dạng cột (Mã NV, Họ tên, Team, Supervisor)!',
+                                'warning'
+                            );
                             return;
                         }
 
                         await saveBatchEmployees(formattedData);
                         excelFileInput.value = '';
+
                     } catch (err) {
-                        console.error("Lỗi đọc file Excel:", err);
-                        showToast("Đọc file Excel thất bại!", "error");
+                        console.error('Lỗi đọc file Excel:', err);
+                        showToast('Đọc file Excel thất bại: ' + (err.message || err.code), 'error');
                     }
                 };
+
                 reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // CẤP QUYỀN: ghi admin_users và user_access trong cùng một batch.
+        window.saveAdminUser = async function(e) {
+            e.preventDefault();
+
+            if (currentUserRole !== 'superadmin') {
+                showToast('Chỉ Super Admin mới được cấp quyền.', 'warning');
+                return;
+            }
+
+            const { collection, doc, writeBatch } = window.fs;
+            const db = window.db;
+
+            const email = document.getElementById('adminEmail').value.trim().toLowerCase();
+            const displayName = document.getElementById('adminDisplayName').value.trim();
+            const isSuper = document.getElementById('adminIsSuper').value === 'true';
+
+            if (!email || !email.includes('@') || !displayName) {
+                showToast('Vui lòng nhập email và họ tên hợp lệ.', 'warning');
+                return;
+            }
+
+            if (
+                adminUsersCache.some(
+                    u => String(u.email || '').trim().toLowerCase() === email
+                )
+            ) {
+                showToast('Email này đã có trong danh sách quản trị.', 'warning');
+                return;
+            }
+
+            try {
+                const batch = writeBatch(db);
+                const adminRef = doc(collection(db, 'admin_users'));
+                const accessRef = doc(db, 'user_access', email);
+
+                const userData = {
+                    email,
+                    displayName,
+                    isSuper
+                };
+
+                batch.set(adminRef, userData);
+
+                batch.set(accessRef, {
+                    ...userData,
+                    canWrite: true,
+                    enabled: true
+                });
+
+                await batch.commit();
+
+                showToast(`Đã cấp quyền thành công cho [${email}]!`);
+                document.getElementById('adminForm').reset();
+
+            } catch (err) {
+                console.error('Lỗi cấp quyền:', err);
+
+                showToast(
+                    'Không thể cấp quyền: ' + (err.message || err.code || String(err)),
+                    'error'
+                );
+            }
+        };
+
+        function renderAdminUsers(list) {
+            const tbody = document.getElementById('adminsTable');
+            if (!tbody) return;
+
+            tbody.innerHTML = list.map(item => `
+                <tr class="hover:bg-gray-50 border-b border-gray-100">
+                    <td class="p-2.5 font-bold text-gray-800">${item.email || ''}</td>
+                    <td class="p-2.5 font-bold text-orange-600">${item.displayName || ''}</td>
+                    <td class="p-2.5">
+                        ${(item.isSuper === true || item.isSuper === 'true')
+                            ? '<span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-xs">Super Admin</span>'
+                            : '<span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">Người Thực Hiện</span>'}
+                    </td>
+                    <td class="p-2.5 text-center">
+                        <button
+                            onclick="deleteAdminUser('${item.id}', '${String(item.email || '').replace(/'/g, '&#39;')}')"
+                            class="bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1 rounded font-bold text-xs transition-all">
+                            Xóa Quyền
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // THU HỒI QUYỀN: giữ admin_users và user_access đồng bộ.
+        window.deleteAdminUser = async function(id, email) {
+            if (currentUserRole !== 'superadmin') {
+                showToast('Chỉ Super Admin mới được thu hồi quyền.', 'warning');
+                return;
+            }
+
+            const targetEmail = String(email || '').trim().toLowerCase();
+
+            if (
+                currentUser &&
+                String(currentUser.email || '').trim().toLowerCase() === targetEmail
+            ) {
+                showToast('Không thể tự xóa quyền của tài khoản đang đăng nhập.', 'warning');
+                return;
+            }
+
+            const targetUser = adminUsersCache.find(u => u.id === id);
+            const isSuper = (u) => u && (u.isSuper === true || u.isSuper === 'true');
+
+            const hasOtherSuper = adminUsersCache.some(
+                u => u.id !== id && isSuper(u)
+            );
+
+            if (isSuper(targetUser) && !hasOtherSuper) {
+                showToast('Không thể xóa Super Admin cuối cùng của hệ thống.', 'warning');
+                return;
+            }
+
+            const confirmDelete = await showCustomConfirm(
+                'Xóa quyền Admin',
+                `Bạn có chắc muốn xóa quyền của email [${targetEmail}]?`,
+                true
+            );
+
+            if (!confirmDelete) return;
+
+            const { doc, writeBatch } = window.fs;
+            const db = window.db;
+
+            const anotherAdminRecord = adminUsersCache.some(
+                u => u.id !== id &&
+                    String(u.email || '').trim().toLowerCase() === targetEmail
+            );
+
+            try {
+                const batch = writeBatch(db);
+
+                batch.delete(doc(db, 'admin_users', id));
+
+                if (!anotherAdminRecord) {
+                    batch.delete(doc(db, 'user_access', targetEmail));
+                }
+
+                await batch.commit();
+
+                showToast('Đã cập nhật quyền quản trị thành công!');
+
+            } catch (err) {
+                console.error('Lỗi thu hồi quyền:', err);
+
+                showToast(
+                    'Không thể thu hồi quyền: ' + (err.message || err.code || String(err)),
+                    'error'
+                );
+            }
+        };
+
+        window.switchTab = function(tabName) {
+            if (tabName === 'admin' && currentUserRole !== 'superadmin') {
+                showToast('Bạn không có quyền truy cập vào khu vực Bảo Mật!', 'warning');
+                return;
+            }
+
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+
+            const tab = document.getElementById(`tab-${tabName}`);
+            if (tab) tab.classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.className =
+                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold hover:bg-slate-800 hover:text-white transition-all text-sm';
+            });
+
+            const navButton = document.getElementById(`nav-${tabName}`);
+
+            if (navButton) {
+                navButton.className =
+                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold bg-orange-500 text-white transition-all text-sm';
+            }
+        };
+
+        // TÌM KIẾM UNRETURNED
+        const searchUnreturnedInput = document.getElementById('searchUnreturned');
+
+        if (searchUnreturnedInput) {
+            searchUnreturnedInput.addEventListener('input', function() {
+                const keyword = this.value.toLowerCase().trim();
+
+                if (!keyword) {
+                    renderUnreturned(unreturnedCache);
+                    return;
+                }
+
+                const filtered = unreturnedCache.filter(item => {
+                    return [
+                        item.pdaCode,
+                        item.opsId,
+                        item.empName,
+                        item.team,
+                        item.supervisor
+                    ].some(value => String(value || '').toLowerCase().includes(keyword));
+                });
+
+                renderUnreturned(filtered);
             });
         }
     </script>
