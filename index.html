@@ -451,6 +451,170 @@
             .status-progress-bar { animation: none !important; transition: none !important; }
         }
 
+
+
+        /* ===== PATCH LAYOUT: 3 THẺ DÙNG VÙNG RIÊNG, KHÔNG CHỒNG ẢNH LÊN CONTROL ===== */
+        .dashboard-three-cards > .dashboard-card {
+            min-width: 0;
+            min-height: 0;
+        }
+
+        /* Font chữ trên 3 thẻ tăng nhẹ để dễ đọc khi thao tác nhanh. */
+        .dashboard-three-cards h2 {
+            font-size: 13px !important;
+            line-height: 1.3 !important;
+        }
+        .dashboard-three-cards [class~="text-[9px]"] {
+            font-size: 10px !important;
+        }
+        .dashboard-three-cards [class~="text-[10px]"] {
+            font-size: 11px !important;
+        }
+        .dashboard-three-cards input,
+        .dashboard-three-cards select {
+            font-size: 13px !important;
+        }
+        .dashboard-three-cards .status-device-block > div:first-child > span:first-child {
+            font-size: 13px !important;
+        }
+
+        /* Áp dụng nguyên tắc từ WebApp tham khảo: ảnh chỉ nằm trong vùng sân khấu
+           phía dưới OPS ID, không còn là lớp phủ absolute trên các trường nhập. */
+        .ops-compact {
+            justify-content: flex-start !important;
+            gap: .7rem !important;
+        }
+        .card-depth > .ops-gif-stage,
+        .ops-compact > .ops-gif-stage {
+            position: relative !important;
+            inset: auto !important;
+            left: auto !important;
+            right: auto !important;
+            top: auto !important;
+            bottom: auto !important;
+            width: auto !important;
+            height: 132px !important;
+            min-height: 132px !important;
+            max-height: 150px !important;
+            flex: 0 0 132px !important;
+            align-self: stretch !important;
+            margin: .2rem .15rem 0 !important;
+            overflow: hidden !important;
+            contain: paint !important;
+            clip-path: inset(0 round 14px) !important;
+            isolation: isolate !important;
+            pointer-events: none !important;
+            opacity: .78 !important;
+            z-index: 1 !important;
+        }
+        .ops-compact > :not(.ops-gif-stage) {
+            position: relative;
+            z-index: 2;
+        }
+        .ops-gif-image {
+            position: absolute !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            object-fit: cover !important;
+            object-position: center 42% !important;
+            pointer-events: none !important;
+        }
+        #selectedEmpBox {
+            flex: 1 1 auto;
+            min-height: 105px;
+        }
+
+        /* QR lớn hơn, theo vùng QR riêng ở cuối thẻ Trạng thái. */
+        .confirm-qr-card {
+            flex-shrink: 0;
+            min-height: 232px;
+            padding: .7rem .55rem;
+            gap: .5rem;
+            overflow: hidden;
+        }
+        .confirm-qr-label {
+            font-size: 11px !important;
+        }
+        .confirm-qr-hint,
+        .confirm-qr-status {
+            font-size: 10px !important;
+        }
+        #confirm-qr {
+            width: 158px !important;
+            height: 158px !important;
+            min-width: 158px !important;
+            min-height: 158px !important;
+            padding: 4px !important;
+        }
+        #confirm-qr img,
+        #confirm-qr canvas {
+            width: 150px !important;
+            height: 150px !important;
+            max-width: none !important;
+        }
+
+        /* Filter panel for Logs. */
+        .logs-filter-control {
+            width: 100%;
+            min-width: 0;
+            min-height: 38px;
+            border: 1px solid #cbd5e1;
+            border-radius: .65rem;
+            background: #fff;
+            padding: .5rem .6rem;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 700;
+            outline: none;
+        }
+        .logs-filter-control:focus {
+            border-color: #f97316;
+            box-shadow: 0 0 0 2px rgba(249,115,22,.12);
+        }
+        #logsFilterCount {
+            font-size: 11px;
+            font-weight: 800;
+            color: #64748b;
+            white-space: nowrap;
+        }
+        @media (max-width: 1023px) {
+            .confirm-qr-card {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-around;
+                min-height: 174px;
+                margin-top: .5rem;
+            }
+            .confirm-qr-copy {
+                width: auto;
+                flex: 1 1 auto;
+                text-align: left;
+                min-width: 0;
+            }
+            #confirm-qr {
+                width: 148px !important;
+                height: 148px !important;
+                min-width: 148px !important;
+                min-height: 148px !important;
+            }
+            #confirm-qr img,
+            #confirm-qr canvas {
+                width: 140px !important;
+                height: 140px !important;
+            }
+        }
+        @media (max-width: 767px) {
+            .dashboard-three-cards { row-gap: 1rem; }
+            .ops-compact > .ops-gif-stage {
+                height: 120px !important;
+                min-height: 120px !important;
+                flex-basis: 120px !important;
+            }
+            .logs-filter-grid > * { grid-column: span 12 / span 12 !important; }
+        }
+
     </style>
 </head>
 
@@ -605,7 +769,7 @@
                 <div class="grid grid-cols-12 gap-4 items-stretch dashboard-three-cards">
 
                     <!-- THẺ 1: TRẠNG THÁI KHO + QR XÁC NHẬN -->
-                    <section class="dashboard-card col-span-12 lg:col-span-2 card-depth rounded-2xl p-3.5 flex flex-col gap-3">
+                    <section class="dashboard-card col-span-12 lg:col-span-3 card-depth rounded-2xl p-3.5 flex flex-col gap-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                             <span class="font-extrabold text-gray-800 uppercase text-[10px] tracking-wide">Trạng thái kho</span>
                             <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-100 font-extrabold px-2 py-1 rounded-full text-[9px]">
@@ -713,7 +877,7 @@
                     </section>
 
                     <!-- THẺ 3: QUÉT THIẾT BỊ -->
-                    <section class="dashboard-card col-span-12 lg:col-span-7 card-depth rounded-2xl p-3.5 flex flex-col gap-3">
+                    <section class="dashboard-card col-span-12 lg:col-span-6 card-depth rounded-2xl p-3.5 flex flex-col gap-3">
                         <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
                             <span class="w-7 h-7 rounded-full bg-orange-100 text-orange-700 font-extrabold flex items-center justify-center text-xs border border-orange-200">2</span>
                             <div>
@@ -841,9 +1005,49 @@
 
             <!-- LOGS -->
             <div id="tab-logs" class="tab-content hidden bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-                <div class="flex justify-between items-center mb-3 border-b pb-2">
+                <div class="flex justify-between items-center mb-3 border-b pb-2 gap-3 flex-wrap">
                     <h2 class="text-base font-bold text-gray-800 uppercase">LOGS NHẬT KÝ MƯỢN / TRẢ</h2>
-                    <span class="text-xs text-gray-500 font-semibold"><i class="fa-solid fa-arrow-down-wide-short text-orange-500 mr-1"></i> Sắp xếp: Mới nhất ➔ Cũ nhất</span>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <span id="logsFilterCount">Đang tải lịch sử...</span>
+                        <span class="text-xs text-gray-500 font-semibold"><i class="fa-solid fa-arrow-down-wide-short text-orange-500 mr-1"></i> Mới nhất → cũ nhất</span>
+                    </div>
+                </div>
+
+                <div class="logs-filter-grid grid grid-cols-12 gap-2 mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3 items-center">
+                    <div class="col-span-12 md:col-span-3">
+                        <label for="logsFilterSearch" class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Từ khóa</label>
+                        <input id="logsFilterSearch" type="search" class="logs-filter-control" placeholder="PDA, OPS ID, nhân viên, admin..." autocomplete="off">
+                    </div>
+                    <div class="col-span-6 md:col-span-2">
+                        <label for="logsFilterStatus" class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Lịch sử</label>
+                        <select id="logsFilterStatus" class="logs-filter-control">
+                            <option value="">Tất cả</option>
+                            <option value="MƯỢN">Mượn</option>
+                            <option value="TRẢ">Trả</option>
+                        </select>
+                    </div>
+                    <div class="col-span-6 md:col-span-2">
+                        <label for="logsFilterType" class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Loại thiết bị</label>
+                        <select id="logsFilterType" class="logs-filter-control">
+                            <option value="">Tất cả</option>
+                            <option value="Máy mới">Máy mới (MT93)</option>
+                            <option value="Máy cũ">Máy cũ (MT90)</option>
+                            <option value="Súng Scan">Súng Scan</option>
+                        </select>
+                    </div>
+                    <div class="col-span-6 md:col-span-2">
+                        <label for="logsFilterFrom" class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Từ ngày</label>
+                        <input id="logsFilterFrom" type="date" class="logs-filter-control">
+                    </div>
+                    <div class="col-span-6 md:col-span-2">
+                        <label for="logsFilterTo" class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Đến ngày</label>
+                        <input id="logsFilterTo" type="date" class="logs-filter-control">
+                    </div>
+                    <div class="col-span-12 md:col-span-1 flex items-end">
+                        <button id="btnClearLogsFilters" type="button" class="w-full min-h-[38px] bg-white hover:bg-orange-50 border border-slate-300 hover:border-orange-300 text-slate-600 hover:text-orange-700 rounded-lg font-extrabold text-[11px] transition" title="Xóa tất cả bộ lọc">
+                            <i class="fa-solid fa-rotate-left mr-1"></i><span>Xóa</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -1052,6 +1256,7 @@
         let currentAdminDisplayName = 'HÀ VIỆT HÙNG';
 
         let adminUsersCache = [];
+        let logsCache = [];
         let selectedEmployee = null;
         let pendingBorrowPdaList = [];
         let pendingReturnPdaList = [];
@@ -1514,8 +1719,8 @@
 
             new QRCode(holder, {
                 text: CONFIRM_QR_TOKEN,
-                width: 100,
-                height: 100,
+                width: 150,
+                height: 150,
                 colorDark: '#0f172a',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.M
@@ -1724,6 +1929,7 @@
             updateInventoryStats();
             generateConfirmQr();
             setupConfirmScannerListener();
+            setupLogsFilters();
         });
 
         window.addEventListener('keydown', (e) => {
@@ -1867,7 +2073,8 @@
                     });
 
                     logs.sort((a, b) => b._rawTime - a._rawTime);
-                    renderLogs(logs);
+                    logsCache = logs;
+                    applyLogFilters();
                 },
                 listenerError('nhật ký mượn trả')
             );
@@ -2720,8 +2927,123 @@
             }).join('');
         }
 
+        function normalizeLogSearch(value) {
+            return String(value || '')
+                .toLocaleLowerCase('vi-VN')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .trim();
+        }
+
+        function setupLogsFilters() {
+            const filterIds = [
+                'logsFilterSearch',
+                'logsFilterStatus',
+                'logsFilterType',
+                'logsFilterFrom',
+                'logsFilterTo'
+            ];
+
+            filterIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el || el.dataset.filterBound === '1') return;
+                el.dataset.filterBound = '1';
+                el.addEventListener('input', applyLogFilters);
+                el.addEventListener('change', applyLogFilters);
+            });
+
+            const clearButton = document.getElementById('btnClearLogsFilters');
+            if (clearButton && clearButton.dataset.filterBound !== '1') {
+                clearButton.dataset.filterBound = '1';
+                clearButton.addEventListener('click', () => {
+                    filterIds.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = '';
+                    });
+                    applyLogFilters();
+                });
+            }
+
+            applyLogFilters();
+        }
+
+        function applyLogFilters() {
+            const searchValue = normalizeLogSearch(
+                document.getElementById('logsFilterSearch')?.value || ''
+            );
+            const statusValue = String(
+                document.getElementById('logsFilterStatus')?.value || ''
+            ).trim();
+            const typeValue = String(
+                document.getElementById('logsFilterType')?.value || ''
+            ).trim();
+            const fromValue = document.getElementById('logsFilterFrom')?.value || '';
+            const toValue = document.getElementById('logsFilterTo')?.value || '';
+
+            const fromTime = fromValue
+                ? new Date(fromValue + 'T00:00:00').getTime()
+                : null;
+            const toTime = toValue
+                ? new Date(toValue + 'T23:59:59.999').getTime()
+                : null;
+
+            let filtered = logsCache.filter(log => {
+                const deviceType = detectDeviceType(log.pdaCode);
+                if (statusValue && String(log.status || '').toUpperCase() !== statusValue) {
+                    return false;
+                }
+                if (typeValue && deviceType !== typeValue) return false;
+
+                const rawTime = Number(log._rawTime || 0);
+                if (fromTime !== null && (!rawTime || rawTime < fromTime)) return false;
+                if (toTime !== null && (!rawTime || rawTime > toTime)) return false;
+
+                if (searchValue) {
+                    const haystack = normalizeLogSearch([
+                        log.timestamp,
+                        log.pdaCode,
+                        deviceType,
+                        log.status,
+                        log.opsId,
+                        log.empName,
+                        log.details,
+                        log.adminName
+                    ].join(' '));
+                    if (!haystack.includes(searchValue)) return false;
+                }
+
+                return true;
+            });
+
+            // Log listener already sorts newest first; sort again for stable rendering
+            // in case later code invokes the filter with an edited cache.
+            filtered.sort((a, b) => Number(b._rawTime || 0) - Number(a._rawTime || 0));
+            renderLogs(filtered);
+
+            const countNode = document.getElementById('logsFilterCount');
+            if (countNode) {
+                countNode.textContent = `Hiển thị ${filtered.length}/${logsCache.length} lịch sử`;
+            }
+        }
+
         function renderLogs(logs) {
-            document.getElementById('logsTable').innerHTML = logs.map(log => {
+            const tbody = document.getElementById('logsTable');
+            if (!tbody) return;
+
+            if (!logs.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="p-8 text-center text-slate-400 font-bold">
+                            <i class="fa-solid fa-filter-circle-xmark text-2xl mb-2 block text-slate-300"></i>
+                            Không tìm thấy lịch sử phù hợp với bộ lọc.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = logs.map(log => {
                 const devType = detectDeviceType(log.pdaCode);
 
                 return `
