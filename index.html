@@ -114,31 +114,6 @@
             font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
         }
 
-        .radar-box {
-            position: relative;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: rgba(255,247,237,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .radar-circle {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 2px solid rgba(249,115,22,0.4);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.8); opacity: 0.8; }
-            100% { transform: scale(1.4); opacity: 0; }
-        }
-
         @keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -579,6 +554,9 @@
             color: #64748b;
             white-space: nowrap;
         }
+        .logs-filter-grid { align-items: end !important; }
+        #btnClearLogsFilters { height: 38px; min-height: 38px; align-self: end; }
+        .logs-filter-grid > div:last-child { align-self: end; }
         @media (max-width: 1023px) {
             .confirm-qr-card {
                 flex-direction: row;
@@ -794,15 +772,7 @@
                                 <div id="mt93ProgressBar" class="status-progress-bar bg-red-500" style="width:93%"></div>
                             </div>
                         </div>
-
-                        <div class="flex justify-center py-1">
-                            <div class="radar-box" aria-label="Trạng thái hệ thống">
-                                <div class="radar-circle"></div>
-                                <i class="fa-solid fa-wifi text-orange-500 text-xl"></i>
-                            </div>
-                        </div>
-
-                        <div class="status-device-block">
+<div class="status-device-block">
                             <div class="flex items-start justify-between gap-2">
                                 <span class="font-extrabold text-xs text-slate-700">
                                     MT90
@@ -820,13 +790,13 @@
                             </div>
                         </div>
 
-                        <!-- QR xác nhận; cần bấm nút giao dịch trước rồi quét QR -->
+                        <!-- QR xác nhận: quét trực tiếp hoặc bấm nút đều ghi ngay -->
                         <div class="confirm-qr-card mt-auto">
                             <div class="confirm-qr-copy">
                                 <span class="confirm-qr-label">
                                     <i class="fa-solid fa-qrcode mr-1"></i> QR xác nhận
                                 </span>
-                                <p class="confirm-qr-hint">Bấm nút xác nhận giao dịch rồi quét mã QR này.</p>
+                                <p class="confirm-qr-hint">Chọn một cách: quét QR để ghi ngay, hoặc bấm nút Xác nhận cấp / trả tất cả.</p>
                                 <span id="confirmQrStatus" class="confirm-qr-status" aria-live="polite">Sẵn sàng xác nhận</span>
                             </div>
                             <div id="confirm-qr" aria-label="QR xác nhận giao dịch"></div>
@@ -1013,7 +983,7 @@
                     </div>
                 </div>
 
-                <div class="logs-filter-grid grid grid-cols-12 gap-2 mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3 items-center">
+                <div class="logs-filter-grid grid grid-cols-12 gap-2 mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3 items-end">
                     <div class="col-span-12 md:col-span-3">
                         <label for="logsFilterSearch" class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Từ khóa</label>
                         <input id="logsFilterSearch" type="search" class="logs-filter-control" placeholder="PDA, OPS ID, nhân viên, admin..." autocomplete="off">
@@ -1043,7 +1013,7 @@
                         <label for="logsFilterTo" class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Đến ngày</label>
                         <input id="logsFilterTo" type="date" class="logs-filter-control">
                     </div>
-                    <div class="col-span-12 md:col-span-1 flex items-end">
+                    <div class="col-span-12 md:col-span-1 flex items-end self-end">
                         <button id="btnClearLogsFilters" type="button" class="w-full min-h-[38px] bg-white hover:bg-orange-50 border border-slate-300 hover:border-orange-300 text-slate-600 hover:text-orange-700 rounded-lg font-extrabold text-[11px] transition" title="Xóa tất cả bộ lọc">
                             <i class="fa-solid fa-rotate-left mr-1"></i><span>Xóa</span>
                         </button>
@@ -1265,10 +1235,9 @@
         let currentModalPdaCodes = [];
         let customConfirmResolver = null;
 
-        // QR xác nhận: token khớp với mã QR và chỉ cho phép chạy giao dịch sau khi quét.
+        // Hai cách ghi độc lập: quét QR hoặc bấm nút Xác nhận. Cả hai gọi chung giao dịch.
         const CONFIRM_QR_TOKEN = 'BNB_PDA_CONFIRM_TRANSACTION_V1';
-        let qrConfirmArmed = false;
-        let qrConfirmSnapshot = '';
+        let transactionInProgress = false;
         let confirmScannerBuffer = '';
         let confirmScannerResetTimer = null;
         let confirmScannerFireTimer = null;
@@ -1669,26 +1638,12 @@
 
         /* ============================================================
            QR XÁC NHẬN GIAO DỊCH
-           - Bấm Xác nhận cấp / trả tất cả để kích hoạt chờ QR.
-           - Quét QR bằng súng scan hoạt động như bàn phím.
-           - Chỉ gọi giao dịch Firebase khi token đúng và danh sách
-             chờ không thay đổi kể từ lúc bấm xác nhận.
+           - Người dùng chọn MỘT trong hai cách:
+             (1) Quét QR bằng máy quét mã để ghi dữ liệu ngay.
+             (2) Bấm nút Xác nhận cấp / trả tất cả để ghi dữ liệu ngay.
+           - Cả hai cách dùng chung executeBatchTransaction(), không bắt
+             buộc phải bấm nút trước khi quét QR.
            ============================================================ */
-
-        function makeQrConfirmSnapshot() {
-            return JSON.stringify({
-                role: currentUserRole,
-                borrow: [...pendingBorrowPdaList],
-                returns: pendingReturnPdaList.map(item => ({
-                    code: item.code,
-                    originalPdaCode: item.originalData && item.originalData.pdaCode,
-                    originalOpsId: item.originalData && item.originalData.opsId
-                })),
-                selectedOpsId: selectedEmployee ? selectedEmployee.opsId : '',
-                team: document.getElementById('displayEmpTeam')?.value || '',
-                supervisor: document.getElementById('displayEmpSup')?.value || ''
-            });
-        }
 
         function setConfirmQrStatus(message, state = 'idle') {
             const node = document.getElementById('confirmQrStatus');
@@ -1734,53 +1689,9 @@
             btn.disabled = currentUserRole === 'guest';
         }
 
-        function cancelQrConfirmation(message = 'Đã hủy yêu cầu xác nhận.', showToastMessage = false) {
-            qrConfirmArmed = false;
-            qrConfirmSnapshot = '';
-            setConfirmQrStatus(message, 'idle');
-            resetConfirmButtonLabel();
-
-            if (showToastMessage) {
-                showToast(message, 'warning');
-            }
-        }
-
-        // Hàm inline từ nút Xác nhận: chỉ kích hoạt chờ QR, chưa ghi Firestore.
-        window.processBatchTransaction = function() {
-            if (currentUserRole === 'guest') {
-                setConfirmQrStatus('Tài khoản chưa có quyền ghi dữ liệu.', 'error');
-                showToast('Tài khoản của bạn chưa được cấp quyền thao tác!', 'warning');
-                return;
-            }
-
-            if (qrConfirmArmed) {
-                cancelQrConfirmation('Đã hủy yêu cầu xác nhận.', false);
-                showToast('Đã hủy xác nhận QR. Chưa ghi giao dịch.', 'warning');
-                return;
-            }
-
-            if (pendingBorrowPdaList.length === 0 && pendingReturnPdaList.length === 0) {
-                setConfirmQrStatus('Chưa có thiết bị trong danh sách chờ.', 'warning');
-                showToast('Hãy quét ít nhất 1 mã PDA để cấp mượn hoặc thu hồi!', 'warning');
-                return;
-            }
-
-            if (pendingBorrowPdaList.length > 0 && !selectedEmployee) {
-                setConfirmQrStatus('Cần quét OPS ID trước khi mượn.', 'warning');
-                showToast('Vui lòng quét Ops ID nhân viên mượn máy trước khi cấp!', 'warning');
-                return;
-            }
-
-            qrConfirmArmed = true;
-            qrConfirmSnapshot = makeQrConfirmSnapshot();
-            setConfirmQrStatus('ĐANG CHỜ QUÉT QR XÁC NHẬN', 'waiting');
-
-            const btn = document.getElementById('btnConfirm');
-            if (btn) {
-                btn.innerHTML = '<i class="fa-solid fa-qrcode mr-1"></i> ĐANG CHỜ QUÉT QR · BẤM ĐỂ HỦY';
-            }
-
-            showToast('Đã sẵn sàng. Hãy quét QR trên thẻ Trạng thái kho để ghi nhận giao dịch.', 'warning');
+        // Phương án 1: bấm nút -> ghi ngay, không chờ quét QR.
+        window.processBatchTransaction = async function() {
+            await executeBatchTransaction('button');
         };
 
         function clearActiveInputAfterConfirmScan() {
@@ -1822,6 +1733,7 @@
 
             clearActiveInputAfterConfirmScan();
             console.log('[CONFIRM QR SCANNER]', reason || 'scan');
+            // Phương án 2: quét đúng QR -> ghi ngay, không cần bấm nút trước.
             handleConfirmQrScan();
         }
 
@@ -1877,47 +1789,7 @@
         }
 
         async function handleConfirmQrScan() {
-            if (!qrConfirmArmed) {
-                setConfirmQrStatus('Hãy bấm nút xác nhận trước khi quét QR.', 'warning');
-                showToast('QR chưa được kích hoạt. Hãy bấm Xác nhận cấp / trả tất cả trước.', 'warning');
-                return;
-            }
-
-            if (currentUserRole === 'guest') {
-                cancelQrConfirmation('Tài khoản chưa có quyền ghi dữ liệu.', false);
-                setConfirmQrStatus('Tài khoản chưa có quyền ghi dữ liệu.', 'error');
-                showToast('Tài khoản của bạn chưa được cấp quyền thao tác!', 'warning');
-                return;
-            }
-
-            if (makeQrConfirmSnapshot() !== qrConfirmSnapshot) {
-                cancelQrConfirmation('Danh sách đã thay đổi. Hãy bấm xác nhận và quét QR lại.', false);
-                setConfirmQrStatus('Danh sách thay đổi — cần xác nhận lại.', 'warning');
-                showToast('Dữ liệu trong hàng chờ đã thay đổi. Vui lòng xác nhận QR lại.', 'warning');
-                return;
-            }
-
-            if (pendingBorrowPdaList.length === 0 && pendingReturnPdaList.length === 0) {
-                cancelQrConfirmation('Danh sách chờ đang trống.', false);
-                setConfirmQrStatus('Danh sách chờ đang trống.', 'warning');
-                showToast('Danh sách chờ không còn thiết bị để xác nhận.', 'warning');
-                return;
-            }
-
-            if (pendingBorrowPdaList.length > 0 && !selectedEmployee) {
-                cancelQrConfirmation('Cần quét OPS ID trước khi mượn.', false);
-                setConfirmQrStatus('Cần quét OPS ID trước khi mượn.', 'warning');
-                showToast('Vui lòng quét Ops ID nhân viên mượn máy trước khi cấp!', 'warning');
-                return;
-            }
-
-            // Tắt chờ trước khi gọi ghi dữ liệu để chặn quét lặp.
-            qrConfirmArmed = false;
-            qrConfirmSnapshot = '';
-            setConfirmQrStatus('QR hợp lệ — đang ghi nhận giao dịch…', 'success');
-            showToast('QR xác nhận hợp lệ. Đang ghi nhận giao dịch…', 'success');
-
-            await executeBatchTransaction();
+            await executeBatchTransaction('qr');
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -2435,9 +2307,6 @@
         }
 
         window.removePending = function(type, index) {
-            if (qrConfirmArmed) {
-                cancelQrConfirmation('Danh sách đã thay đổi. Hãy xác nhận QR lại.', false);
-            }
             if (type === 'borrow') {
                 pendingBorrowPdaList.splice(index, 1);
             } else {
@@ -2450,35 +2319,47 @@
         window.clearPendingList = function() {
             pendingBorrowPdaList = [];
             pendingReturnPdaList = [];
-            if (qrConfirmArmed) {
-                cancelQrConfirmation('Danh sách đã xóa. Yêu cầu QR đã bị hủy.', false);
-            }
             renderPendingList();
             setConfirmQrStatus('Sẵn sàng xác nhận', 'idle');
         };
 
-        async function executeBatchTransaction() {
+        async function executeBatchTransaction(method = 'button') {
+            if (transactionInProgress) {
+                setConfirmQrStatus('Giao dịch đang được ghi nhận, vui lòng đợi…', 'waiting');
+                return;
+            }
             if (currentUserRole === 'guest') {
+                setConfirmQrStatus('Tài khoản chưa có quyền ghi dữ liệu.', 'error');
                 showToast('Tài khoản của bạn chưa được cấp quyền thao tác!', 'warning');
                 return;
             }
 
             if (pendingBorrowPdaList.length === 0 && pendingReturnPdaList.length === 0) {
+                setConfirmQrStatus('Chưa có thiết bị trong danh sách chờ.', 'warning');
                 showToast('Hãy quét ít nhất 1 mã PDA để cấp mượn hoặc thu hồi!', 'warning');
                 return;
             }
 
             if (pendingBorrowPdaList.length > 0 && !selectedEmployee) {
+                setConfirmQrStatus('Cần quét OPS ID trước khi mượn.', 'warning');
                 showToast('Vui lòng quét Ops ID nhân viên mượn máy trước khi cấp!', 'warning');
                 return;
             }
 
+            // Khóa cả nút lẫn QR trong suốt thời gian ghi để chống ghi trùng.
+            transactionInProgress = true;
             const btnConfirm = document.getElementById('btnConfirm');
+            if (btnConfirm) {
+                btnConfirm.disabled = true;
+                btnConfirm.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang ghi nhận...';
+            }
+            setConfirmQrStatus(
+                method === 'qr' ? 'QR hợp lệ — đang ghi nhận giao dịch…' : 'Đang ghi nhận theo nút Xác nhận…',
+                'waiting'
+            );
 
-            btnConfirm.disabled = true;
-            btnConfirm.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang ghi nhận...';
-
-            const { collection, writeBatch, doc, query, where, getDocs, serverTimestamp } = window.fs;
+            try {
+                const { collection, writeBatch, doc, query, where, getDocs, serverTimestamp } = window.fs;
             const db = window.db;
 
             const nowObj = new Date();
@@ -2499,9 +2380,8 @@
             const finalTeam = overrideTeam || (selectedEmployee ? selectedEmployee.team : '');
             const finalSup = overrideSup || (selectedEmployee ? selectedEmployee.supervisor : '');
 
-            const batch = writeBatch(db);
+                const batch = writeBatch(db);
 
-            try {
                 if (pendingBorrowPdaList.length > 0) {
                     for (const borrowPda of pendingBorrowPdaList) {
                         const qCheck = query(
@@ -2625,8 +2505,8 @@
                     'error'
                 );
             } finally {
-                btnConfirm.disabled = currentUserRole === 'guest';
-                btnConfirm.innerHTML = 'XÁC NHẬN CẤP / TRẢ TẤT CẢ';
+                transactionInProgress = false;
+                resetConfirmButtonLabel();
             }
         }
 
