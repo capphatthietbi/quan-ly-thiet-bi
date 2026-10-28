@@ -12,7 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- Firebase SDK v9 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -84,66 +84,374 @@
     </script>
 
     <style>
-        html {
-            font-size: 15px !important;
-            -webkit-text-size-adjust: 100% !important;
-            -moz-text-size-adjust: 100% !important;
-            -ms-text-size-adjust: 100% !important;
-            text-size-adjust: 100% !important;
-            zoom: 1 !important;
-            height: 100%;
-        }
+        /* ===== SPX DASHBOARD: TRẠNG THÁI / OPS ID / QUÉT THIẾT BỊ ===== */
+.dashboard-three-cards {
+  align-items: stretch;
+}
 
-        body, input, button, select, textarea, table, th, td, h1, h2, h3, h4, p, span, div {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+.dashboard-three-cards > .dashboard-card {
+  min-width: 0;
+}
 
-        body {
-            font-size: 15px !important;
-            min-width: 1200px;
-            overflow-x: auto;
-            touch-action: manipulation;
-        }
+.card-depth {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
+  border: 1px solid rgba(226, 232, 240, .95);
+  box-shadow:
+    0 1px 3px rgba(0,0,0,.035),
+    0 10px 25px -5px rgba(15,23,42,.08),
+    0 20px 40px -10px rgba(15,23,42,.055);
+}
 
-        .fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-brands {
-            font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
-        }
+.card-depth::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,.55),
+    transparent 36%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
 
-        .radar-box {
-            position: relative;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: rgba(255,247,237,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.card-depth > * {
+  position: relative;
+  z-index: 1;
+}
 
-        .radar-circle {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 2px solid rgba(249,115,22,0.4);
-            animation: pulse 2s infinite;
-        }
+.card-depth > .ops-gif-stage {
+  position: absolute;
+  z-index: 0;
+}
 
-        @keyframes pulse {
-            0% { transform: scale(0.8); opacity: 0.8; }
-            100% { transform: scale(1.4); opacity: 0; }
-        }
+.status-device-card {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
 
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+.status-device-block {
+  padding: .75rem;
+  border-radius: .9rem;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(180deg, #fff, #f8fafc);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+}
 
-        .toast-animate {
-            animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+.status-progress-track {
+  height: 7px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+
+.status-progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .45s ease;
+}
+
+.status-live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 4px rgba(16,185,129,.12);
+  animation: status-live-pulse 2s ease-in-out infinite;
+}
+
+@keyframes status-live-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(16,185,129,.10);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(16,185,129,.02);
+  }
+}
+
+/* QR xác nhận */
+.confirm-qr-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  padding: .7rem .4rem;
+  border-radius: 1rem;
+  border: 1px solid #fed7aa;
+  background: linear-gradient(
+    135deg,
+    #fff7ed,
+    #fff 65%,
+    #fffaf5
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    0 5px 14px rgba(234,88,12,.06);
+}
+
+.confirm-qr-copy {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+
+.confirm-qr-label {
+  display: block;
+  color: #c2410c;
+  font-size: 9px;
+  line-height: 1.3;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.confirm-qr-hint {
+  margin-top: .25rem;
+  color: #78716c;
+  font-size: 9px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+#confirm-qr {
+  width: 108px;
+  height: 108px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: .7rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(15,23,42,.1);
+}
+
+#confirm-qr img,
+#confirm-qr canvas {
+  display: block;
+  width: 100px !important;
+  height: 100px !important;
+}
+
+.confirm-qr-status {
+  display: block;
+  width: 100%;
+  margin-top: .35rem;
+  color: #64748b;
+  font-size: 9px;
+  line-height: 1.35;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.confirm-qr-status.is-waiting {
+  color: #c2410c;
+}
+
+.confirm-qr-status.is-success {
+  color: #047857;
+}
+
+.confirm-qr-status.is-warning {
+  color: #b45309;
+}
+
+.confirm-qr-status.is-error {
+  color: #b91c1c;
+}
+
+/* GIF trên thẻ OPS ID */
+.ops-compact {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.ops-compact > :not(.ops-gif-stage) {
+  position: relative;
+  z-index: 2;
+}
+
+.ops-gif-stage {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  top: 58%;
+  bottom: 8px;
+  min-height: 105px;
+  overflow: hidden;
+  contain: paint;
+  clip-path: inset(0 round 16px);
+  isolation: isolate;
+  pointer-events: none;
+  background: #0f172a;
+  opacity: .44;
+  z-index: 0;
+}
+
+.ops-gif-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center top;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  z-index: 0;
+}
+
+/* Thẻ quét thiết bị */
+.scanner-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: .75rem;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.scanner-left-column {
+  display: grid;
+  grid-template-rows: repeat(2, minmax(145px, 1fr));
+  gap: .75rem;
+  min-width: 0;
+  min-height: 0;
+}
+
+.scanner-right-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.scanner-zone {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 145px;
+}
+
+.scanner-zone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: .48;
+  background-image:
+    linear-gradient(rgba(16,185,129,.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16,185,129,.1) 1px, transparent 1px);
+  background-size: 19px 19px;
+}
+
+#zone-return::before {
+  background-image:
+    linear-gradient(rgba(245,158,11,.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245,158,11,.12) 1px, transparent 1px);
+}
+
+.scanner-queue {
+  height: 290px;
+  min-height: 230px;
+  max-height: 360px;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.scanner-queue::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scanner-queue::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+
+.scanner-queue::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.queue-total-highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .2rem .5rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border: 1px solid #fdba74;
+  flex-shrink: 0;
+}
+
+.queue-total-highlight #pendingCount {
+  min-width: 1.7rem;
+  height: 1.7rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff;
+  font-size: .95rem;
+  font-weight: 900;
+}
+
+@media (max-width: 1023px) {
+  .confirm-qr-card {
+    flex-direction: row;
+    justify-content: space-evenly;
+  }
+
+  .confirm-qr-copy {
+    width: auto;
+    flex: 1 1 auto;
+    text-align: left;
+  }
+
+  .scanner-main-grid {
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .scanner-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scanner-left-column {
+    grid-template-rows: auto auto;
+  }
+
+  .scanner-queue {
+    height: 260px;
+    min-height: 220px;
+  }
+
+  .ops-gif-stage {
+    top: 62%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-progress-bar {
+    transition: none !important;
+  }
+}
     </style>
 </head>
 
@@ -293,118 +601,308 @@
             </div>
 
             <!-- DASHBOARD -->
-            <div id="tab-dashboard" class="tab-content flex-1 flex flex-col space-y-4 min-h-0">
-                <div class="grid grid-cols-12 gap-4 items-stretch">
+           <!-- HÀNG 3 THẺ: TRẠNG THÁI / OPS ID / QUÉT THIẾT BỊ -->
+<div class="grid grid-cols-12 gap-4 items-stretch dashboard-three-cards">
 
-                    <div class="col-span-12 lg:col-span-2 bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex flex-col justify-between">
-                        <div class="flex justify-between items-center border-b pb-2.5">
-                            <span class="font-extrabold text-gray-800 uppercase text-xs tracking-wide">Trạng Thái Kho</span>
-                            <span class="bg-orange-100 text-orange-600 font-bold px-2 py-0.5 rounded-full text-[10px]">Realtime</span>
-                        </div>
+  <!-- THẺ 1: TRẠNG THÁI KHO + QR XÁC NHẬN -->
+  <section class="dashboard-card col-span-12 lg:col-span-2 card-depth status-device-card rounded-2xl p-3.5">
 
-                        <div class="space-y-2 my-2">
-                            <div class="flex justify-between font-extrabold text-sm">
-                                <span>MT93 (Máy mới)</span>
-                                <span class="text-orange-600">
-                                    Còn: <span id="mt93AvailableText">4</span>/
-                                    <button onclick="editTotalDevices('mt93')" title="Click để chỉnh sửa tổng máy MT93" class="hover:underline font-extrabold text-orange-700 bg-orange-50 px-1 rounded border border-orange-200">
-                                        <span id="mt93TotalText">54</span> <i class="fa-solid fa-pen text-[9px]"></i>
-                                    </button>
-                                </span>
-                            </div>
-                            <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-                                <div id="mt93ProgressBar" class="bg-red-500 h-full transition-all duration-500" style="width: 93%;"></div>
-                            </div>
-                        </div>
+    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+      <span class="font-extrabold text-gray-800 uppercase text-[10px] tracking-wide">
+        Trạng thái kho
+      </span>
 
-                        <div class="flex justify-center my-3">
-                            <div class="radar-box">
-                                <div class="radar-circle"></div>
-                                <i class="fa-solid fa-wifi text-orange-500 text-xl"></i>
-                            </div>
-                        </div>
+      <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-100 font-extrabold px-2 py-1 rounded-full text-[9px]">
+        <span class="status-live-dot"></span>
+        Realtime
+      </span>
+    </div>
 
-                        <div class="space-y-2 my-2">
-                            <div class="flex justify-between font-extrabold text-sm">
-                                <span>MT90 (Máy cũ)</span>
-                                <span class="text-blue-600">
-                                    Còn: <span id="mt90AvailableText">19</span>/
-                                    <button onclick="editTotalDevices('mt90')" title="Click để chỉnh sửa tổng máy MT90" class="hover:underline font-extrabold text-blue-700 bg-blue-50 px-1 rounded border border-blue-200">
-                                        <span id="mt90TotalText">23</span> <i class="fa-solid fa-pen text-[9px]"></i>
-                                    </button>
-                                </span>
-                            </div>
-                            <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-                                <div id="mt90ProgressBar" class="bg-blue-500 h-full transition-all duration-500" style="width: 17%;"></div>
-                            </div>
-                        </div>
-                    </div>
+    <div class="status-device-block">
+      <div class="flex items-start justify-between gap-2">
+        <span class="font-extrabold text-xs text-slate-700">
+          MT93
+          <span class="block text-[9px] text-slate-400">Máy mới</span>
+        </span>
 
-                    <div class="col-span-12 lg:col-span-4 bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex flex-col justify-between space-y-3">
-                        <div class="flex items-center gap-2 border-b pb-2.5">
-                            <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 font-extrabold flex items-center justify-center text-xs">1</span>
-                            <h2 class="font-extrabold uppercase text-xs text-gray-800 tracking-wide">OPS ID NHÂN VIÊN (MƯỢN / TRẢ HỘ)</h2>
-                        </div>
+        <span class="text-right text-orange-600 text-[10px] font-extrabold">
+          Còn <span id="mt93AvailableText">4</span>/
 
-                        <div class="flex gap-2">
-                            <input type="text" id="scanEmpInput" autofocus placeholder="Quét mã NV (Chỉ cần quét 1 lần)..." class="flex-1 p-3 border-2 border-orange-400 rounded-xl focus:border-orange-600 outline-none font-bold text-gray-800 text-sm shadow-sm">
-                        </div>
+          <button
+            onclick="editTotalDevices('mt93')"
+            title="Chỉnh tổng máy MT93"
+            class="hover:underline bg-orange-50 px-1 rounded border border-orange-200">
+            <span id="mt93TotalText">54</span>
+            <i class="fa-solid fa-pen text-[8px]"></i>
+          </button>
+        </span>
+      </div>
 
-                        <div id="selectedEmpBox" class="border-2 border-dashed border-orange-200 rounded-xl p-4 bg-orange-50/40 flex-1 flex items-center justify-center min-h-[110px]">
-                            <p class="text-gray-400 font-semibold text-xs">Chưa quét thông tin nhân viên</p>
-                        </div>
+      <div class="status-progress-track mt-2">
+        <div
+          id="mt93ProgressBar"
+          class="status-progress-bar bg-red-500"
+          style="width:93%">
+        </div>
+      </div>
+    </div>
 
-                        <div class="grid grid-cols-2 gap-3 pt-1">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">TEAM</label>
-                                <select id="displayEmpTeam" class="w-full p-2.5 border border-orange-300 rounded-lg bg-white font-bold text-gray-800 outline-none text-xs focus:border-orange-600 cursor-pointer">
-                                    <option value="">-- Chọn Team --</option>
-                                </select>
-                            </div>
+    <div class="flex justify-center py-1">
+      <div class="radar-box" aria-label="Trạng thái hệ thống">
+        <div class="radar-circle"></div>
+        <i class="fa-solid fa-wifi text-orange-500 text-xl"></i>
+      </div>
+    </div>
 
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">SUPERVISOR</label>
-                                <select id="displayEmpSup" class="w-full p-2.5 border border-orange-300 rounded-lg bg-white font-bold text-gray-800 outline-none text-xs focus:border-orange-600 cursor-pointer">
-                                    <option value="">-- Chọn Sup --</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+    <div class="status-device-block">
+      <div class="flex items-start justify-between gap-2">
+        <span class="font-extrabold text-xs text-slate-700">
+          MT90
+          <span class="block text-[9px] text-slate-400">Máy cũ</span>
+        </span>
 
-                    <div class="col-span-12 lg:col-span-6 bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex flex-col justify-between space-y-3">
-                        <div class="flex items-center gap-2 border-b pb-2.5">
-                            <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 font-extrabold flex items-center justify-center text-xs">2</span>
-                            <h2 class="font-extrabold uppercase text-xs text-gray-800 tracking-wide">QUÉT MÃ THIẾT BỊ</h2>
-                        </div>
+        <span class="text-right text-blue-600 text-[10px] font-extrabold">
+          Còn <span id="mt90AvailableText">19</span>/
 
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="border-2 border-emerald-400 border-dashed rounded-xl p-3 bg-emerald-50/30">
-                                <span class="font-extrabold text-emerald-800 block mb-1 text-xs uppercase"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> MƯỢN</span>
-                                <input type="text" id="borrowPdaInput" placeholder="Quét mã thiết bị mượn..." class="w-full p-2.5 border rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-emerald-500">
-                            </div>
+          <button
+            onclick="editTotalDevices('mt90')"
+            title="Chỉnh tổng máy MT90"
+            class="hover:underline bg-blue-50 px-1 rounded border border-blue-200">
+            <span id="mt90TotalText">23</span>
+            <i class="fa-solid fa-pen text-[8px]"></i>
+          </button>
+        </span>
+      </div>
 
-                            <div class="border-2 border-amber-400 border-dashed rounded-xl p-3 bg-amber-50/30">
-                                <span class="font-extrabold text-amber-800 block mb-1 text-xs uppercase"><i class="fa-solid fa-arrow-down-to-bracket mr-1"></i> TRẢ</span>
-                                <input type="text" id="returnPdaInput" placeholder="Quét mã thiết bị trả..." class="w-full p-2.5 border rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-amber-500">
-                            </div>
-                        </div>
+      <div class="status-progress-track mt-2">
+        <div
+          id="mt90ProgressBar"
+          class="status-progress-bar bg-blue-500"
+          style="width:17%">
+        </div>
+      </div>
+    </div>
 
-                        <div class="flex-1 flex flex-col justify-center my-1">
-                            <div class="flex justify-between items-center text-xs font-bold text-gray-600 mb-1.5">
-                                <span>Danh sách thiết bị vừa quét (<span id="pendingCount" class="text-orange-600 font-extrabold">0</span>):</span>
-                                <button onclick="clearPendingList()" class="text-red-500 hover:underline">Xóa tất cả</button>
-                            </div>
+    <!-- QR XÁC NHẬN -->
+    <div class="confirm-qr-card mt-auto">
+      <div class="confirm-qr-copy">
+        <span class="confirm-qr-label">
+          <i class="fa-solid fa-qrcode mr-1"></i>
+          QR xác nhận
+        </span>
 
-                            <div id="pendingPdaList" class="flex flex-col gap-1.5 min-h-[70px] max-h-[110px] overflow-y-auto p-2.5 border rounded-xl bg-gray-50">
-                                <span class="text-gray-400 text-xs italic font-medium">Chưa quét mã thiết bị nào...</span>
-                            </div>
-                        </div>
+        <p class="confirm-qr-hint">
+          Bấm nút xác nhận giao dịch, sau đó quét mã QR này.
+        </p>
 
-                        <button id="btnConfirm" onclick="processBatchTransaction()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-3 rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-xs uppercase tracking-wider">
-                            XÁC NHẬN CẤP / TRẢ TẤT CẢ
-                        </button>
-                    </div>
-                </div>
+        <span
+          id="confirmQrStatus"
+          class="confirm-qr-status"
+          aria-live="polite">
+          Sẵn sàng xác nhận
+        </span>
+      </div>
+
+      <div
+        id="confirm-qr"
+        aria-label="QR xác nhận giao dịch">
+      </div>
+    </div>
+  </section>
+
+  <!-- THẺ 2: OPS ID + GIF -->
+  <section class="dashboard-card col-span-12 lg:col-span-3 card-depth ops-compact rounded-2xl p-3.5 flex flex-col gap-3">
+
+    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="bg-orange-100 text-orange-700 w-7 h-7 rounded-full flex items-center justify-center font-black text-xs border border-orange-200 shrink-0">
+          1
+        </span>
+
+        <div class="min-w-0">
+          <h2 class="font-extrabold uppercase text-xs text-slate-900 tracking-tight">
+            OPS ID
+          </h2>
+          <p class="text-[9px] text-slate-400 font-bold mt-0.5">
+            Quét mã nhân viên
+          </p>
+        </div>
+      </div>
+
+      <span class="text-[9px] font-black bg-slate-100 border border-slate-200 text-slate-500 px-2 py-1 rounded-full shrink-0">
+        CHECK
+      </span>
+    </div>
+
+    <div class="relative">
+      <label
+        for="scanEmpInput"
+        class="block mb-1 text-[10px] font-extrabold uppercase text-slate-500">
+        Mã nhân viên / OPS ID
+      </label>
+
+      <input
+        type="text"
+        id="scanEmpInput"
+        autofocus
+        placeholder="Quét mã nhân viên..."
+        class="w-full p-3 border-2 border-orange-300 rounded-xl focus:border-orange-600 outline-none font-extrabold text-gray-800 text-sm shadow-sm">
+    </div>
+
+    <div
+      id="selectedEmpBox"
+      class="border-2 border-dashed border-orange-200 rounded-xl p-4 bg-orange-50/70 flex-1 flex items-center justify-center min-h-[110px]">
+      <p class="text-gray-400 font-semibold text-xs">
+        Chưa quét thông tin nhân viên
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 pt-1">
+      <div>
+        <label
+          for="displayEmpTeam"
+          class="block text-[9px] font-extrabold text-gray-500 uppercase mb-1">
+          Team
+        </label>
+
+        <select
+          id="displayEmpTeam"
+          class="w-full p-2.5 border border-orange-200 rounded-lg bg-white font-bold text-gray-800 outline-none text-[10px] focus:border-orange-600 cursor-pointer">
+          <option value="">-- Chọn Team --</option>
+        </select>
+      </div>
+
+      <div>
+        <label
+          for="displayEmpSup"
+          class="block text-[9px] font-extrabold text-gray-500 uppercase mb-1">
+          Supervisor
+        </label>
+
+        <select
+          id="displayEmpSup"
+          class="w-full p-2.5 border border-orange-200 rounded-lg bg-white font-bold text-gray-800 outline-none text-[10px] focus:border-orange-600 cursor-pointer">
+          <option value="">-- Chọn Sup --</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- GIF làm lớp nền; không che các ô nhập liệu -->
+    <div class="ops-gif-stage" aria-hidden="true">
+      <img
+        class="ops-gif-image"
+        src="./ops-id.gif"
+        alt="">
+    </div>
+  </section>
+
+  <!-- THẺ 3: QUÉT THIẾT BỊ -->
+  <section class="dashboard-card col-span-12 lg:col-span-7 card-depth rounded-2xl p-3.5 flex flex-col gap-3">
+
+    <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+      <span class="w-7 h-7 rounded-full bg-orange-100 text-orange-700 font-extrabold flex items-center justify-center text-xs border border-orange-200">
+        2
+      </span>
+
+      <div>
+        <h2 class="font-extrabold uppercase text-xs text-gray-800 tracking-wide">
+          Quét thiết bị
+        </h2>
+        <p class="text-[9px] text-slate-400 font-semibold mt-0.5">
+          Quét mượn hoặc trả, sau đó xác nhận bằng QR
+        </p>
+      </div>
+    </div>
+
+    <div class="scanner-main-grid">
+
+      <!-- CỘT TRÁI: MƯỢN / TRẢ -->
+      <div class="scanner-left-column">
+
+        <div
+          id="zone-borrow"
+          class="scanner-zone border-2 border-emerald-300 border-dashed rounded-xl p-3 bg-emerald-50/80 flex flex-col justify-between gap-2">
+
+          <div>
+            <span class="font-extrabold text-emerald-800 block mb-1 text-[10px] uppercase">
+              <i class="fa-solid fa-arrow-up-from-bracket mr-1"></i>
+              Mượn thiết bị
+            </span>
+            <p class="text-[9px] text-emerald-700/80 font-semibold">
+              Quét mã thiết bị cấp cho nhân viên đang chọn.
+            </p>
+          </div>
+
+          <input
+            type="text"
+            id="borrowPdaInput"
+            placeholder="Quét mã thiết bị mượn..."
+            class="w-full p-2.5 border border-emerald-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-emerald-500">
+        </div>
+
+        <div
+          id="zone-return"
+          class="scanner-zone border-2 border-amber-300 border-dashed rounded-xl p-3 bg-amber-50/80 flex flex-col justify-between gap-2">
+
+          <div>
+            <span class="font-extrabold text-amber-800 block mb-1 text-[10px] uppercase">
+              <i class="fa-solid fa-arrow-down-to-bracket mr-1"></i>
+              Trả thiết bị
+            </span>
+            <p class="text-[9px] text-amber-700/80 font-semibold">
+              Quét mã thiết bị đang ở trạng thái chưa trả.
+            </p>
+          </div>
+
+          <input
+            type="text"
+            id="returnPdaInput"
+            placeholder="Quét mã thiết bị trả..."
+            class="w-full p-2.5 border border-amber-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-amber-500">
+        </div>
+      </div>
+
+      <!-- CỘT PHẢI: DANH SÁCH CHỜ -->
+      <div class="scanner-right-column">
+
+        <div class="flex justify-between items-center gap-2 text-xs font-bold text-gray-600 mb-2">
+          <span>Danh sách chờ</span>
+
+          <span class="queue-total-highlight">
+            <span class="text-[9px] font-extrabold uppercase text-orange-800">
+              Tổng
+            </span>
+            <span id="pendingCount">0</span>
+          </span>
+        </div>
+
+        <div
+          id="pendingPdaList"
+          class="scanner-queue flex flex-col gap-1.5 p-2.5 border rounded-xl bg-slate-50">
+          <span class="text-gray-400 text-xs italic font-medium">
+            Chưa quét mã thiết bị nào...
+          </span>
+        </div>
+
+        <div class="flex gap-2 mt-2">
+          <button
+            onclick="clearPendingList()"
+            class="px-3 py-2 rounded-xl border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 text-[10px] font-extrabold transition-all">
+            <i class="fa-solid fa-trash-can mr-1"></i>
+            Xóa
+          </button>
+
+          <button
+            id="btnConfirm"
+            onclick="processBatchTransaction()"
+            class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-3 px-3 rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-[10px] uppercase tracking-wide">
+            Xác nhận cấp / trả tất cả
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
 
                 <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex-1 flex flex-col min-h-0">
                     <div class="flex justify-between items-center mb-3 pb-2 border-b">
@@ -740,6 +1238,351 @@
         window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
+            /* ===== QR XÁC NHẬN GIAO DỊCH ===== */
+const CONFIRM_QR_TOKEN = 'BNB_PDA_CONFIRM_TRANSACTION_V1';
+const QR_CONFIRM_PASS = Symbol('transaction-confirmed-by-qr');
+
+let qrConfirmArmed = false;
+let confirmScannerBuffer = '';
+let confirmScannerResetTimer = null;
+let confirmScannerFireTimer = null;
+let lastConfirmScannerFireAt = 0;
+
+function setConfirmQrStatus(message, state = 'idle') {
+  const node = document.getElementById('confirmQrStatus');
+  if (!node) return;
+
+  const states = {
+    idle: '',
+    waiting: 'is-waiting',
+    success: 'is-success',
+    warning: 'is-warning',
+    error: 'is-error'
+  };
+
+  node.className =
+    'confirm-qr-status ' + (states[state] || '');
+
+  node.textContent = String(message || '');
+}
+
+function generateConfirmQr() {
+  const holder = document.getElementById('confirm-qr');
+  if (!holder) return;
+
+  holder.innerHTML = '';
+
+  if (typeof QRCode === 'undefined') {
+    setConfirmQrStatus(
+      'Không tải được thư viện QR. Tải lại trang.',
+      'error'
+    );
+    return;
+  }
+
+  new QRCode(holder, {
+    text: CONFIRM_QR_TOKEN,
+    width: 100,
+    height: 100,
+    colorDark: '#0f172a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+}
+
+window.requestQrConfirmation = function () {
+  if (currentUserRole === 'guest') {
+    qrConfirmArmed = false;
+
+    setConfirmQrStatus(
+      'Tài khoản chưa có quyền ghi dữ liệu.',
+      'error'
+    );
+
+    window.showToast(
+      'Tài khoản của bạn chưa được cấp quyền thao tác!',
+      'warning'
+    );
+    return;
+  }
+
+  // Bấm nút lần hai khi đang chờ QR sẽ hủy yêu cầu.
+  if (qrConfirmArmed) {
+    qrConfirmArmed = false;
+
+    setConfirmQrStatus(
+      'Đã hủy yêu cầu xác nhận.',
+      'idle'
+    );
+
+    const btn = document.getElementById('btnConfirm');
+    if (btn) {
+      btn.innerHTML = 'Xác nhận cấp / trả tất cả';
+    }
+
+    window.showToast(
+      'Đã hủy xác nhận QR. Chưa có giao dịch nào được ghi.',
+      'warning'
+    );
+    return;
+  }
+
+  const hasBorrow = pendingBorrowPdaList.length > 0;
+  const hasReturn = pendingReturnPdaList.length > 0;
+
+  if (!hasBorrow && !hasReturn) {
+    setConfirmQrStatus(
+      'Chưa có thiết bị trong danh sách chờ.',
+      'warning'
+    );
+
+    window.showToast(
+      'Hãy quét ít nhất 1 mã PDA trước khi xác nhận.',
+      'warning'
+    );
+    return;
+  }
+
+  if (hasBorrow && !selectedEmployee) {
+    setConfirmQrStatus(
+      'Cần quét OPS ID trước khi mượn.',
+      'warning'
+    );
+
+    window.showToast(
+      'Vui lòng quét Ops ID nhân viên mượn máy trước khi cấp!',
+      'warning'
+    );
+    return;
+  }
+
+  qrConfirmArmed = true;
+
+  setConfirmQrStatus(
+    'ĐANG CHỜ QUÉT QR XÁC NHẬN',
+    'waiting'
+  );
+
+  const btn = document.getElementById('btnConfirm');
+  if (btn) {
+    btn.innerHTML =
+      '<i class="fa-solid fa-qrcode mr-1"></i> Đang chờ quét QR';
+  }
+
+  window.showToast(
+    'Đã sẵn sàng. Hãy quét QR xác nhận trên thẻ Trạng thái Kho.',
+    'warning'
+  );
+};
+
+function removeConfirmTokenFromFocusedInput() {
+  const active = document.activeElement;
+  if (!active) return;
+
+  const tag = String(active.tagName || '').toUpperCase();
+  if (tag !== 'INPUT' && tag !== 'TEXTAREA') return;
+
+  const value = String(active.value || '');
+  const index = value.toUpperCase().lastIndexOf(CONFIRM_QR_TOKEN);
+
+  if (index < 0) return;
+
+  active.value =
+    value.slice(0, index) +
+    value.slice(index + CONFIRM_QR_TOKEN.length);
+
+  active.dispatchEvent(new Event('input', {
+    bubbles: true
+  }));
+}
+
+function fireConfirmScanner(reason) {
+  const now = Date.now();
+
+  // Chống nhận cùng một lần quét hai lần.
+  if (now - lastConfirmScannerFireAt < 1000) return;
+
+  lastConfirmScannerFireAt = now;
+
+  if (confirmScannerResetTimer) {
+    clearTimeout(confirmScannerResetTimer);
+  }
+
+  if (confirmScannerFireTimer) {
+    clearTimeout(confirmScannerFireTimer);
+  }
+
+  confirmScannerResetTimer = null;
+  confirmScannerFireTimer = null;
+  confirmScannerBuffer = '';
+
+  removeConfirmTokenFromFocusedInput();
+
+  console.log(
+    '[CONFIRM QR SCANNER]',
+    reason || 'scan'
+  );
+
+  handleConfirmQrScan();
+}
+
+function setupConfirmScannerListener() {
+  document.addEventListener('keydown', function (event) {
+    if (event.ctrlKey || event.altKey || event.metaKey) return;
+
+    const key = String(event.key || '');
+
+    // Máy quét có thể gửi Enter hoặc Tab sau nội dung QR.
+    if (key === 'Enter' || key === 'Tab') {
+      if (
+        confirmScannerBuffer.toUpperCase() ===
+        CONFIRM_QR_TOKEN
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        fireConfirmScanner('enter-suffix');
+      }
+      return;
+    }
+
+    if (key.length !== 1) return;
+
+    const upperKey = key.toUpperCase();
+
+    const nextBuffer = (
+      confirmScannerBuffer + upperKey
+    ).slice(-CONFIRM_QR_TOKEN.length);
+
+    if (CONFIRM_QR_TOKEN.startsWith(nextBuffer)) {
+      confirmScannerBuffer = nextBuffer;
+    } else if (CONFIRM_QR_TOKEN.startsWith(upperKey)) {
+      confirmScannerBuffer = upperKey;
+    } else {
+      confirmScannerBuffer = '';
+    }
+
+    if (confirmScannerResetTimer) {
+      clearTimeout(confirmScannerResetTimer);
+    }
+
+    confirmScannerResetTimer = setTimeout(function () {
+      confirmScannerBuffer = '';
+      confirmScannerResetTimer = null;
+    }, 700);
+
+    // Hỗ trợ máy quét không gửi Enter/Tab.
+    if (confirmScannerBuffer === CONFIRM_QR_TOKEN) {
+      if (confirmScannerFireTimer) {
+        clearTimeout(confirmScannerFireTimer);
+      }
+
+      confirmScannerFireTimer = setTimeout(function () {
+        confirmScannerFireTimer = null;
+        fireConfirmScanner('token-complete');
+      }, 120);
+    }
+  }, true);
+}
+
+function handleConfirmQrScan() {
+  if (currentUserRole === 'guest') {
+    qrConfirmArmed = false;
+
+    const btn = document.getElementById('btnConfirm');
+    if (btn) {
+      btn.innerHTML = 'Xác nhận cấp / trả tất cả';
+    }
+
+    setConfirmQrStatus(
+      'Tài khoản chưa có quyền ghi dữ liệu.',
+      'error'
+    );
+
+    window.showToast(
+      'Tài khoản của bạn chưa được cấp quyền thao tác!',
+      'warning'
+    );
+    return;
+  }
+
+  if (!qrConfirmArmed) {
+    setConfirmQrStatus(
+      'Hãy bấm nút xác nhận trước khi quét QR.',
+      'warning'
+    );
+
+    window.showToast(
+      'QR chưa được kích hoạt. Hãy bấm nút Xác nhận cấp / trả tất cả trước.',
+      'warning'
+    );
+    return;
+  }
+
+  if (
+    pendingBorrowPdaList.length === 0 &&
+    pendingReturnPdaList.length === 0
+  ) {
+    qrConfirmArmed = false;
+
+    const btn = document.getElementById('btnConfirm');
+    if (btn) {
+      btn.innerHTML = 'Xác nhận cấp / trả tất cả';
+    }
+
+    setConfirmQrStatus(
+      'Danh sách chờ đang trống.',
+      'warning'
+    );
+
+    window.showToast(
+      'Danh sách chờ không còn thiết bị để xác nhận.',
+      'warning'
+    );
+    return;
+  }
+
+  if (
+    pendingBorrowPdaList.length > 0 &&
+    !selectedEmployee
+  ) {
+    qrConfirmArmed = false;
+
+    const btn = document.getElementById('btnConfirm');
+    if (btn) {
+      btn.innerHTML = 'Xác nhận cấp / trả tất cả';
+    }
+
+    setConfirmQrStatus(
+      'Cần quét OPS ID trước khi mượn.',
+      'warning'
+    );
+
+    window.showToast(
+      'Vui lòng quét Ops ID nhân viên mượn máy trước khi cấp!',
+      'warning'
+    );
+    return;
+  }
+
+  qrConfirmArmed = false;
+
+  setConfirmQrStatus(
+    'QR hợp lệ — đang ghi nhận giao dịch…',
+    'success'
+  );
+
+  window.showToast(
+    'QR xác nhận hợp lệ. Đang ghi nhận giao dịch…',
+    'success'
+  );
+
+  // Chỉ gọi hàm giao dịch hiện có sau khi QR được xác nhận.
+  window.processBatchTransaction(QR_CONFIRM_PASS);
+}
+
+// HTML và thư viện QR đã được tải trước module này.
+generateConfirmQr();
+setupConfirmScannerListener();
 
             let bgStyle = 'bg-slate-900 text-white border-slate-700';
             let icon = '<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>';
@@ -1617,7 +2460,16 @@
             renderPendingList();
         };
 
-        window.processBatchTransaction = async function() {
+        window.processBatchTransaction = async function(qrPass = null) {
+  if (qrPass !== QR_CONFIRM_PASS) {
+    window.requestQrConfirmation();
+    return;
+  }
+
+  qrConfirmArmed = false;
+
+  // Giữ nguyên toàn bộ phần thân hàm cũ phía dưới,
+  // bắt đầu từ kiểm tra currentUserRole và xử lý giao dịch.
             if (currentUserRole === 'guest') {
                 showToast('Tài khoản của bạn chưa được cấp quyền thao tác!', 'warning');
                 return;
