@@ -3278,33 +3278,39 @@
 
         // ============================================================
         // DANH MỤC KHO MÃ MÁY
-        // Nguồn tổng hợp: devices (danh mục chuẩn), unreturned (đang mượn),
-        // logs (mã từng phát sinh giao dịch để nhận diện dữ liệu cũ).
+        // NGUỒN CHUẨN DUY NHẤT: devices (danh mục kho).
+        // unreturned chỉ dùng để xác định trạng thái đang mượn / trong kho.
+        // logs chỉ phục vụ tra cứu lịch sử, tuyệt đối không cộng mã vào tổng kho.
+        // Mã bị trùng trong collection devices cũng chỉ tính một lần.
         // ============================================================
         function buildInventoryRows() {
             const byCode = new Map();
-            const addCode = (code, data = {}, source = '') => {
-                const normalized = String(code || '').trim().toUpperCase();
-                if (!normalized) return;
-                const old = byCode.get(normalized) || {};
-                byCode.set(normalized, {
-                    ...old,
-                    ...data,
-                    pdaCode: normalized,
-                    id: data.id || old.id || '',
-                    deviceType: data.deviceType || data.pdaType || old.deviceType || detectDeviceType(normalized),
-                    source: [old.source, source].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(' + ')
-                });
-            };
+            const borrowedByCode = new Map();
 
-            registeredDevicesCache.forEach(item => addCode(item.pdaCode || item.deviceCode || item.serial, item, 'Danh mục kho'));
-            logsCache.forEach(item => addCode(item.pdaCode, item, 'Lịch sử'));
-            unreturnedCache.forEach(item => addCode(item.pdaCode, item, 'Đang mượn'));
+            // Lập chỉ mục thiết bị đang mượn, không tạo thêm mã máy mới.
+            unreturnedCache.forEach(record => {
+                const code = String(record.pdaCode || '').trim().toUpperCase();
+                if (code && !borrowedByCode.has(code)) borrowedByCode.set(code, record);
+            });
+
+            // Chỉ các mã đã đăng ký trong devices mới được tính vào tổng kho.
+            registeredDevicesCache.forEach(item => {
+                const code = String(item.pdaCode || item.deviceCode || item.serial || '').trim().toUpperCase();
+                if (!code) return;
+
+                // Khử trùng lặp theo mã máy, kể cả khác chữ hoa / chữ thường.
+                if (!byCode.has(code)) {
+                    byCode.set(code, {
+                        ...item,
+                        pdaCode: code,
+                        deviceType: item.deviceType || item.pdaType || detectDeviceType(code),
+                        source: 'Danh mục kho'
+                    });
+                }
+            });
 
             const rows = Array.from(byCode.values()).map(item => {
-                const borrowed = unreturnedCache.find(record =>
-                    String(record.pdaCode || '').trim().toUpperCase() === item.pdaCode
-                );
+                const borrowed = borrowedByCode.get(item.pdaCode);
                 return {
                     ...item,
                     status: borrowed ? 'Đang mượn' : 'Trong kho',
@@ -3312,7 +3318,7 @@
                     opsId: borrowed?.opsId || '',
                     team: borrowed?.team || '',
                     supervisor: borrowed?.supervisor || '',
-                    isRegistered: Boolean(item.id)
+                    isRegistered: true
                 };
             });
 
