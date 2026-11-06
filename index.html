@@ -88,7 +88,7 @@
 
     <style>
         html {
-            font-size: 15px !important;
+            font-size: 16px !important;
             -webkit-text-size-adjust: 100% !important;
             -moz-text-size-adjust: 100% !important;
             -ms-text-size-adjust: 100% !important;
@@ -104,7 +104,8 @@
         }
 
         body {
-            font-size: 15px !important;
+            font-size: 16px !important;
+            font-weight: 600;
             min-width: 1200px;
             overflow-x: auto;
             touch-action: manipulation;
@@ -453,6 +454,31 @@
             font-size: 13px !important;
         }
 
+        /* Tăng khả năng đọc toàn hệ thống: chữ lớn hơn, đậm và tương phản hơn. */
+        body { font-size: 16px !important; color: #1f2937; }
+        body .text-xs { font-size: 13px !important; }
+        body .text-sm { font-size: 14px !important; }
+        body [class~="text-[9px]"] { font-size: 11px !important; }
+        body [class~="text-[10px]"] { font-size: 12px !important; }
+        body [class~="text-[11px]"] { font-size: 13px !important; }
+        body input, body select, body textarea { font-size: 14px !important; font-weight: 700 !important; }
+        body button { font-weight: 800; }
+        body label, body th { font-weight: 800 !important; }
+        body td, body p, body span { font-weight: 600; }
+        body .font-medium { font-weight: 700 !important; }
+        body .font-semibold { font-weight: 800 !important; }
+        body .font-bold { font-weight: 800 !important; }
+        body .font-extrabold, body .font-black { font-weight: 900 !important; }
+        .dashboard-three-cards h2 { font-size: 15px !important; }
+        .dashboard-three-cards [class~="text-[9px]"] { font-size: 11px !important; }
+        .dashboard-three-cards [class~="text-[10px]"] { font-size: 12px !important; }
+        .dashboard-three-cards input, .dashboard-three-cards select { font-size: 14px !important; }
+        .inventory-stat-number { font-size: 28px; line-height: 1.1; font-weight: 900; }
+        .master-option-row { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.65rem .75rem; border:1px solid #e2e8f0; border-radius:.7rem; background:#fff; }
+        .master-option-row + .master-option-row { margin-top:.5rem; }
+        .inventory-table th, .inventory-table td { padding:.7rem .75rem; font-size:13px; }
+        .inventory-table th { white-space:nowrap; }
+
         /* Áp dụng nguyên tắc từ WebApp tham khảo: ảnh chỉ nằm trong vùng sân khấu
            phía dưới OPS ID, không còn là lớp phủ absolute trên các trường nhập. */
         .ops-compact {
@@ -697,6 +723,14 @@
 
                 <button onclick="switchTab('employees')" id="nav-employees" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold hover:bg-slate-800 hover:text-white transition-all text-sm">
                     <i class="fa-solid fa-users text-base w-5 text-emerald-400"></i> Danh Sách Nhân Viên
+                </button>
+
+                <button onclick="switchTab('inventory')" id="nav-inventory" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold hover:bg-slate-800 hover:text-white transition-all text-sm">
+                    <i class="fa-solid fa-barcode text-base w-5 text-cyan-400"></i> Kho Mã Máy
+                </button>
+
+                <button onclick="switchTab('masterdata')" id="nav-masterdata" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold hover:bg-slate-800 hover:text-white transition-all text-sm">
+                    <i class="fa-solid fa-people-group text-base w-5 text-violet-400"></i> Quản Lý Team & Sup
                 </button>
 
                 <button onclick="switchTab('admin')" id="nav-admin" class="hidden w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold hover:bg-slate-800 hover:text-white transition-all text-red-400 text-sm">
@@ -1172,6 +1206,135 @@
                 </div>
             </div>
 
+            <!-- INVENTORY: DANH MỤC MÃ MÁY TRONG KHO -->
+            <div id="tab-inventory" class="tab-content hidden space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                        <p class="text-sm text-slate-500 font-extrabold uppercase">Tổng mã máy đã ghi nhận</p>
+                        <div id="inventoryTotalCount" class="inventory-stat-number text-slate-900 mt-2">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-emerald-200 shadow-sm p-4">
+                        <p class="text-sm text-emerald-700 font-extrabold uppercase">Đang có trong kho</p>
+                        <div id="inventoryAvailableCount" class="inventory-stat-number text-emerald-700 mt-2">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-amber-200 shadow-sm p-4">
+                        <p class="text-sm text-amber-700 font-extrabold uppercase">Đang được mượn</p>
+                        <div id="inventoryBorrowedCount" class="inventory-stat-number text-amber-700 mt-2">0</div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                        <div>
+                            <h2 class="text-base font-extrabold text-slate-900 uppercase">Quản lý danh mục mã máy</h2>
+                            <p class="text-sm text-slate-500 mt-1">Thêm mã máy lẻ hoặc nhập danh sách Excel/CSV. Trạng thái mượn được đối chiếu realtime với giao dịch đang mở.</p>
+                        </div>
+                        <label for="deviceExcelInput" class="px-3 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm cursor-pointer">
+                            <i class="fa-solid fa-file-excel mr-1"></i> Nhập Excel / CSV
+                        </label>
+                        <input id="deviceExcelInput" type="file" accept=".xlsx,.xls,.csv" class="hidden">
+                    </div>
+
+                    <form id="deviceForm" onsubmit="saveSingleDevice(event)" class="grid grid-cols-1 md:grid-cols-4 gap-2 items-end">
+                        <div class="md:col-span-2">
+                            <label for="deviceCodeInput" class="block text-sm text-slate-700 mb-1">Mã PDA / Serial</label>
+                            <input id="deviceCodeInput" required type="text" placeholder="Nhập hoặc quét mã máy..." class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:border-cyan-600">
+                        </div>
+                        <div>
+                            <label for="deviceTypeInput" class="block text-sm text-slate-700 mb-1">Loại thiết bị</label>
+                            <select id="deviceTypeInput" class="w-full p-2.5 border border-slate-300 rounded-lg bg-white">
+                                <option value="Máy mới">Máy mới (MT93)</option>
+                                <option value="Máy cũ">Máy cũ (MT90)</option>
+                                <option value="Súng Scan">Súng Scan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button id="btnSaveDevice" type="submit" class="w-full p-2.5 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-extrabold">
+                                <i class="fa-solid fa-plus mr-1"></i> Thêm mã máy
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="flex flex-wrap items-center gap-2 mt-4">
+                        <input id="inventorySearch" type="search" placeholder="Tìm mã máy, người mượn, Team, Sup..." class="flex-1 min-w-[220px] p-2.5 border border-slate-300 rounded-lg">
+                        <select id="inventoryStatusFilter" class="p-2.5 border border-slate-300 rounded-lg bg-white">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="Trong kho">Trong kho</option>
+                            <option value="Đang mượn">Đang mượn</option>
+                        </select>
+                        <select id="inventoryTypeFilter" class="p-2.5 border border-slate-300 rounded-lg bg-white">
+                            <option value="">Tất cả loại máy</option>
+                            <option value="Máy mới">Máy mới (MT93)</option>
+                            <option value="Máy cũ">Máy cũ (MT90)</option>
+                            <option value="Súng Scan">Súng Scan</option>
+                        </select>
+                        <span id="inventoryFilterCount" class="text-sm font-extrabold text-slate-500">0 mã máy</span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-4 py-3 border-b border-slate-200 flex justify-between items-center gap-2">
+                        <h3 class="font-extrabold text-slate-900 uppercase">Danh sách mã máy</h3>
+                        <span class="text-sm text-slate-500">Mã trong kho được đánh dấu màu xanh</span>
+                    </div>
+                    <div class="overflow-x-auto max-h-[65vh] overflow-y-auto">
+                        <table class="w-full text-left border-collapse inventory-table">
+                            <thead class="bg-slate-900 text-white sticky top-0 z-10">
+                                <tr>
+                                    <th>Mã PDA / Serial</th>
+                                    <th>Loại thiết bị</th>
+                                    <th>Trạng thái</th>
+                                    <th>Người đang mượn</th>
+                                    <th>Team / Sup</th>
+                                    <th>Nguồn dữ liệu</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTable" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MASTER DATA: TEAM & SUPERVISOR -->
+            <div id="tab-masterdata" class="tab-content hidden space-y-4">
+                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 text-indigo-900 text-sm font-semibold">
+                    <i class="fa-solid fa-circle-info mr-1"></i>
+                    Danh mục tại đây sẽ tự đồng bộ vào ô chọn Team và Supervisor trong phần quét OPS ID và quản lý nhân viên. Khi xóa một lựa chọn, dữ liệu nhân viên cũ không bị xóa.
+                </div>
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    <section class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                            <div>
+                                <h2 class="text-lg font-extrabold text-slate-900"><i class="fa-solid fa-people-group text-violet-600 mr-2"></i>Danh mục Team</h2>
+                                <p class="text-sm text-slate-500 mt-1">Thêm, đổi tên hoặc gỡ Team khỏi danh sách chọn.</p>
+                            </div>
+                            <span id="teamOptionCount" class="px-3 py-1 rounded-full bg-violet-50 text-violet-700 font-extrabold">0</span>
+                        </div>
+                        <form onsubmit="saveMasterOption(event, 'team')" class="flex gap-2 mb-3">
+                            <input id="teamOptionInput" type="text" required maxlength="80" placeholder="Tên Team mới..." class="flex-1 min-w-0 p-2.5 border border-slate-300 rounded-lg">
+                            <button type="submit" class="px-4 py-2.5 rounded-lg bg-violet-700 hover:bg-violet-800 text-white font-extrabold"><i class="fa-solid fa-plus mr-1"></i> Thêm</button>
+                        </form>
+                        <div id="teamOptionsList" class="max-h-[55vh] overflow-y-auto pr-1"></div>
+                    </section>
+
+                    <section class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                            <div>
+                                <h2 class="text-lg font-extrabold text-slate-900"><i class="fa-solid fa-user-tie text-emerald-600 mr-2"></i>Danh mục Supervisor</h2>
+                                <p class="text-sm text-slate-500 mt-1">Thêm, chỉnh sửa hoặc gỡ tên Sup khỏi danh sách chọn.</p>
+                            </div>
+                            <span id="supOptionCount" class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-extrabold">0</span>
+                        </div>
+                        <form onsubmit="saveMasterOption(event, 'supervisor')" class="flex gap-2 mb-3">
+                            <input id="supOptionInput" type="text" required maxlength="100" placeholder="Tên Supervisor mới..." class="flex-1 min-w-0 p-2.5 border border-slate-300 rounded-lg">
+                            <button type="submit" class="px-4 py-2.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold"><i class="fa-solid fa-plus mr-1"></i> Thêm</button>
+                        </form>
+                        <div id="supOptionsList" class="max-h-[55vh] overflow-y-auto pr-1"></div>
+                    </section>
+                </div>
+            </div>
+
             <!-- ADMIN MANAGEMENT -->
             <div id="tab-admin" class="tab-content hidden space-y-4">
                 <div class="bg-white rounded-xl p-4 shadow-sm border border-red-200">
@@ -1268,6 +1431,17 @@
         let pendingReturnPdaList = [];
         let employeeCache = [];
         let unreturnedCache = [];
+        let registeredDevicesCache = [];
+        let masterOptionsCache = [];
+        let inventoryRowsCache = [];
+        const DEFAULT_TEAM_OPTIONS = [
+            'Admin', 'ASM', 'Cache', 'GTC', 'Inbound', 'Manual',
+            'OB North B1', 'OB North B2', 'OB Xmetro', 'TBS', 'Ops Support'
+        ];
+        const DEFAULT_SUP_OPTIONS = [
+            'Mgr. Phạm Tiến', 'Sup Xuân Huy', 'Sup Tuấn Anh',
+            'Sup Anh Sơn', 'AM Hồng Đăng'
+        ];
         let currentModalPdaCodes = [];
         let currentUnreturnedView = [];
         let customConfirmResolver = null;
@@ -1404,6 +1578,10 @@
             const btnDeleteAllEmp = document.getElementById('btnDeleteAllEmp');
             const excelFileInput = document.getElementById('excelFileInput');
             const pdaExcelInput = document.getElementById('pdaExcelInput');
+            const btnSaveDevice = document.getElementById('btnSaveDevice');
+            const deviceCodeInput = document.getElementById('deviceCodeInput');
+            const deviceTypeInput = document.getElementById('deviceTypeInput');
+            const deviceExcelInput = document.getElementById('deviceExcelInput');
 
             if (btnConfirm) btnConfirm.disabled = !enabled;
             if (btnSaveEmp) btnSaveEmp.disabled = !enabled;
@@ -1411,6 +1589,10 @@
             if (btnDeleteAllEmp) btnDeleteAllEmp.disabled = !enabled;
             if (excelFileInput) excelFileInput.disabled = !enabled;
             if (pdaExcelInput) pdaExcelInput.disabled = !enabled;
+            if (btnSaveDevice) btnSaveDevice.disabled = !enabled;
+            if (deviceCodeInput) deviceCodeInput.disabled = !enabled;
+            if (deviceTypeInput) deviceTypeInput.disabled = !enabled;
+            if (deviceExcelInput) deviceExcelInput.disabled = !enabled;
         }
 
         // Chỉ truy vấn đúng document user_access/{email}.
@@ -1494,6 +1676,8 @@
 
             renderUnreturned(unreturnedCache);
             renderEmployees(employeeCache);
+            renderMasterOptions();
+            renderInventoryTable();
 
             return true;
         }
@@ -1974,6 +2158,7 @@
                     renderUnreturned(unreturnedCache);
                     renderPivotTable(unreturnedCache);
                     updateInventoryStats();
+                    renderInventoryTable();
                 },
                 listenerError('danh sách thiết bị chưa trả')
             );
@@ -2003,6 +2188,7 @@
                     logs.sort((a, b) => b._rawTime - a._rawTime);
                     logsCache = logs;
                     applyLogFilters();
+                    renderInventoryTable();
                 },
                 listenerError('nhật ký mượn trả')
             );
@@ -2021,8 +2207,31 @@
 
                     renderEmployees(employeeCache);
                     updateDropdownOptions(employeeCache);
+                    renderMasterOptions();
+                    renderInventoryTable();
                 },
                 listenerError('danh sách nhân viên')
+            );
+
+            onSnapshot(
+                collection(db, 'devices'),
+                (snapshot) => {
+                    registeredDevicesCache = [];
+                    snapshot.forEach(item => registeredDevicesCache.push({ id: item.id, ...item.data() }));
+                    renderInventoryTable();
+                },
+                listenerError('danh mục mã máy')
+            );
+
+            onSnapshot(
+                collection(db, 'master_options'),
+                (snapshot) => {
+                    masterOptionsCache = [];
+                    snapshot.forEach(item => masterOptionsCache.push({ id: item.id, ...item.data() }));
+                    updateDropdownOptions(employeeCache);
+                    renderMasterOptions();
+                },
+                listenerError('danh mục Team / Supervisor')
             );
 
             // Chỉ Super Admin được tải danh sách admin.
@@ -2046,73 +2255,70 @@
             }
         }
 
-        function updateDropdownOptions(emps) {
-            const rawTeamList = [
-                'Admin', 'ASM', 'Cache', 'GTC', 'Inbound', 'Manual',
-                'OB North B1', 'OB North B2', 'OB Xmetro', 'TBS', 'Ops Support'
-            ];
+        function normalizeOptionKey(value) {
+            return cleanOptionString(value).toLocaleLowerCase('vi-VN');
+        }
 
-            const rawSupList = [
-                'Mgr. Phạm Tiến', 'Sup Xuân Huy', 'Sup Tuấn Anh',
-                'Sup Anh Sơn', 'AM Hồng Đăng'
-            ];
+        function getMasterOptionNames(type, emps = employeeCache) {
+            const defaults = type === 'team' ? DEFAULT_TEAM_OPTIONS : DEFAULT_SUP_OPTIONS;
+            const field = type === 'team' ? 'team' : 'supervisor';
+            const names = new Map();
 
-            const teamSet = new Set(rawTeamList.map(cleanOptionString));
-            const supSet = new Set(rawSupList.map(cleanOptionString));
-
-            emps.forEach(e => {
-                if (e.team) {
-                    const cleaned = cleanOptionString(e.team);
-                    if (cleaned) teamSet.add(cleaned);
-                }
-
-                if (e.supervisor) {
-                    const cleaned = cleanOptionString(e.supervisor);
-                    if (cleaned) supSet.add(cleaned);
-                }
+            defaults.forEach(name => {
+                const clean = cleanOptionString(name);
+                if (clean) names.set(normalizeOptionKey(clean), clean);
             });
 
-            const sortedTeams = Array.from(teamSet).sort();
-            const sortedSups = Array.from(supSet).sort();
+            (emps || []).forEach(emp => {
+                const clean = cleanOptionString(emp[field]);
+                if (clean) names.set(normalizeOptionKey(clean), clean);
+            });
+
+            masterOptionsCache.filter(item => item.type === type && item.active !== false).forEach(item => {
+                const clean = cleanOptionString(item.name);
+                if (clean) names.set(normalizeOptionKey(clean), clean);
+            });
+
+            // Một bản ghi active:false là yêu cầu gỡ tên khỏi danh sách lựa chọn,
+            // nhưng không xóa giá trị cũ đang lưu trên hồ sơ nhân viên.
+            masterOptionsCache.filter(item => item.type === type && item.active === false).forEach(item => {
+                names.delete(normalizeOptionKey(item.name));
+            });
+
+            return Array.from(names.values()).sort((a, b) => a.localeCompare(b, 'vi'));
+        }
+
+        function updateDropdownOptions(emps) {
+            const sortedTeams = getMasterOptionNames('team', emps);
+            const sortedSups = getMasterOptionNames('supervisor', emps);
 
             const teamDatalist = document.getElementById('teamOptions');
-
             if (teamDatalist) {
-                teamDatalist.innerHTML =
-                    sortedTeams.map(t => `<option value="${t}">`).join('');
+                teamDatalist.innerHTML = sortedTeams.map(t => `<option value="${escapeHtml(t)}">`).join('');
             }
 
             const supDatalist = document.getElementById('supOptions');
-
             if (supDatalist) {
-                supDatalist.innerHTML =
-                    sortedSups.map(s => `<option value="${s}">`).join('');
+                supDatalist.innerHTML = sortedSups.map(name => `<option value="${escapeHtml(name)}">`).join('');
             }
 
             const displayTeamSelect = document.getElementById('displayEmpTeam');
-
             if (displayTeamSelect) {
                 const currentVal = displayTeamSelect.value;
-
-                displayTeamSelect.innerHTML =
-                    '<option value="">-- Chọn Team --</option>' +
-                    sortedTeams.map(t => `<option value="${t}">${t}</option>`).join('');
-
+                displayTeamSelect.innerHTML = '<option value="">-- Chọn Team --</option>' +
+                    sortedTeams.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
                 displayTeamSelect.value = currentVal;
             }
 
             const displaySupSelect = document.getElementById('displayEmpSup');
-
             if (displaySupSelect) {
                 const currentVal = displaySupSelect.value;
-
-                displaySupSelect.innerHTML =
-                    '<option value="">-- Chọn Sup --</option>' +
-                    sortedSups.map(s => `<option value="${s}">${s}</option>`).join('');
-
+                displaySupSelect.innerHTML = '<option value="">-- Chọn Sup --</option>' +
+                    sortedSups.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
                 displaySupSelect.value = currentVal;
             }
         }
+
 
         const scanEmpInput = document.getElementById('scanEmpInput');
 
@@ -3068,6 +3274,412 @@
                     </tr>
                 `;
             }).join('');
+        }
+
+        // ============================================================
+        // DANH MỤC KHO MÃ MÁY
+        // Nguồn tổng hợp: devices (danh mục chuẩn), unreturned (đang mượn),
+        // logs (mã từng phát sinh giao dịch để nhận diện dữ liệu cũ).
+        // ============================================================
+        function buildInventoryRows() {
+            const byCode = new Map();
+            const addCode = (code, data = {}, source = '') => {
+                const normalized = String(code || '').trim().toUpperCase();
+                if (!normalized) return;
+                const old = byCode.get(normalized) || {};
+                byCode.set(normalized, {
+                    ...old,
+                    ...data,
+                    pdaCode: normalized,
+                    id: data.id || old.id || '',
+                    deviceType: data.deviceType || data.pdaType || old.deviceType || detectDeviceType(normalized),
+                    source: [old.source, source].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(' + ')
+                });
+            };
+
+            registeredDevicesCache.forEach(item => addCode(item.pdaCode || item.deviceCode || item.serial, item, 'Danh mục kho'));
+            logsCache.forEach(item => addCode(item.pdaCode, item, 'Lịch sử'));
+            unreturnedCache.forEach(item => addCode(item.pdaCode, item, 'Đang mượn'));
+
+            const rows = Array.from(byCode.values()).map(item => {
+                const borrowed = unreturnedCache.find(record =>
+                    String(record.pdaCode || '').trim().toUpperCase() === item.pdaCode
+                );
+                return {
+                    ...item,
+                    status: borrowed ? 'Đang mượn' : 'Trong kho',
+                    borrower: borrowed ? (borrowed.empName || borrowed.opsId || 'Chưa rõ') : '',
+                    opsId: borrowed?.opsId || '',
+                    team: borrowed?.team || '',
+                    supervisor: borrowed?.supervisor || '',
+                    isRegistered: Boolean(item.id)
+                };
+            });
+
+            rows.sort((a, b) => a.pdaCode.localeCompare(b.pdaCode, 'en', { numeric: true }));
+            return rows;
+        }
+
+        function applyInventoryFilters() {
+            const keyword = String(document.getElementById('inventorySearch')?.value || '').trim().toLowerCase();
+            const status = String(document.getElementById('inventoryStatusFilter')?.value || '');
+            const type = String(document.getElementById('inventoryTypeFilter')?.value || '');
+
+            const filtered = inventoryRowsCache.filter(row => {
+                if (status && row.status !== status) return false;
+                if (type && row.deviceType !== type) return false;
+                if (!keyword) return true;
+                return [row.pdaCode, row.deviceType, row.status, row.borrower, row.opsId, row.team, row.supervisor]
+                    .some(value => String(value || '').toLowerCase().includes(keyword));
+            });
+
+            const tbody = document.getElementById('inventoryTable');
+            const count = document.getElementById('inventoryFilterCount');
+            if (count) count.textContent = `${filtered.length}/${inventoryRowsCache.length} mã máy`;
+            if (!tbody) return;
+
+            if (!filtered.length) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold">Chưa có mã máy phù hợp. Hãy thêm mã hoặc nhập danh sách Excel.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(row => {
+                const statusClass = row.status === 'Trong kho'
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                    : 'bg-amber-100 text-amber-800 border-amber-200';
+                const sourceText = row.source || 'Dữ liệu giao dịch';
+                const personText = row.borrower ? `${escapeHtml(row.borrower)} (${escapeHtml(row.opsId)})` : '—';
+                const teamText = row.team || row.supervisor
+                    ? `${escapeHtml(row.team || '—')} / ${escapeHtml(row.supervisor || '—')}`
+                    : '—';
+                const action = row.isRegistered
+                    ? `<button type="button" onclick="deleteDeviceRecord('${encodeURIComponent(row.id)}','${encodeURIComponent(row.pdaCode)}')" class="px-2.5 py-1 rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 font-extrabold">Xóa</button>`
+                    : '<span class="text-slate-400">—</span>';
+
+                return `<tr class="hover:bg-slate-50">
+                    <td class="font-extrabold text-cyan-800"><span class="select-all">${escapeHtml(row.pdaCode)}</span>
+                        <button type="button" onclick="copyInventoryCode('${encodeURIComponent(row.pdaCode)}')" class="ml-1 text-slate-400 hover:text-cyan-700" title="Sao chép mã"><i class="fa-regular fa-copy"></i></button>
+                    </td>
+                    <td>${renderDeviceBadge(row.deviceType)}</td>
+                    <td><span class="inline-flex px-2.5 py-1 rounded-full border ${statusClass} font-extrabold">${row.status}</span></td>
+                    <td>${personText}</td>
+                    <td>${teamText}</td>
+                    <td class="text-slate-500">${escapeHtml(sourceText)}</td>
+                    <td class="text-center">${action}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderInventoryTable() {
+            inventoryRowsCache = buildInventoryRows();
+            const total = inventoryRowsCache.length;
+            const borrowed = inventoryRowsCache.filter(row => row.status === 'Đang mượn').length;
+            const available = total - borrowed;
+            const totalNode = document.getElementById('inventoryTotalCount');
+            const availableNode = document.getElementById('inventoryAvailableCount');
+            const borrowedNode = document.getElementById('inventoryBorrowedCount');
+            if (totalNode) totalNode.textContent = total;
+            if (availableNode) availableNode.textContent = available;
+            if (borrowedNode) borrowedNode.textContent = borrowed;
+            applyInventoryFilters();
+        }
+
+        window.saveSingleDevice = async function(event) {
+            event.preventDefault();
+            if (currentUserRole === 'guest') {
+                showToast('Tài khoản chỉ xem, không thể thêm mã máy.', 'warning');
+                return;
+            }
+            const code = String(document.getElementById('deviceCodeInput').value || '').trim().toUpperCase();
+            const deviceType = document.getElementById('deviceTypeInput').value || detectDeviceType(code);
+            if (!code) return;
+
+            try {
+                const { collection, query, where, getDocs, addDoc, updateDoc, doc, serverTimestamp } = window.fs;
+                const db = window.db;
+                const result = await getDocs(query(collection(db, 'devices'), where('pdaCode', '==', code)));
+                const payload = { pdaCode: code, deviceType, updatedAt: serverTimestamp(), updatedBy: currentAdminDisplayName };
+                if (result.empty) {
+                    await addDoc(collection(db, 'devices'), { ...payload, createdAt: serverTimestamp() });
+                    showToast(`Đã thêm mã máy ${code} vào danh mục kho.`);
+                } else {
+                    await updateDoc(doc(db, 'devices', result.docs[0].id), payload);
+                    showToast(`Đã cập nhật mã máy ${code}.`);
+                }
+                document.getElementById('deviceForm').reset();
+                document.getElementById('deviceTypeInput').value = 'Máy mới';
+            } catch (error) {
+                console.error('Lỗi lưu mã máy:', error);
+                showToast('Không thể lưu mã máy: ' + (error.message || error.code || String(error)), 'error');
+            }
+        };
+
+        window.deleteDeviceRecord = async function(encodedId, encodedCode) {
+            if (currentUserRole === 'guest') return;
+            const id = decodeURIComponent(encodedId);
+            const code = decodeURIComponent(encodedCode);
+            const confirmed = await showCustomConfirm('Xóa mã máy', `Xóa mã [${code}] khỏi danh mục quản lý? Lịch sử mượn/trả không bị xóa.`, true);
+            if (!confirmed) return;
+            try {
+                await window.fs.deleteDoc(window.fs.doc(window.db, 'devices', id));
+                showToast(`Đã xóa mã ${code} khỏi danh mục kho.`);
+            } catch (error) {
+                console.error('Lỗi xóa mã máy:', error);
+                showToast('Không thể xóa mã máy: ' + (error.message || error.code || String(error)), 'error');
+            }
+        };
+
+        window.copyInventoryCode = function(encodedCode) {
+            window.copySinglePdaCode(decodeURIComponent(encodedCode));
+        };
+
+        function normalizeInventoryDeviceType(value, code) {
+            const normalized = String(value || '').toLowerCase().normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+            if (normalized.includes('scan') || normalized.includes('sung')) return 'Súng Scan';
+            if (normalized.includes('mt90') || normalized.includes('may cu')) return 'Máy cũ';
+            if (normalized.includes('mt93') || normalized.includes('may moi')) return 'Máy mới';
+            return detectDeviceType(code);
+        }
+
+        async function saveDeviceRecordsBulk(items) {
+            if (currentUserRole === 'guest') throw new Error('Tài khoản chỉ xem, không có quyền nhập mã máy.');
+            const { collection, getDocs, writeBatch, doc, serverTimestamp } = window.fs;
+            const db = window.db;
+            const existingSnapshot = await getDocs(collection(db, 'devices'));
+            const existingByCode = new Map();
+            existingSnapshot.forEach(item => {
+                const data = item.data();
+                const code = String(data.pdaCode || '').trim().toUpperCase();
+                if (code) existingByCode.set(code, item.id);
+            });
+
+            let batch = writeBatch(db);
+            let operationCount = 0;
+            let added = 0;
+            let updated = 0;
+            const commitIfNeeded = async () => {
+                if (operationCount >= 400) {
+                    await batch.commit();
+                    batch = writeBatch(db);
+                    operationCount = 0;
+                }
+            };
+
+            for (const item of items) {
+                const code = String(item.pdaCode || '').trim().toUpperCase();
+                if (!code) continue;
+                const type = normalizeInventoryDeviceType(item.deviceType, code);
+                const oldId = existingByCode.get(code);
+                const ref = oldId ? doc(db, 'devices', oldId) : doc(collection(db, 'devices'));
+                batch.set(ref, {
+                    pdaCode: code,
+                    deviceType: type,
+                    updatedAt: serverTimestamp(),
+                    updatedBy: currentAdminDisplayName,
+                    ...(!oldId ? { createdAt: serverTimestamp() } : {})
+                }, { merge: true });
+                if (oldId) updated++; else added++;
+                existingByCode.set(code, ref.id);
+                operationCount++;
+                await commitIfNeeded();
+            }
+            if (operationCount) await batch.commit();
+            return { added, updated };
+        }
+
+        const deviceCodeInput = document.getElementById('deviceCodeInput');
+        if (deviceCodeInput) {
+            deviceCodeInput.addEventListener('input', () => {
+                const code = deviceCodeInput.value.trim();
+                const type = detectDeviceType(code);
+                const typeSelect = document.getElementById('deviceTypeInput');
+                if (typeSelect && code) typeSelect.value = type;
+            });
+        }
+
+        const deviceExcelInput = document.getElementById('deviceExcelInput');
+        if (deviceExcelInput) {
+            deviceExcelInput.addEventListener('change', event => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                if (currentUserRole === 'guest') {
+                    showToast('Tài khoản chỉ xem, không thể nhập Excel.', 'warning');
+                    event.target.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = async loadEvent => {
+                    try {
+                        const workbook = XLSX.read(new Uint8Array(loadEvent.target.result), { type: 'array' });
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                        const normalized = rows.map(row => {
+                            const keys = Object.keys(row);
+                            const codeKey = keys.find(key => ['mapda', 'mamay', 'pda', 'serial', 'devicecode', 'pdacode'].includes(
+                                String(key).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]/g, '')
+                            ));
+                            const typeKey = keys.find(key => ['loai', 'loaithietbi', 'devicetype', 'type'].includes(
+                                String(key).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]/g, '')
+                            ));
+                            return {
+                                pdaCode: codeKey ? String(row[codeKey] || '').trim() : '',
+                                deviceType: typeKey ? String(row[typeKey] || '').trim() : ''
+                            };
+                        }).filter(item => item.pdaCode);
+                        const unique = Array.from(new Map(normalized.map(item => [item.pdaCode.toUpperCase(), item])).values());
+                        if (!unique.length) throw new Error('Không tìm thấy cột Mã PDA / Mã máy / Serial trong file.');
+                        const result = await saveDeviceRecordsBulk(unique);
+                        showToast(`Đã nhập ${unique.length} mã máy (thêm ${result.added}, cập nhật ${result.updated}).`);
+                    } catch (error) {
+                        console.error('Lỗi nhập Excel danh mục máy:', error);
+                        showToast('Nhập Excel thất bại: ' + (error.message || error.code || String(error)), 'error');
+                    } finally {
+                        deviceExcelInput.value = '';
+                    }
+                };
+                reader.onerror = () => {
+                    showToast('Không thể đọc file Excel đã chọn.', 'error');
+                    deviceExcelInput.value = '';
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        ['inventorySearch', 'inventoryStatusFilter', 'inventoryTypeFilter'].forEach(id => {
+            const control = document.getElementById(id);
+            if (control) control.addEventListener('input', applyInventoryFilters);
+            if (control && control.tagName === 'SELECT') control.addEventListener('change', applyInventoryFilters);
+        });
+
+        // ============================================================
+        // QUẢN LÝ TEAM / SUPERVISOR
+        // Lưu riêng trong master_options để không phải tạo nhân viên giả.
+        // ============================================================
+        async function upsertMasterOption(type, name, active = true) {
+            const cleanName = cleanOptionString(name);
+            if (!cleanName) throw new Error('Tên danh mục không được để trống.');
+            const { collection, query, where, getDocs, addDoc, updateDoc, doc } = window.fs;
+            const db = window.db;
+            const snapshot = await getDocs(query(collection(db, 'master_options'), where('type', '==', type)));
+            const matching = snapshot.docs.find(item => normalizeOptionKey(item.data().name) === normalizeOptionKey(cleanName));
+            const payload = { type, name: cleanName, active, updatedAt: new Date().toISOString(), updatedBy: currentAdminDisplayName };
+            if (matching) {
+                await updateDoc(doc(db, 'master_options', matching.id), payload);
+            } else {
+                await addDoc(collection(db, 'master_options'), { ...payload, createdAt: new Date().toISOString() });
+            }
+        }
+
+        window.saveMasterOption = async function(event, type) {
+            event.preventDefault();
+            if (currentUserRole === 'guest') {
+                showToast('Tài khoản chỉ xem, không thể chỉnh sửa danh mục.', 'warning');
+                return;
+            }
+            const inputId = type === 'team' ? 'teamOptionInput' : 'supOptionInput';
+            const input = document.getElementById(inputId);
+            const name = String(input?.value || '').trim();
+            if (!name) return;
+            try {
+                await upsertMasterOption(type, name, true);
+                input.value = '';
+                showToast(type === 'team' ? `Đã thêm / khôi phục Team ${name}.` : `Đã thêm / khôi phục Supervisor ${name}.`);
+            } catch (error) {
+                console.error('Lỗi lưu danh mục:', error);
+                showToast('Không thể lưu danh mục: ' + (error.message || error.code || String(error)), 'error');
+            }
+        };
+
+        window.editMasterOption = async function(type, encodedName) {
+            if (currentUserRole === 'guest') return;
+            const oldName = decodeURIComponent(encodedName);
+            const newName = prompt(`Nhập tên mới cho ${type === 'team' ? 'Team' : 'Supervisor'}:`, oldName);
+            if (newName === null) return;
+            const cleanNew = cleanOptionString(newName);
+            if (!cleanNew) {
+                showToast('Tên mới không được để trống.', 'warning');
+                return;
+            }
+            try {
+                await upsertMasterOption(type, oldName, false);
+                await upsertMasterOption(type, cleanNew, true);
+
+                // Đồng bộ tên mới sang hồ sơ nhân viên đang dùng lựa chọn cũ.
+                const field = type === 'team' ? 'team' : 'supervisor';
+                const matchedEmployees = employeeCache.filter(emp =>
+                    normalizeOptionKey(emp[field]) === normalizeOptionKey(oldName) && emp.id
+                );
+                if (matchedEmployees.length) {
+                    const { writeBatch, doc } = window.fs;
+                    let batch = writeBatch(window.db);
+                    let count = 0;
+                    for (const emp of matchedEmployees) {
+                        batch.update(doc(window.db, 'employees', emp.id), { [field]: cleanNew });
+                        count++;
+                        if (count % 400 === 0) {
+                            await batch.commit();
+                            batch = writeBatch(window.db);
+                        }
+                    }
+                    if (count % 400) await batch.commit();
+                }
+                showToast(`Đã đổi tên ${oldName} thành ${cleanNew} và cập nhật ${matchedEmployees.length} hồ sơ nhân viên.`);
+            } catch (error) {
+                console.error('Lỗi đổi tên danh mục:', error);
+                showToast('Không thể đổi tên: ' + (error.message || error.code || String(error)), 'error');
+            }
+        };
+
+        window.deleteMasterOption = async function(type, encodedName) {
+            if (currentUserRole === 'guest') return;
+            const name = decodeURIComponent(encodedName);
+            const label = type === 'team' ? 'Team' : 'Supervisor';
+            const confirmed = await showCustomConfirm(
+                `Gỡ ${label}`,
+                `Gỡ [${name}] khỏi danh sách lựa chọn? Thông tin cũ trên hồ sơ nhân viên và lịch sử vẫn được giữ nguyên.`,
+                true
+            );
+            if (!confirmed) return;
+            try {
+                await upsertMasterOption(type, name, false);
+                showToast(`Đã gỡ ${label} [${name}] khỏi danh sách lựa chọn.`);
+            } catch (error) {
+                console.error('Lỗi gỡ danh mục:', error);
+                showToast('Không thể gỡ danh mục: ' + (error.message || error.code || String(error)), 'error');
+            }
+        };
+
+        function renderMasterOptions() {
+            const teamNames = getMasterOptionNames('team');
+            const supNames = getMasterOptionNames('supervisor');
+            const isDisabled = currentUserRole === 'guest';
+            const renderList = (names, type) => names.length ? names.map(name => {
+                const encoded = encodeURIComponent(name);
+                return `<div class="master-option-row">
+                    <span class="font-extrabold text-slate-800 break-all">${escapeHtml(name)}</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="editMasterOption('${type}','${encoded}')" ${isDisabled ? 'disabled' : ''} class="px-2.5 py-1 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 font-extrabold disabled:opacity-40"><i class="fa-solid fa-pen mr-1"></i>Sửa</button>
+                        <button type="button" onclick="deleteMasterOption('${type}','${encoded}')" ${isDisabled ? 'disabled' : ''} class="px-2.5 py-1 rounded-lg border border-red-200 bg-red-50 text-red-700 font-extrabold disabled:opacity-40"><i class="fa-solid fa-trash mr-1"></i>Gỡ</button>
+                    </div>
+                </div>`;
+            }).join('') : '<p class="p-5 text-center text-slate-400 font-semibold">Chưa có dữ liệu.</p>';
+
+            const teamList = document.getElementById('teamOptionsList');
+            const supList = document.getElementById('supOptionsList');
+            const teamCount = document.getElementById('teamOptionCount');
+            const supCount = document.getElementById('supOptionCount');
+            if (teamList) teamList.innerHTML = renderList(teamNames, 'team');
+            if (supList) supList.innerHTML = renderList(supNames, 'supervisor');
+            if (teamCount) teamCount.textContent = teamNames.length;
+            if (supCount) supCount.textContent = supNames.length;
+
+            const canWrite = currentUserRole !== 'guest';
+            ['teamOptionInput', 'supOptionInput'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = !canWrite;
+            });
+            document.querySelectorAll('#tab-masterdata form button[type="submit"]').forEach(btn => btn.disabled = !canWrite);
         }
 
         function renderEmployees(emps) {
