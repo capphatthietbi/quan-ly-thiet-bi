@@ -2335,6 +2335,85 @@
                 .trim();
         }
 
+        // OPS ID là khóa liên kết giữa Danh sách nhân viên và các giao dịch đang mở.
+        function normalizeOpsId(value) {
+            return String(value || '').trim().toLocaleLowerCase('vi-VN');
+        }
+
+        function getEmployeeByOpsId(opsId) {
+            const key = normalizeOpsId(opsId);
+            if (!key) return null;
+            return employeeCache.find(emp => normalizeOpsId(emp.opsId) === key) || null;
+        }
+
+        // Đồng bộ thông tin hiển thị từ hồ sơ nhân viên mới nhất.
+        // Chỉ cập nhật cache phía giao diện; KHÔNG ghi đè document unreturned hoặc logs.
+        function syncUnreturnedEmployeeData() {
+            const employeeByOpsId = new Map();
+            employeeCache.forEach(emp => {
+                const key = normalizeOpsId(emp.opsId);
+                if (key) employeeByOpsId.set(key, emp);
+            });
+
+            unreturnedCache = unreturnedCache.map(record => {
+                const employee = employeeByOpsId.get(normalizeOpsId(record.opsId));
+                if (!employee) return record;
+
+                return {
+                    ...record,
+                    empName: employee.empName ?? record.empName ?? '',
+                    team: employee.team ?? '',
+                    supervisor: employee.supervisor ?? ''
+                };
+            });
+
+            // Nếu đang chọn nhân viên ở thẻ OPS ID, cập nhật cả hồ sơ đang chọn.
+            if (selectedEmployee && selectedEmployee.opsId) {
+                const latestEmployee = employeeByOpsId.get(normalizeOpsId(selectedEmployee.opsId));
+                if (latestEmployee) {
+                    const previousTeam = cleanOptionString(selectedEmployee.team);
+                    const previousSup = cleanOptionString(selectedEmployee.supervisor);
+                    selectedEmployee = { ...selectedEmployee, ...latestEmployee };
+
+                    const teamSelect = document.getElementById('displayEmpTeam');
+                    const supSelect = document.getElementById('displayEmpSup');
+                    // Chỉ tự thay lựa chọn nếu người dùng chưa chủ động chọn giá trị khác hồ sơ cũ.
+                    if (teamSelect && (!teamSelect.value || teamSelect.value === previousTeam)) {
+                        teamSelect.value = cleanOptionString(latestEmployee.team);
+                    }
+                    if (supSelect && (!supSelect.value || supSelect.value === previousSup)) {
+                        supSelect.value = cleanOptionString(latestEmployee.supervisor);
+                    }
+
+                    const empBox = document.getElementById('selectedEmpBox');
+                    if (empBox) {
+                        empBox.innerHTML = `
+                            <div class="flex justify-between items-center w-full">
+                                <div>
+                                    <p class="font-extrabold text-gray-800 text-sm">${escapeHtml(latestEmployee.empName || '')}</p>
+                                    <p class="text-gray-500 font-bold text-xs mt-0.5">
+                                        Mã NV: <span class="text-orange-600 font-extrabold">${escapeHtml(latestEmployee.opsId || '')}</span>
+                                    </p>
+                                </div>
+                                <span class="bg-emerald-100 text-emerald-700 font-extrabold px-3 py-1 rounded-lg text-xs">✓ Đã chọn NV</span>
+                            </div>`;
+                    }
+                }
+            }
+
+            // Làm mới các thẻ phụ thuộc hồ sơ nhân viên.
+            refreshUnreturnedFilterOptions();
+            applyUnreturnedFilters();
+            renderPivotTable(unreturnedCache);
+            renderInventoryTable();
+
+            // Nếu modal chi tiết đang mở thì cập nhật tên, Team và Sup ngay lập tức.
+            const modal = document.getElementById('empDetailsModal');
+            if (modal && !modal.classList.contains('hidden') && modal.dataset.opsId) {
+                window.openEmpDetailsModal(modal.dataset.opsId);
+            }
+        }
+
         // Khởi tạo listener chỉ sau khi tài khoản đã được xác minh.
         function startDataListeners() {
             if (dataListenersStarted) return;
@@ -2365,6 +2444,8 @@
                         });
                     });
 
+                    // Đồng bộ tên/Team/Sup theo Danh sách nhân viên đã tải.
+                    syncUnreturnedEmployeeData();
                     refreshUnreturnedFilterOptions();
                     applyUnreturnedFilters();
                     renderPivotTable(unreturnedCache);
@@ -2419,7 +2500,10 @@
                     renderEmployees(employeeCache);
                     updateDropdownOptions(employeeCache);
                     renderMasterOptions();
-                    renderInventoryTable();
+
+                    // Hồ sơ nhân viên là nguồn chuẩn: cập nhật các thẻ đang hiển thị
+                    // ngay khi Firestore onSnapshot phát hiện thay đổi.
+                    syncUnreturnedEmployeeData();
                 },
                 listenerError('danh sách nhân viên')
             );
@@ -3166,6 +3250,9 @@
         }
 
         window.openEmpDetailsModal = function(opsId) {
+            const modalElement = document.getElementById('empDetailsModal');
+            if (modalElement) modalElement.dataset.opsId = String(opsId || '');
+
             const empItems = unreturnedCache.filter(
                 item => String(item.opsId || '').toLowerCase() === String(opsId || '').toLowerCase()
             );
@@ -3327,7 +3414,9 @@
         };
 
         window.closeModal = function() {
-            document.getElementById('empDetailsModal').classList.add('hidden');
+            const modal = document.getElementById('empDetailsModal');
+            modal.classList.add('hidden');
+            delete modal.dataset.opsId;
         };
 
         function renderUnreturned(list) {
