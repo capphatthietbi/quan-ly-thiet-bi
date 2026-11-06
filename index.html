@@ -648,7 +648,125 @@
             .logs-filter-grid > * { grid-column: span 12 / span 12 !important; }
         }
 
-    </style>
+    
+
+        /* ===== STICKY TABLE HEADERS: ÁP DỤNG TRÊN TẤT CẢ CÁC THẺ ===== */
+        .data-table-scroll {
+            position: relative;
+            max-height: min(68vh, 720px);
+            overflow: auto;
+            overscroll-behavior: contain;
+            scrollbar-gutter: stable;
+        }
+        .data-table-scroll table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .data-table-scroll thead th {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 30 !important;
+            background-color: inherit;
+            background-clip: padding-box;
+        }
+        .data-table-scroll thead {
+            position: relative;
+            z-index: 20;
+        }
+
+        /* Pivot: hai bảng độc lập đặt song song, mỗi Supervisor chỉ thuộc một bảng. */
+        .pivot-tables-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .65rem;
+            align-items: start;
+        }
+        .pivot-table-panel {
+            min-width: 0;
+            border: 1px solid #dbe3ee;
+            border-radius: .75rem;
+            overflow: hidden;
+            background: #fff;
+        }
+        .pivot-table-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .5rem;
+            padding: .45rem .6rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .pivot-table-scroll {
+            max-height: min(66vh, 680px);
+            overflow: auto;
+        }
+        .pivot-compact-table {
+            width: 100%;
+            min-width: 0;
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 10px;
+        }
+        .pivot-compact-table thead th {
+            padding: .42rem .28rem;
+            font-size: 9px;
+            line-height: 1.2;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+        .pivot-compact-table tbody td {
+            padding: .42rem .28rem;
+            font-size: 10px;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+            vertical-align: middle;
+        }
+        .pivot-compact-table .pivot-subtotal-row td {
+            padding: .45rem .28rem;
+            font-size: 9px;
+            line-height: 1.25;
+        }
+        .pivot-grand-summary {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: .5rem;
+            padding: .6rem;
+            border: 1px solid #cbd5e1;
+            border-radius: .75rem;
+            background: #0f172a;
+            color: #fff;
+        }
+        .pivot-grand-summary > div {
+            min-width: 0;
+            text-align: center;
+        }
+        .pivot-grand-summary .summary-label {
+            display: block;
+            color: #cbd5e1;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .pivot-grand-summary .summary-value {
+            display: block;
+            margin-top: .15rem;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 900;
+        }
+        @media (max-width: 900px) {
+            .pivot-tables-grid { grid-template-columns: 1fr; }
+            .pivot-table-scroll { max-height: 58vh; }
+        }
+        @media (max-width: 520px) {
+            .pivot-grand-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+</style>
 </head>
 
 <body class="bg-[#f4f6f8] text-gray-800 text-sm flex h-screen overflow-hidden select-none">
@@ -1003,7 +1121,7 @@
                         <span class="text-xs font-bold text-gray-400">Bấm trả nhanh tại cột thao tác bên dưới</span>
                     </div>
 
-                    <div class="overflow-x-auto flex-1 max-h-[320px] overflow-y-auto rounded-xl border border-gray-100">
+                    <div class="data-table-scroll overflow-x-auto flex-1 max-h-[320px] overflow-y-auto rounded-xl border border-gray-100">
                         <table class="w-full text-left border-collapse relative">
                             <thead class="bg-slate-900 text-white font-bold text-xs uppercase sticky top-0 z-10 shadow-sm">
                                 <tr>
@@ -1025,15 +1143,49 @@
             <div id="tab-unreturned" class="tab-content hidden bg-white rounded-xl p-4 shadow-sm border border-gray-200">
                 <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
                     <h2 class="text-base font-bold text-gray-800 uppercase">Unreturned List (Danh Sách Chưa Trả)</h2>
-                    <div class="flex items-center gap-2">
-                        <button type="button" onclick="copyAllUnreturnedPdaCodes()" class="px-3 py-2 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs font-extrabold">
-                            <i class="fa-regular fa-copy mr-1"></i> Copy danh sách PDA chưa trả
+                    <button type="button" onclick="copyAllUnreturnedPdaCodes()" class="px-3 py-2 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs font-extrabold">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy danh sách PDA chưa trả
+                    </button>
+                </div>
+
+                <!-- BỘ LỌC DANH SÁCH CHƯA TRẢ -->
+                <div class="unreturned-filter-grid grid grid-cols-12 gap-2 mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3 items-end">
+                    <div class="col-span-12 md:col-span-4">
+                        <label for="searchUnreturned" class="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Tìm kiếm</label>
+                        <input type="search" id="searchUnreturned" placeholder="Mã PDA, OPS ID, tên nhân viên..." autocomplete="off" class="w-full min-h-[40px] p-2 border border-slate-300 rounded-lg text-sm font-semibold outline-none focus:border-orange-500">
+                    </div>
+                    <div class="col-span-12 sm:col-span-4 md:col-span-2">
+                        <label for="unreturnedFilterType" class="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Loại thiết bị</label>
+                        <select id="unreturnedFilterType" class="w-full min-h-[40px] p-2 border border-slate-300 rounded-lg bg-white text-sm font-semibold outline-none focus:border-orange-500">
+                            <option value="">Tất cả loại</option>
+                            <option value="Máy mới">Máy mới (MT93)</option>
+                            <option value="Máy cũ">Máy cũ (MT90)</option>
+                            <option value="Súng Scan">Súng Scan</option>
+                        </select>
+                    </div>
+                    <div class="col-span-12 sm:col-span-4 md:col-span-2">
+                        <label for="unreturnedFilterTeam" class="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Team</label>
+                        <select id="unreturnedFilterTeam" class="w-full min-h-[40px] p-2 border border-slate-300 rounded-lg bg-white text-sm font-semibold outline-none focus:border-orange-500">
+                            <option value="">Tất cả Team</option>
+                        </select>
+                    </div>
+                    <div class="col-span-12 sm:col-span-4 md:col-span-2">
+                        <label for="unreturnedFilterSup" class="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Supervisor</label>
+                        <select id="unreturnedFilterSup" class="w-full min-h-[40px] p-2 border border-slate-300 rounded-lg bg-white text-sm font-semibold outline-none focus:border-orange-500">
+                            <option value="">Tất cả Sup</option>
+                        </select>
+                    </div>
+                    <div class="col-span-6 md:col-span-1">
+                        <button id="btnClearUnreturnedFilters" type="button" class="w-full min-h-[40px] px-2 rounded-lg bg-white hover:bg-orange-50 border border-slate-300 hover:border-orange-300 text-slate-700 hover:text-orange-700 font-extrabold text-xs transition" title="Xóa bộ lọc">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Xóa
                         </button>
-                        <input type="text" id="searchUnreturned" placeholder="Tìm theo mã máy, tên NV, Ops ID..." class="p-2 border rounded-lg w-72 text-xs">
+                    </div>
+                    <div class="col-span-6 md:col-span-1 flex items-center justify-end md:justify-center">
+                        <span id="unreturnedFilterCount" class="text-xs font-extrabold text-slate-600 whitespace-nowrap" aria-live="polite">0/0 thiết bị</span>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="data-table-scroll overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-800 text-white font-bold text-xs">
                             <tr>
@@ -1068,7 +1220,7 @@
                             Tổng PDA Chưa Trả: <span id="pivotTotalPdas" class="text-purple-900 text-sm font-bold">0</span>
                         </div>
                     </div>
-                    <div id="pivotContainer" class="overflow-x-auto rounded-xl border border-slate-200 bg-white"></div>
+                    <div id="pivotContainer" class="rounded-xl border border-slate-200 bg-white overflow-hidden"></div>
                 </div>
             </div>
 
@@ -1119,7 +1271,7 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="data-table-scroll overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-100 text-gray-700 font-bold border-b text-xs">
                             <tr>
@@ -1214,7 +1366,7 @@
                         </div>
                     </div>
 
-                    <div class="flex-1 overflow-y-auto border rounded-lg border-gray-100">
+                    <div class="data-table-scroll flex-1 overflow-y-auto border rounded-lg border-gray-100">
                         <table class="w-full text-left relative">
                             <thead class="bg-gray-100 text-gray-600 sticky top-0 shadow-sm z-10 font-bold text-xs">
                                 <tr>
@@ -1260,7 +1412,7 @@
                             </div>
                             <span class="text-xs font-bold text-slate-500">Cập nhật realtime</span>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="data-table-scroll overflow-x-auto">
                             <table class="w-full text-left border-collapse inventory-breakdown-table">
                                 <thead class="bg-slate-800 text-white text-sm">
                                     <tr>
@@ -1332,7 +1484,7 @@
                         <h3 class="font-extrabold text-slate-900 uppercase">Danh sách mã máy</h3>
                         <span class="text-sm text-slate-500">Mã trong kho được đánh dấu màu xanh</span>
                     </div>
-                    <div class="overflow-x-auto max-h-[65vh] overflow-y-auto">
+                    <div class="data-table-scroll overflow-x-auto max-h-[65vh] overflow-y-auto">
                         <table class="w-full text-left border-collapse inventory-table">
                             <thead class="bg-slate-900 text-white sticky top-0 z-10">
                                 <tr>
@@ -1424,7 +1576,7 @@
                         </div>
                     </form>
 
-                    <div class="overflow-x-auto">
+                    <div class="data-table-scroll overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead class="bg-slate-900 text-white font-bold text-xs">
                                 <tr>
@@ -1731,7 +1883,8 @@
                 renderAdminUsers([]);
             }
 
-            renderUnreturned(unreturnedCache);
+            refreshUnreturnedFilterOptions();
+            applyUnreturnedFilters();
             renderEmployees(employeeCache);
             renderMasterOptions();
             renderInventoryTable();
@@ -2212,7 +2365,8 @@
                         });
                     });
 
-                    renderUnreturned(unreturnedCache);
+                    refreshUnreturnedFilterOptions();
+                    applyUnreturnedFilters();
                     renderPivotTable(unreturnedCache);
                     updateInventoryStats();
                     renderInventoryTable();
@@ -2894,73 +3048,116 @@
                 supervisorGroups.get(row.supervisor).push(row);
             });
 
+            // Chia nguyên từng Supervisor vào một trong hai bảng, cân bằng theo số nhân viên.
+            // Không tách một Supervisor sang cả hai bảng.
+            const groupEntries = Array.from(supervisorGroups.entries());
+            const balancedOrder = [...groupEntries].sort((a, b) => b[1].length - a[1].length);
+            const tableGroups = [[], []];
+            const tableLoads = [0, 0];
+
+            balancedOrder.forEach(entry => {
+                const target = tableLoads[0] <= tableLoads[1] ? 0 : 1;
+                tableGroups[target].push(entry);
+                tableLoads[target] += entry[1].length;
+            });
+            tableGroups.forEach(groups => groups.sort((a, b) => a[0].localeCompare(b[0], 'vi')));
+
             const grand = { new: 0, old: 0, scan: 0, total: 0 };
-            let bodyHtml = '';
+            rows.forEach(emp => {
+                grand.new += emp.counts.new;
+                grand.old += emp.counts.old;
+                grand.scan += emp.counts.scan;
+                grand.total += emp.total;
+            });
 
-            for (const [supervisor, employees] of supervisorGroups) {
-                const subtotal = { new: 0, old: 0, scan: 0, total: 0 };
+            const tableHeader = `
+                <colgroup>
+                    <col style="width:17%">
+                    <col style="width:13%">
+                    <col style="width:28%">
+                    <col style="width:10%">
+                    <col style="width:10%">
+                    <col style="width:11%">
+                    <col style="width:11%">
+                </colgroup>
+                <thead class="bg-slate-800 text-white uppercase shadow-sm">
+                    <tr>
+                        <th>Supervisor</th>
+                        <th>Team</th>
+                        <th>Họ tên / OPS ID</th>
+                        <th class="text-center">Máy mới</th>
+                        <th class="text-center">Máy cũ</th>
+                        <th class="text-center">Súng Scan</th>
+                        <th class="text-center">Tổng</th>
+                    </tr>
+                </thead>`;
 
-                employees.forEach(emp => {
-                    subtotal.new += emp.counts.new;
-                    subtotal.old += emp.counts.old;
-                    subtotal.scan += emp.counts.scan;
-                    subtotal.total += emp.total;
+            function renderPivotTableBlock(groups, index) {
+                let bodyHtml = '';
+                groups.forEach(([supervisor, employees]) => {
+                    const subtotal = { new: 0, old: 0, scan: 0, total: 0 };
+                    employees.forEach(emp => {
+                        subtotal.new += emp.counts.new;
+                        subtotal.old += emp.counts.old;
+                        subtotal.scan += emp.counts.scan;
+                        subtotal.total += emp.total;
+
+                        bodyHtml += `
+                            <tr data-pivot-opsid="${escapeHtml(emp.opsId)}" class="pivot-employee-row hover:bg-orange-50 cursor-pointer border-b border-slate-100">
+                                <td class="text-slate-700" title="${escapeHtml(emp.supervisor)}">${escapeHtml(emp.supervisor)}</td>
+                                <td class="text-slate-700" title="${escapeHtml(emp.team)}">${escapeHtml(emp.team)}</td>
+                                <td>
+                                    <span class="block font-extrabold text-slate-800">${escapeHtml(emp.empName)}</span>
+                                    <span class="block text-slate-400 font-bold">${escapeHtml(emp.opsId)}</span>
+                                </td>
+                                <td class="text-center font-bold text-emerald-700">${emp.counts.new || '–'}</td>
+                                <td class="text-center font-bold text-blue-700">${emp.counts.old || '–'}</td>
+                                <td class="text-center font-bold text-purple-700">${emp.counts.scan || '–'}</td>
+                                <td class="text-center font-black text-slate-900">${emp.total}</td>
+                            </tr>`;
+                    });
 
                     bodyHtml += `
-                        <tr data-pivot-opsid="${escapeHtml(emp.opsId)}" class="pivot-employee-row hover:bg-orange-50 cursor-pointer border-b border-slate-100">
-                            <td class="px-3 py-2.5 text-slate-700">${escapeHtml(emp.supervisor)}</td>
-                            <td class="px-3 py-2.5 text-slate-700">${escapeHtml(emp.team)}</td>
-                            <td class="px-3 py-2.5">
-                                <span class="block font-extrabold text-slate-800">${escapeHtml(emp.empName)}</span>
-                                <span class="block text-[10px] font-bold text-slate-400">${escapeHtml(emp.opsId)}</span>
-                            </td>
-                            <td class="px-3 py-2.5 text-center font-bold text-emerald-700">${emp.counts.new || '–'}</td>
-                            <td class="px-3 py-2.5 text-center font-bold text-blue-700">${emp.counts.old || '–'}</td>
-                            <td class="px-3 py-2.5 text-center font-bold text-purple-700">${emp.counts.scan || '–'}</td>
-                            <td class="px-3 py-2.5 text-center font-black text-slate-900">${emp.total}</td>
+                        <tr class="pivot-subtotal-row bg-purple-50 border-b-2 border-purple-200 font-extrabold">
+                            <td colspan="3" class="text-purple-900">Tổng Sup: ${escapeHtml(supervisor)}</td>
+                            <td class="text-center text-emerald-800">${subtotal.new}</td>
+                            <td class="text-center text-blue-800">${subtotal.old}</td>
+                            <td class="text-center text-purple-800">${subtotal.scan}</td>
+                            <td class="text-center text-purple-950">${subtotal.total}</td>
                         </tr>`;
                 });
 
-                grand.new += subtotal.new;
-                grand.old += subtotal.old;
-                grand.scan += subtotal.scan;
-                grand.total += subtotal.total;
+                if (!groups.length) {
+                    bodyHtml = `<tr><td colspan="7" class="px-2 py-6 text-center text-slate-400">Không có Supervisor trong bảng này.</td></tr>`;
+                }
 
-                bodyHtml += `
-                    <tr class="bg-purple-50 border-b-2 border-purple-200 font-extrabold">
-                        <td colspan="3" class="px-3 py-2.5 text-purple-900">Tổng Supervisor: ${escapeHtml(supervisor)}</td>
-                        <td class="px-3 py-2.5 text-center text-emerald-800">${subtotal.new}</td>
-                        <td class="px-3 py-2.5 text-center text-blue-800">${subtotal.old}</td>
-                        <td class="px-3 py-2.5 text-center text-purple-800">${subtotal.scan}</td>
-                        <td class="px-3 py-2.5 text-center text-purple-950">${subtotal.total}</td>
-                    </tr>`;
+                return `
+                    <section class="pivot-table-panel">
+                        <div class="pivot-table-heading">
+                            <span><i class="fa-solid fa-table-columns text-purple-600 mr-1"></i> BẢNG ${index + 1}</span>
+                            <span>${groups.length} Supervisor · ${tableLoads[index]} nhân viên</span>
+                        </div>
+                        <div class="data-table-scroll pivot-table-scroll">
+                            <table class="pivot-compact-table text-left">
+                                ${tableHeader}
+                                <tbody>${bodyHtml}</tbody>
+                            </table>
+                        </div>
+                    </section>`;
             }
 
-            bodyHtml += `
-                <tr class="bg-slate-900 text-white font-black">
-                    <td colspan="3" class="px-3 py-3 uppercase tracking-wide">Tổng cộng toàn bộ</td>
-                    <td class="px-3 py-3 text-center">${grand.new}</td>
-                    <td class="px-3 py-3 text-center">${grand.old}</td>
-                    <td class="px-3 py-3 text-center">${grand.scan}</td>
-                    <td class="px-3 py-3 text-center text-orange-300">${grand.total}</td>
-                </tr>`;
-
             container.innerHTML = `
-                <table class="min-w-[980px] w-full border-collapse text-xs text-left">
-                    <thead class="sticky top-0 z-10 bg-slate-800 text-white uppercase shadow-sm">
-                        <tr>
-                            <th class="px-3 py-3">Supervisor</th>
-                            <th class="px-3 py-3">Team</th>
-                            <th class="px-3 py-3">Họ tên</th>
-                            <th class="px-3 py-3 text-center">Máy mới</th>
-                            <th class="px-3 py-3 text-center">Máy cũ</th>
-                            <th class="px-3 py-3 text-center">Súng Scan</th>
-                            <th class="px-3 py-3 text-center">Tổng cộng</th>
-                        </tr>
-                    </thead>
-                    <tbody>${bodyHtml}</tbody>
-                </table>
-                <p class="px-3 py-2 text-[10px] text-slate-500 bg-slate-50 border-t border-slate-200">Nhấp vào dòng nhân viên để xem danh sách mã thiết bị đang giữ. Các dòng tím là tổng theo Supervisor; dòng cuối là tổng toàn hệ thống.</p>`;
+                <div class="pivot-tables-grid p-2">
+                    ${renderPivotTableBlock(tableGroups[0], 0)}
+                    ${renderPivotTableBlock(tableGroups[1], 1)}
+                </div>
+                <div class="pivot-grand-summary mx-2 mb-2">
+                    <div><span class="summary-label">Máy mới</span><span class="summary-value">${grand.new}</span></div>
+                    <div><span class="summary-label">Máy cũ</span><span class="summary-value">${grand.old}</span></div>
+                    <div><span class="summary-label">Súng Scan</span><span class="summary-value">${grand.scan}</span></div>
+                    <div><span class="summary-label">Tổng cộng</span><span class="summary-value">${grand.total}</span></div>
+                </div>
+                <p class="px-3 py-2 text-[10px] text-slate-500 bg-slate-50 border-t border-slate-200">Hai bảng được chia theo Supervisor để dễ theo dõi. Nhấp vào dòng nhân viên để xem danh sách mã thiết bị đang giữ; dòng tím là tổng theo từng Supervisor.</p>`;
 
             container.onclick = function(event) {
                 const row = event.target.closest('tr[data-pivot-opsid]');
@@ -3134,13 +3331,19 @@
         };
 
         function renderUnreturned(list) {
-            currentUnreturnedView = Array.isArray(list) ? list.slice() : [];
+            list = Array.isArray(list) ? list : [];
+            currentUnreturnedView = list.slice();
             const fullTbody = document.getElementById('unreturnedFullTable');
             const miniTbody = document.getElementById('unreturnedMiniTable');
+            const countEl = document.getElementById('unreturnedFilterCount');
+
+            if (countEl) {
+                countEl.textContent = `${list.length}/${unreturnedCache.length} thiết bị`;
+            }
 
             const isDisabled = currentUserRole === 'guest';
 
-            fullTbody.innerHTML = list.map(item => {
+            fullTbody.innerHTML = list.length ? list.map(item => {
                 const devType = detectDeviceType(item.pdaCode);
 
                 return `
@@ -3165,7 +3368,14 @@
                         </td>
                     </tr>
                 `;
-            }).join('');
+            }).join('') : `
+                <tr>
+                    <td colspan="9" class="p-8 text-center text-slate-400 font-semibold">
+                        <i class="fa-solid fa-filter-circle-xmark text-2xl block mb-2"></i>
+                        Không tìm thấy thiết bị phù hợp với bộ lọc.
+                    </td>
+                </tr>
+            `;
 
             miniTbody.innerHTML = list.map(item => {
                 const devType = detectDeviceType(item.pdaCode);
@@ -3190,6 +3400,99 @@
                     </tr>
                 `;
             }).join('');
+        }
+
+        // ============================================================
+        // BỘ LỌC DANH SÁCH THIẾT BỊ CHƯA TRẢ
+        // ============================================================
+        function refreshUnreturnedFilterOptions() {
+            const teamSelect = document.getElementById('unreturnedFilterTeam');
+            const supSelect = document.getElementById('unreturnedFilterSup');
+            if (!teamSelect || !supSelect) return;
+
+            const selectedTeam = teamSelect.value;
+            const selectedSup = supSelect.value;
+            const uniqueSorted = values => [...new Set(values
+                .map(value => String(value || '').trim())
+                .filter(Boolean))]
+                .sort((a, b) => a.localeCompare(b, 'vi', { sensitivity: 'base' }));
+
+            const teams = uniqueSorted(unreturnedCache.map(item => item.team));
+            const supervisors = uniqueSorted(unreturnedCache.map(item => item.supervisor));
+
+            teamSelect.innerHTML = '<option value="">Tất cả Team</option>' +
+                teams.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
+            supSelect.innerHTML = '<option value="">Tất cả Sup</option>' +
+                supervisors.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
+
+            if (teams.includes(selectedTeam)) teamSelect.value = selectedTeam;
+            if (supervisors.includes(selectedSup)) supSelect.value = selectedSup;
+        }
+
+        function applyUnreturnedFilters() {
+            const keyword = normalizeLogSearch(
+                document.getElementById('searchUnreturned')?.value || ''
+            );
+            const selectedType = document.getElementById('unreturnedFilterType')?.value || '';
+            const selectedTeam = document.getElementById('unreturnedFilterTeam')?.value || '';
+            const selectedSup = document.getElementById('unreturnedFilterSup')?.value || '';
+
+            const filtered = unreturnedCache.filter(item => {
+                const searchableText = normalizeLogSearch([
+                    item.pdaCode,
+                    item.opsId,
+                    item.empName,
+                    item.team,
+                    item.supervisor,
+                    item.adminName
+                ].join(' '));
+
+                const matchKeyword = !keyword || searchableText.includes(keyword);
+                const matchType = !selectedType || detectDeviceType(item.pdaCode) === selectedType;
+                const matchTeam = !selectedTeam || String(item.team || '').trim() === selectedTeam;
+                const matchSup = !selectedSup || String(item.supervisor || '').trim() === selectedSup;
+
+                return matchKeyword && matchType && matchTeam && matchSup;
+            });
+
+            renderUnreturned(filtered);
+        }
+
+        function setupUnreturnedFilters() {
+            const search = document.getElementById('searchUnreturned');
+            const filterIds = [
+                'unreturnedFilterType',
+                'unreturnedFilterTeam',
+                'unreturnedFilterSup'
+            ];
+
+            if (search && search.dataset.filterBound !== '1') {
+                search.dataset.filterBound = '1';
+                search.addEventListener('input', applyUnreturnedFilters);
+            }
+
+            filterIds.forEach(id => {
+                const element = document.getElementById(id);
+                if (!element || element.dataset.filterBound === '1') return;
+                element.dataset.filterBound = '1';
+                element.addEventListener('change', applyUnreturnedFilters);
+            });
+
+            const clearButton = document.getElementById('btnClearUnreturnedFilters');
+            if (clearButton && clearButton.dataset.filterBound !== '1') {
+                clearButton.dataset.filterBound = '1';
+                clearButton.addEventListener('click', () => {
+                    if (search) search.value = '';
+                    filterIds.forEach(id => {
+                        const element = document.getElementById(id);
+                        if (element) element.value = '';
+                    });
+                    applyUnreturnedFilters();
+                });
+            }
+
+            refreshUnreturnedFilterOptions();
+            applyUnreturnedFilters();
         }
 
         function normalizeLogSearch(value) {
@@ -4531,31 +4834,8 @@
             }
         };
 
-        // TÌM KIẾM UNRETURNED
-        const searchUnreturnedInput = document.getElementById('searchUnreturned');
-
-        if (searchUnreturnedInput) {
-            searchUnreturnedInput.addEventListener('input', function() {
-                const keyword = this.value.toLowerCase().trim();
-
-                if (!keyword) {
-                    renderUnreturned(unreturnedCache);
-                    return;
-                }
-
-                const filtered = unreturnedCache.filter(item => {
-                    return [
-                        item.pdaCode,
-                        item.opsId,
-                        item.empName,
-                        item.team,
-                        item.supervisor
-                    ].some(value => String(value || '').toLowerCase().includes(keyword));
-                });
-
-                renderUnreturned(filtered);
-            });
-        }
+        // Khởi tạo bộ lọc danh sách thiết bị chưa trả.
+        setupUnreturnedFilters();
     </script>
 </body>
 </html>
