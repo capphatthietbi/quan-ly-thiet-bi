@@ -474,6 +474,9 @@
         .dashboard-three-cards [class~="text-[10px]"] { font-size: 12px !important; }
         .dashboard-three-cards input, .dashboard-three-cards select { font-size: 14px !important; }
         .inventory-stat-number { font-size: 28px; line-height: 1.1; font-weight: 900; }
+        .inventory-breakdown-table { min-width: 560px; }
+        .inventory-breakdown-table th,
+        .inventory-breakdown-table td { white-space: nowrap; }
         .master-option-row { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.65rem .75rem; border:1px solid #e2e8f0; border-radius:.7rem; background:#fff; }
         .master-option-row + .master-option-row { margin-top:.5rem; }
         .inventory-table th, .inventory-table td { padding:.7rem .75rem; font-size:13px; }
@@ -905,38 +908,38 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-2">
-                            <div class="min-w-0">
-                                <p class="text-[10px] font-extrabold uppercase text-sky-900"><i class="fa-solid fa-file-excel mr-1 text-emerald-600"></i> Nhập mã mượn / trả bằng Excel</p>
-                                <p class="text-[9px] font-semibold text-sky-700">Cột bắt buộc: Mã PDA. Có thể thêm cột Thao tác (MƯỢN/TRẢ); bỏ trống sẽ tự nhận diện theo trạng thái kho.</p>
-                            </div>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <button type="button" onclick="downloadPdaImportTemplate()" class="px-2.5 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-[10px] font-extrabold">
-                                    <i class="fa-solid fa-download mr-1"></i> Tải file mẫu
-                                </button>
-                                <label for="pdaExcelInput" class="px-3 py-2 rounded-lg bg-sky-700 hover:bg-sky-800 text-white text-[10px] font-extrabold cursor-pointer shadow-sm">
-                                    <i class="fa-solid fa-file-import mr-1"></i> Chọn Excel
-                                </label>
-                                <input type="file" id="pdaExcelInput" accept=".xlsx,.xls,.csv" class="hidden">
-                            </div>
-                        </div>
-
                         <div class="scanner-main-grid">
                             <div class="scanner-left-column">
                                 <div id="zone-borrow" class="scanner-zone border-2 border-emerald-300 border-dashed rounded-xl p-3 bg-emerald-50/80 flex flex-col justify-between gap-2">
-                                    <div>
-                                        <span class="font-extrabold text-emerald-800 block mb-1 text-[10px] uppercase"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> Mượn thiết bị</span>
-                                        <p class="text-[9px] text-emerald-700/80 font-semibold">Quét mã thiết bị cấp cho nhân viên đang chọn.</p>
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="min-w-0">
+                                            <span class="font-extrabold text-emerald-800 block mb-1 text-[10px] uppercase"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> 1. MƯỢN MÁY</span>
+                                            <p class="text-[9px] text-emerald-700/80 font-semibold">Quét mã hoặc chọn Excel: chỉ cần dán mã PDA, mỗi dòng 1 mã (không cần tiêu đề).</p>
+                                        </div>
+                                        <div class="shrink-0">
+                                            <label for="borrowPdaExcelInput" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-emerald-300 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[10px] font-extrabold cursor-pointer shadow-sm">
+                                                <i class="fa-regular fa-file-excel"></i> EXCEL
+                                            </label>
+                                            <input type="file" id="borrowPdaExcelInput" accept=".xlsx,.xls,.csv" class="hidden">
+                                        </div>
                                     </div>
-                                    <input type="text" id="borrowPdaInput" placeholder="Quét mã thiết bị mượn..." class="w-full p-2.5 border border-emerald-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-emerald-500">
+                                    <input type="text" id="borrowPdaInput" placeholder="Quét PDA cấp..." class="w-full p-2.5 border border-emerald-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-emerald-500">
                                 </div>
 
                                 <div id="zone-return" class="scanner-zone border-2 border-amber-300 border-dashed rounded-xl p-3 bg-amber-50/80 flex flex-col justify-between gap-2">
-                                    <div>
-                                        <span class="font-extrabold text-amber-800 block mb-1 text-[10px] uppercase"><i class="fa-solid fa-arrow-down-to-bracket mr-1"></i> Trả thiết bị</span>
-                                        <p class="text-[9px] text-amber-700/80 font-semibold">Quét mã thiết bị đang ở trạng thái chưa trả.</p>
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="min-w-0">
+                                            <span class="font-extrabold text-amber-800 block mb-1 text-[10px] uppercase"><i class="fa-solid fa-arrow-down-to-bracket mr-1"></i> 2. TRẢ MÁY</span>
+                                            <p class="text-[9px] text-amber-700/80 font-semibold">Quét mã hoặc chọn Excel: chỉ cần dán mã PDA, mỗi dòng 1 mã (không cần tiêu đề).</p>
+                                        </div>
+                                        <div class="shrink-0">
+                                            <label for="returnPdaExcelInput" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-amber-300 bg-amber-100 hover:bg-amber-200 text-amber-800 text-[10px] font-extrabold cursor-pointer shadow-sm">
+                                                <i class="fa-regular fa-file-excel"></i> EXCEL
+                                            </label>
+                                            <input type="file" id="returnPdaExcelInput" accept=".xlsx,.xls,.csv" class="hidden">
+                                        </div>
                                     </div>
-                                    <input type="text" id="returnPdaInput" placeholder="Quét mã thiết bị trả..." class="w-full p-2.5 border border-amber-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-amber-500">
+                                    <input type="text" id="returnPdaInput" placeholder="Quét PDA trả..." class="w-full p-2.5 border border-amber-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-amber-500">
                                 </div>
                             </div>
 
@@ -1208,18 +1211,44 @@
 
             <!-- INVENTORY: DANH MỤC MÃ MÁY TRONG KHO -->
             <div id="tab-inventory" class="tab-content hidden space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-                        <p class="text-sm text-slate-500 font-extrabold uppercase">Tổng mã máy đã ghi nhận</p>
-                        <div id="inventoryTotalCount" class="inventory-stat-number text-slate-900 mt-2">0</div>
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
+                        <div class="p-4">
+                            <p class="text-sm text-slate-500 font-extrabold uppercase">Tổng số máy</p>
+                            <div id="inventoryTotalCount" class="inventory-stat-number text-slate-900 mt-2">0</div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-sm text-emerald-700 font-extrabold uppercase">Tổng đang có trong kho</p>
+                            <div id="inventoryAvailableCount" class="inventory-stat-number text-emerald-700 mt-2">0</div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-sm text-amber-700 font-extrabold uppercase">Tổng đang được mượn</p>
+                            <div id="inventoryBorrowedCount" class="inventory-stat-number text-amber-700 mt-2">0</div>
+                        </div>
                     </div>
-                    <div class="bg-white rounded-xl border border-emerald-200 shadow-sm p-4">
-                        <p class="text-sm text-emerald-700 font-extrabold uppercase">Đang có trong kho</p>
-                        <div id="inventoryAvailableCount" class="inventory-stat-number text-emerald-700 mt-2">0</div>
-                    </div>
-                    <div class="bg-white rounded-xl border border-amber-200 shadow-sm p-4">
-                        <p class="text-sm text-amber-700 font-extrabold uppercase">Đang được mượn</p>
-                        <div id="inventoryBorrowedCount" class="inventory-stat-number text-amber-700 mt-2">0</div>
+                    <div class="border-t border-slate-200">
+                        <div class="px-4 py-3 flex flex-wrap items-center justify-between gap-2 bg-slate-50">
+                            <div>
+                                <h2 class="font-extrabold text-slate-900 uppercase">Chi tiết số lượng theo loại thiết bị</h2>
+                                <p class="text-xs text-slate-500 mt-1">Số liệu tách riêng máy mới, máy cũ và súng Scan.</p>
+                            </div>
+                            <span class="text-xs font-bold text-slate-500">Cập nhật realtime</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse inventory-breakdown-table">
+                                <thead class="bg-slate-800 text-white text-sm">
+                                    <tr>
+                                        <th class="px-4 py-3">Loại thiết bị</th>
+                                        <th class="px-4 py-3 text-center">Tổng số</th>
+                                        <th class="px-4 py-3 text-center">Đang có trong kho</th>
+                                        <th class="px-4 py-3 text-center">Đang được mượn</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventoryBreakdownBody" class="divide-y divide-slate-100">
+                                    <tr><td colspan="4" class="px-4 py-4 text-center text-slate-400">Đang tổng hợp dữ liệu...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -1227,7 +1256,7 @@
                     <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
                         <div>
                             <h2 class="text-base font-extrabold text-slate-900 uppercase">Quản lý danh mục mã máy</h2>
-                            <p class="text-sm text-slate-500 mt-1">Thêm mã máy lẻ hoặc nhập danh sách Excel/CSV. Trạng thái mượn được đối chiếu realtime với giao dịch đang mở.</p>
+                            <p class="text-sm text-slate-500 mt-1">Thêm mã máy lẻ hoặc nhập Excel/CSV: chỉ cần dán mã PDA, mỗi dòng 1 mã, không cần tiêu đề. Trạng thái mượn được đối chiếu realtime với giao dịch đang mở.</p>
                         </div>
                         <label for="deviceExcelInput" class="px-3 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm cursor-pointer">
                             <i class="fa-solid fa-file-excel mr-1"></i> Nhập Excel / CSV
@@ -1577,7 +1606,8 @@
             const btnDeleteSelectedEmp = document.getElementById('btnDeleteSelectedEmp');
             const btnDeleteAllEmp = document.getElementById('btnDeleteAllEmp');
             const excelFileInput = document.getElementById('excelFileInput');
-            const pdaExcelInput = document.getElementById('pdaExcelInput');
+            const borrowPdaExcelInput = document.getElementById('borrowPdaExcelInput');
+            const returnPdaExcelInput = document.getElementById('returnPdaExcelInput');
             const btnSaveDevice = document.getElementById('btnSaveDevice');
             const deviceCodeInput = document.getElementById('deviceCodeInput');
             const deviceTypeInput = document.getElementById('deviceTypeInput');
@@ -1588,7 +1618,8 @@
             if (btnDeleteSelectedEmp) btnDeleteSelectedEmp.disabled = !enabled;
             if (btnDeleteAllEmp) btnDeleteAllEmp.disabled = !enabled;
             if (excelFileInput) excelFileInput.disabled = !enabled;
-            if (pdaExcelInput) pdaExcelInput.disabled = !enabled;
+            if (borrowPdaExcelInput) borrowPdaExcelInput.disabled = !enabled;
+            if (returnPdaExcelInput) returnPdaExcelInput.disabled = !enabled;
             if (btnSaveDevice) btnSaveDevice.disabled = !enabled;
             if (deviceCodeInput) deviceCodeInput.disabled = !enabled;
             if (deviceTypeInput) deviceTypeInput.disabled = !enabled;
@@ -3303,7 +3334,7 @@
                     byCode.set(code, {
                         ...item,
                         pdaCode: code,
-                        deviceType: item.deviceType || item.pdaType || detectDeviceType(code),
+                        deviceType: normalizeInventoryDeviceType(item.deviceType || item.pdaType, code),
                         source: 'Danh mục kho'
                     });
                 }
@@ -3378,6 +3409,7 @@
 
         function renderInventoryTable() {
             inventoryRowsCache = buildInventoryRows();
+
             const total = inventoryRowsCache.length;
             const borrowed = inventoryRowsCache.filter(row => row.status === 'Đang mượn').length;
             const available = total - borrowed;
@@ -3387,6 +3419,47 @@
             if (totalNode) totalNode.textContent = total;
             if (availableNode) availableNode.textContent = available;
             if (borrowedNode) borrowedNode.textContent = borrowed;
+
+            // Thống kê theo từng loại thiết bị; chỉ dựa trên danh mục devices đã khử trùng mã.
+            const typeOrder = ['Máy mới', 'Máy cũ', 'Súng Scan'];
+            const typeCounts = Object.fromEntries(typeOrder.map(type => [type, {
+                total: 0,
+                available: 0,
+                borrowed: 0
+            }]));
+
+            inventoryRowsCache.forEach(row => {
+                const type = normalizeInventoryDeviceType(row.deviceType, row.pdaCode);
+                if (!typeCounts[type]) return;
+                typeCounts[type].total++;
+                if (row.status === 'Đang mượn') typeCounts[type].borrowed++;
+                else typeCounts[type].available++;
+            });
+
+            const breakdownBody = document.getElementById('inventoryBreakdownBody');
+            if (breakdownBody) {
+                const detailRows = typeOrder.map(type => {
+                    const count = typeCounts[type];
+                    return `
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3">${renderDeviceBadge(type)}</td>
+                            <td class="px-4 py-3 text-center font-extrabold text-slate-900">${count.total}</td>
+                            <td class="px-4 py-3 text-center font-extrabold text-emerald-700">${count.available}</td>
+                            <td class="px-4 py-3 text-center font-extrabold text-amber-700">${count.borrowed}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                breakdownBody.innerHTML = detailRows + `
+                    <tr class="bg-slate-50 border-t-2 border-slate-200">
+                        <td class="px-4 py-3 font-extrabold text-slate-900">TỔNG CỘNG</td>
+                        <td class="px-4 py-3 text-center font-black text-slate-900">${total}</td>
+                        <td class="px-4 py-3 text-center font-black text-emerald-700">${available}</td>
+                        <td class="px-4 py-3 text-center font-black text-amber-700">${borrowed}</td>
+                    </tr>
+                `;
+            }
+
             applyInventoryFilters();
         }
 
@@ -3519,22 +3592,43 @@
                     try {
                         const workbook = XLSX.read(new Uint8Array(loadEvent.target.result), { type: 'array' });
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-                        const normalized = rows.map(row => {
-                            const keys = Object.keys(row);
-                            const codeKey = keys.find(key => ['mapda', 'mamay', 'pda', 'serial', 'devicecode', 'pdacode'].includes(
-                                String(key).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]/g, '')
-                            ));
-                            const typeKey = keys.find(key => ['loai', 'loaithietbi', 'devicetype', 'type'].includes(
-                                String(key).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]/g, '')
-                            ));
+                        // Chấp nhận cả file có tiêu đề và file chỉ dán mã PDA từ dòng đầu tiên.
+                        const matrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
+                        const normalizeHeader = value => String(value ?? '').trim().toLowerCase()
+                            .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd')
+                            .replace(/[^a-z0-9]/g, '');
+                        const codeHeaders = ['mapda', 'mamay', 'pda', 'serial', 'devicecode', 'pdacode'];
+                        const typeHeaders = ['loai', 'loaithietbi', 'devicetype', 'type'];
+                        let headerRowIndex = -1;
+                        let codeColumnIndex = -1;
+                        let typeColumnIndex = -1;
+                        for (let i = 0; i < Math.min(matrix.length, 10); i++) {
+                            const row = Array.isArray(matrix[i]) ? matrix[i] : [];
+                            const normalizedHeaders = row.map(normalizeHeader);
+                            const foundCode = normalizedHeaders.findIndex(value => codeHeaders.includes(value));
+                            if (foundCode >= 0) {
+                                headerRowIndex = i;
+                                codeColumnIndex = foundCode;
+                                typeColumnIndex = normalizedHeaders.findIndex(value => typeHeaders.includes(value));
+                                break;
+                            }
+                        }
+                        const dataRows = headerRowIndex >= 0 ? matrix.slice(headerRowIndex + 1) : matrix;
+                        const normalized = dataRows.map(row => {
+                            const values = Array.isArray(row) ? row : [];
+                            const rawCode = headerRowIndex >= 0
+                                ? values[codeColumnIndex]
+                                : values.find(value => String(value ?? '').trim() !== '');
+                            const rawType = headerRowIndex >= 0 && typeColumnIndex >= 0
+                                ? values[typeColumnIndex]
+                                : '';
                             return {
-                                pdaCode: codeKey ? String(row[codeKey] || '').trim() : '',
-                                deviceType: typeKey ? String(row[typeKey] || '').trim() : ''
+                                pdaCode: String(rawCode ?? '').trim(),
+                                deviceType: String(rawType ?? '').trim()
                             };
                         }).filter(item => item.pdaCode);
                         const unique = Array.from(new Map(normalized.map(item => [item.pdaCode.toUpperCase(), item])).values());
-                        if (!unique.length) throw new Error('Không tìm thấy cột Mã PDA / Mã máy / Serial trong file.');
+                        if (!unique.length) throw new Error('Không tìm thấy mã PDA. Hãy dán mỗi mã vào một dòng trong cột A; không cần tiêu đề.');
                         const result = await saveDeviceRecordsBulk(unique);
                         showToast(`Đã nhập ${unique.length} mã máy (thêm ${result.added}, cập nhật ${result.updated}).`);
                     } catch (error) {
@@ -4039,9 +4133,10 @@
         }
 
         // ============================================================
-        // NHẬP DANH SÁCH MÃ PDA BẰNG EXCEL / CSV
-        // Cột bắt buộc: Mã PDA. Cột Thao tác không bắt buộc (MƯỢN/TRẢ).
-        // Nếu không có Thao tác, tự nhận diện theo danh sách unreturned realtime.
+        // NHẬP EXCEL TÁCH RIÊNG CHO MƯỢN VÀ TRẢ
+        // File ở ô MƯỢN chỉ đưa mã vào danh sách chờ MƯỢN.
+        // File ở ô TRẢ chỉ đưa mã vào danh sách chờ TRẢ.
+        // Không cần cột Thao tác trong file Excel.
         // ============================================================
         function normalizeExcelText(value) {
             return String(value ?? '')
@@ -4052,14 +4147,6 @@
                 .replace(/đ/g, 'd')
                 .replace(/[^a-z0-9]+/g, ' ')
                 .trim();
-        }
-
-        function classifyImportedAction(value) {
-            const action = normalizeExcelText(value).toUpperCase();
-            if (!action) return '';
-            if (action.includes('TRA') || action.includes('RETURN')) return 'return';
-            if (action.includes('MUON') || action.includes('BORROW') || action.includes('CAP PHAT')) return 'borrow';
-            return '';
         }
 
         function findUnreturnedRecordByCode(code) {
@@ -4074,14 +4161,13 @@
             if (!normalizedCode) return { added: false, reason: 'empty' };
 
             const key = normalizedCode.toUpperCase();
-            const existsInBorrow = pendingBorrowPdaList.some(x => String(x).toUpperCase() === key);
-            const existsInReturn = pendingReturnPdaList.some(x => String(x.code).toUpperCase() === key);
+            const existsInBorrow = pendingBorrowPdaList.some(x => String(x).trim().toUpperCase() === key);
+            const existsInReturn = pendingReturnPdaList.some(x => String(x.code).trim().toUpperCase() === key);
             if (existsInBorrow || existsInReturn) return { added: false, reason: 'duplicate' };
 
             const activeRecord = findUnreturnedRecordByCode(normalizedCode);
-            const action = requestedAction || (activeRecord ? 'return' : 'borrow');
 
-            if (action === 'return') {
+            if (requestedAction === 'return') {
                 if (!activeRecord) return { added: false, reason: 'not-borrowed' };
                 pendingReturnPdaList.push({
                     code: activeRecord.pdaCode,
@@ -4090,144 +4176,150 @@
                 return { added: true, action: 'return' };
             }
 
-            if (activeRecord) return { added: false, reason: 'already-borrowed' };
-            pendingBorrowPdaList.push(normalizedCode);
-            return { added: true, action: 'borrow' };
+            if (requestedAction === 'borrow') {
+                if (activeRecord) return { added: false, reason: 'already-borrowed' };
+                pendingBorrowPdaList.push(normalizedCode);
+                return { added: true, action: 'borrow' };
+            }
+
+            return { added: false, reason: 'invalid-action' };
         }
 
-        window.downloadPdaImportTemplate = function() {
-            if (typeof XLSX === 'undefined') {
-                showToast('Thư viện Excel chưa tải xong. Vui lòng thử lại.', 'error');
+        function extractPdaCodesFromWorksheet(worksheet) {
+            // Hỗ trợ file chỉ có mã PDA trong một cột, KHÔNG cần dòng tiêu đề.
+            // Nếu có tiêu đề quen thuộc thì tự nhận diện cột mã tương ứng.
+            const rows = XLSX.utils.sheet_to_json(worksheet, {
+                header: 1,
+                defval: '',
+                raw: false
+            });
+            if (!rows.length) throw new Error('Sheet không có dữ liệu.');
+
+            // Chỉ so khớp CHÍNH XÁC tên tiêu đề. Không dùng includes('pda'),
+            // vì mã thật như PDA00001 cũng chứa chữ PDA và có thể bị hiểu nhầm là tiêu đề.
+            const codeHeaders = [
+                'ma pda', 'pda', 'ma may', 'ma thiet bi', 'ma thiet bi pda',
+                'device code', 'device', 'barcode', 'serial', 'serial number', 'code'
+            ];
+            const isCodeHeader = value => codeHeaders.includes(normalizeExcelText(value));
+
+            let headerIndex = -1;
+            let codeColumn = -1;
+            for (let i = 0; i < Math.min(rows.length, 10); i++) {
+                const row = Array.isArray(rows[i]) ? rows[i] : [];
+                const foundCode = row.findIndex(isCodeHeader);
+                if (foundCode >= 0) {
+                    headerIndex = i;
+                    codeColumn = foundCode;
+                    break;
+                }
+            }
+
+            const dataRows = headerIndex >= 0 ? rows.slice(headerIndex + 1) : rows;
+            const codes = [];
+            dataRows.forEach(row => {
+                const values = Array.isArray(row) ? row : [];
+                // Không có tiêu đề: lấy ô đầu tiên có dữ liệu trên mỗi dòng.
+                // File khuyến nghị chỉ dùng một cột, mỗi dòng một mã máy.
+                const rawCode = headerIndex >= 0
+                    ? values[codeColumn]
+                    : values.find(value => String(value ?? '').trim() !== '');
+                const code = String(rawCode ?? '').trim();
+                if (code) codes.push(code);
+            });
+            return codes;
+        }
+
+        function importPdaExcelForAction(file, action) {
+            if (!file) return;
+
+            const inputId = action === 'borrow' ? 'borrowPdaExcelInput' : 'returnPdaExcelInput';
+            const fileInput = document.getElementById(inputId);
+            const actionLabel = action === 'borrow' ? 'MƯỢN' : 'TRẢ';
+
+            if (currentUserRole === 'guest') {
+                showToast('Tài khoản của bạn chỉ có quyền xem, không thể nhập mã mượn/trả.', 'warning');
+                if (fileInput) fileInput.value = '';
                 return;
             }
 
-            const worksheet = XLSX.utils.aoa_to_sheet([
-                ['Mã PDA', 'Thao tác'],
-                ['', '']
-            ]);
-            worksheet['!cols'] = [{ wch: 28 }, { wch: 18 }];
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Nhap ma PDA');
-            XLSX.writeFile(workbook, 'Mau_nhap_ma_muon_tra_PDA.xlsx');
-        };
+            const reader = new FileReader();
+            reader.onload = function(loadEvent) {
+                try {
+                    const workbook = XLSX.read(new Uint8Array(loadEvent.target.result), { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    if (!firstSheetName) throw new Error('File không có sheet dữ liệu.');
 
-        const pdaExcelInput = document.getElementById('pdaExcelInput');
-        if (pdaExcelInput) {
-            pdaExcelInput.addEventListener('change', event => {
-                const file = event.target.files && event.target.files[0];
-                if (!file) return;
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const codes = extractPdaCodesFromWorksheet(worksheet);
+                    if (!codes.length) throw new Error('Không tìm thấy mã PDA trong file.');
 
-                if (currentUserRole === 'guest') {
-                    showToast('Tài khoản của bạn chỉ có quyền xem, không thể nhập mã mượn/trả.', 'warning');
-                    pdaExcelInput.value = '';
-                    return;
-                }
+                    let addedCount = 0;
+                    let duplicateCount = 0;
+                    let invalidCount = 0;
+                    let notBorrowedCount = 0;
+                    let alreadyBorrowedCount = 0;
 
-                const reader = new FileReader();
-                reader.onload = function(loadEvent) {
-                    try {
-                        const workbook = XLSX.read(new Uint8Array(loadEvent.target.result), { type: 'array' });
-                        const firstSheetName = workbook.SheetNames[0];
-                        if (!firstSheetName) throw new Error('File không có sheet dữ liệu.');
-
-                        const worksheet = workbook.Sheets[firstSheetName];
-                        const rows = XLSX.utils.sheet_to_json(worksheet, {
-                            header: 1,
-                            defval: '',
-                            raw: false
-                        });
-                        if (!rows.length) throw new Error('Sheet không có dữ liệu.');
-
-                        const isCodeHeader = value => {
-                            const h = normalizeExcelText(value);
-                            return ['ma pda', 'pda', 'ma thiet bi', 'ma thiet bi pda', 'device code', 'barcode', 'serial', 'code'].some(x => h === x || h.includes(x));
-                        };
-                        const isActionHeader = value => {
-                            const h = normalizeExcelText(value);
-                            return ['thao tac', 'loai giao dich', 'giao dich', 'hanh dong', 'action', 'transaction', 'type', 'trang thai'].some(x => h === x || h.includes(x));
-                        };
-
-                        let headerIndex = -1;
-                        let codeColumn = -1;
-                        let actionColumn = -1;
-                        for (let i = 0; i < Math.min(rows.length, 10); i++) {
-                            const foundCode = rows[i].findIndex(isCodeHeader);
-                            if (foundCode >= 0) {
-                                headerIndex = i;
-                                codeColumn = foundCode;
-                                actionColumn = rows[i].findIndex(isActionHeader);
-                                break;
-                            }
+                    codes.forEach(code => {
+                        if (!/^[A-Za-z0-9._/-]{5,}$/.test(code)) {
+                            invalidCount++;
+                            return;
                         }
 
-                        const dataRows = headerIndex >= 0 ? rows.slice(headerIndex + 1) : rows;
-                        let addedBorrow = 0;
-                        let addedReturn = 0;
-                        let duplicateCount = 0;
-                        let invalidCount = 0;
-                        let notBorrowedCount = 0;
-                        let alreadyBorrowedCount = 0;
+                        const result = addImportedPdaToPending(code, action);
+                        if (result.added) addedCount++;
+                        else if (result.reason === 'duplicate') duplicateCount++;
+                        else if (result.reason === 'not-borrowed') notBorrowedCount++;
+                        else if (result.reason === 'already-borrowed') alreadyBorrowedCount++;
+                        else invalidCount++;
+                    });
 
-                        dataRows.forEach(row => {
-                            let code = '';
-                            let rawAction = '';
-
-                            if (codeColumn >= 0) {
-                                code = String(row[codeColumn] ?? '').trim();
-                                if (actionColumn >= 0) rawAction = row[actionColumn];
-                            } else {
-                                code = String((row || []).find(value => String(value ?? '').trim() !== '') ?? '').trim();
-                            }
-
-                            // Hỗ trợ file đơn giản 2 cột không có hàng tiêu đề: Mã PDA | MƯỢN/TRẢ.
-                            if (!rawAction && headerIndex < 0 && row.length > 1) rawAction = row[1];
-                            if (!code) return;
-                            if (!/^[A-Za-z0-9._/-]{5,}$/.test(code)) {
-                                invalidCount++;
-                                return;
-                            }
-
-                            const result = addImportedPdaToPending(code, classifyImportedAction(rawAction));
-                            if (result.added && result.action === 'borrow') addedBorrow++;
-                            else if (result.added && result.action === 'return') addedReturn++;
-                            else if (result.reason === 'duplicate') duplicateCount++;
-                            else if (result.reason === 'not-borrowed') notBorrowedCount++;
-                            else if (result.reason === 'already-borrowed') alreadyBorrowedCount++;
-                            else invalidCount++;
-                        });
-
-                        renderPendingList();
-                        const totalAdded = addedBorrow + addedReturn;
-                        if (totalAdded) {
-                            showToast(`Đã nhập ${totalAdded} mã: ${addedBorrow} mã MƯỢN, ${addedReturn} mã TRẢ.`);
-                            setConfirmQrStatus(
-                                addedBorrow > 0 && !selectedEmployee
-                                    ? 'Đã nhập mã. Quét OPS ID nhân viên trước khi xác nhận mượn.'
-                                    : 'Đã thêm mã từ Excel vào danh sách chờ.',
-                                'waiting'
-                            );
-                        } else {
-                            showToast('Không có mã hợp lệ nào được thêm vào danh sách chờ.', 'warning');
-                        }
-
-                        const warnings = [];
-                        if (duplicateCount) warnings.push(`${duplicateCount} trùng danh sách chờ`);
-                        if (notBorrowedCount) warnings.push(`${notBorrowedCount} mã yêu cầu TRẢ nhưng hiện không mượn`);
-                        if (alreadyBorrowedCount) warnings.push(`${alreadyBorrowedCount} mã yêu cầu MƯỢN nhưng đang chưa trả`);
-                        if (invalidCount) warnings.push(`${invalidCount} dòng không hợp lệ`);
-                        if (warnings.length) showToast('Bỏ qua: ' + warnings.join('; '), 'warning');
-                    } catch (error) {
-                        console.error('Lỗi nhập Excel mã PDA:', error);
-                        showToast('Không đọc được file Excel: ' + (error.message || String(error)), 'error');
-                    } finally {
-                        pdaExcelInput.value = '';
+                    renderPendingList();
+                    if (addedCount) {
+                        showToast(`Đã nhập ${addedCount} mã vào danh sách chờ ${actionLabel}.`);
+                        setConfirmQrStatus(
+                            action === 'borrow' && !selectedEmployee
+                                ? 'Đã nhập mã mượn. Quét OPS ID nhân viên trước khi xác nhận.'
+                                : `Đã thêm mã ${actionLabel} từ Excel vào danh sách chờ.`,
+                            'waiting'
+                        );
+                    } else {
+                        showToast(`Không có mã hợp lệ nào được thêm vào danh sách ${actionLabel}.`, 'warning');
                     }
-                };
-                reader.onerror = function() {
-                    showToast('Không thể đọc file đã chọn.', 'error');
-                    pdaExcelInput.value = '';
-                };
-                reader.readAsArrayBuffer(file);
+
+                    const warnings = [];
+                    if (duplicateCount) warnings.push(`${duplicateCount} mã trùng danh sách chờ`);
+                    if (action === 'return' && notBorrowedCount) warnings.push(`${notBorrowedCount} mã hiện không có trong danh sách đang mượn`);
+                    if (action === 'borrow' && alreadyBorrowedCount) warnings.push(`${alreadyBorrowedCount} mã hiện đang được mượn`);
+                    if (invalidCount) warnings.push(`${invalidCount} dòng không hợp lệ`);
+                    if (warnings.length) showToast('Bỏ qua: ' + warnings.join('; '), 'warning');
+                } catch (error) {
+                    console.error(`Lỗi nhập Excel mã PDA (${actionLabel}):`, error);
+                    showToast('Không đọc được file Excel: ' + (error.message || String(error)), 'error');
+                } finally {
+                    if (fileInput) fileInput.value = '';
+                }
+            };
+            reader.onerror = function() {
+                showToast('Không thể đọc file đã chọn.', 'error');
+                if (fileInput) fileInput.value = '';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        const borrowPdaExcelInput = document.getElementById('borrowPdaExcelInput');
+        if (borrowPdaExcelInput) {
+            borrowPdaExcelInput.addEventListener('change', event => {
+                const file = event.target.files && event.target.files[0];
+                importPdaExcelForAction(file, 'borrow');
+            });
+        }
+
+        const returnPdaExcelInput = document.getElementById('returnPdaExcelInput');
+        if (returnPdaExcelInput) {
+            returnPdaExcelInput.addEventListener('change', event => {
+                const file = event.target.files && event.target.files[0];
+                importPdaExcelForAction(file, 'return');
             });
         }
 
