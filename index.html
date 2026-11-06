@@ -789,6 +789,23 @@
                                 <div id="mt90ProgressBar" class="status-progress-bar bg-blue-500" style="width:17%"></div>
                             </div>
                         </div>
+                        <div class="status-device-block">
+                            <div class="flex items-start justify-between gap-2">
+                                <span class="font-extrabold text-xs text-slate-700">
+                                    Súng Scan
+                                    <span class="block text-[9px] text-slate-400">Thiết bị quét mã</span>
+                                </span>
+                                <span class="text-right text-purple-700 text-[10px] font-extrabold whitespace-nowrap">
+                                    Còn <span id="scanAvailableText">0</span>/
+                                    <button onclick="editTotalDevices('scan')" title="Chỉnh tổng số Súng Scan" class="hover:underline bg-purple-50 px-1 rounded border border-purple-200">
+                                        <span id="scanTotalText">0</span> <i class="fa-solid fa-pen text-[8px]"></i>
+                                    </button>
+                                </span>
+                            </div>
+                            <div class="status-progress-track mt-2">
+                                <div id="scanProgressBar" class="status-progress-bar bg-purple-500" style="width:0%"></div>
+                            </div>
+                        </div>
 
                         <!-- QR xác nhận: quét trực tiếp hoặc bấm nút đều ghi ngay -->
                         <div class="confirm-qr-card mt-auto">
@@ -851,6 +868,22 @@
                             <div>
                                 <h2 class="font-extrabold uppercase text-xs text-gray-800 tracking-wide">Quét thiết bị</h2>
                                 <p class="text-[9px] text-slate-400 font-semibold mt-0.5">Mượn / Trả → Danh sách chờ xác nhận</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-2">
+                            <div class="min-w-0">
+                                <p class="text-[10px] font-extrabold uppercase text-sky-900"><i class="fa-solid fa-file-excel mr-1 text-emerald-600"></i> Nhập mã mượn / trả bằng Excel</p>
+                                <p class="text-[9px] font-semibold text-sky-700">Cột bắt buộc: Mã PDA. Có thể thêm cột Thao tác (MƯỢN/TRẢ); bỏ trống sẽ tự nhận diện theo trạng thái kho.</p>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button type="button" onclick="downloadPdaImportTemplate()" class="px-2.5 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-[10px] font-extrabold">
+                                    <i class="fa-solid fa-download mr-1"></i> Tải file mẫu
+                                </button>
+                                <label for="pdaExcelInput" class="px-3 py-2 rounded-lg bg-sky-700 hover:bg-sky-800 text-white text-[10px] font-extrabold cursor-pointer shadow-sm">
+                                    <i class="fa-solid fa-file-import mr-1"></i> Chọn Excel
+                                </label>
+                                <input type="file" id="pdaExcelInput" accept=".xlsx,.xls,.csv" class="hidden">
                             </div>
                         </div>
 
@@ -927,9 +960,14 @@
 
             <!-- UNRETURNED LIST -->
             <div id="tab-unreturned" class="tab-content hidden bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-                <div class="flex justify-between items-center mb-3">
+                <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
                     <h2 class="text-base font-bold text-gray-800 uppercase">Unreturned List (Danh Sách Chưa Trả)</h2>
-                    <input type="text" id="searchUnreturned" placeholder="Tìm theo mã máy, tên NV, Ops ID..." class="p-2 border rounded-lg w-72 text-xs">
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="copyAllUnreturnedPdaCodes()" class="px-3 py-2 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs font-extrabold">
+                            <i class="fa-regular fa-copy mr-1"></i> Copy danh sách PDA chưa trả
+                        </button>
+                        <input type="text" id="searchUnreturned" placeholder="Tìm theo mã máy, tên NV, Ops ID..." class="p-2 border rounded-lg w-72 text-xs">
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -967,7 +1005,7 @@
                             Tổng PDA Chưa Trả: <span id="pivotTotalPdas" class="text-purple-900 text-sm font-bold">0</span>
                         </div>
                     </div>
-                    <div id="pivotContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                    <div id="pivotContainer" class="overflow-x-auto rounded-xl border border-slate-200 bg-white"></div>
                 </div>
             </div>
 
@@ -1231,6 +1269,7 @@
         let employeeCache = [];
         let unreturnedCache = [];
         let currentModalPdaCodes = [];
+        let currentUnreturnedView = [];
         let customConfirmResolver = null;
 
         // Hai cách ghi độc lập: quét QR hoặc bấm nút Xác nhận. Cả hai gọi chung giao dịch.
@@ -1247,6 +1286,8 @@
         // Tổng số máy; hiện đang lưu cục bộ trên từng trình duyệt.
         let totalMt93 = parseInt(localStorage.getItem('totalMt93'), 10) || 54;
         let totalMt90 = parseInt(localStorage.getItem('totalMt90'), 10) || 23;
+        let totalScan = Number.parseInt(localStorage.getItem('totalScan'), 10);
+        if (!Number.isFinite(totalScan) || totalScan < 0) totalScan = 0;
 
         const { signInWithPopup, signOut, onAuthStateChanged } = window.authMethods;
         const auth = window.auth;
@@ -1362,12 +1403,14 @@
             const btnDeleteSelectedEmp = document.getElementById('btnDeleteSelectedEmp');
             const btnDeleteAllEmp = document.getElementById('btnDeleteAllEmp');
             const excelFileInput = document.getElementById('excelFileInput');
+            const pdaExcelInput = document.getElementById('pdaExcelInput');
 
             if (btnConfirm) btnConfirm.disabled = !enabled;
             if (btnSaveEmp) btnSaveEmp.disabled = !enabled;
             if (btnDeleteSelectedEmp) btnDeleteSelectedEmp.disabled = !enabled;
             if (btnDeleteAllEmp) btnDeleteAllEmp.disabled = !enabled;
             if (excelFileInput) excelFileInput.disabled = !enabled;
+            if (pdaExcelInput) pdaExcelInput.disabled = !enabled;
         }
 
         // Chỉ truy vấn đúng document user_access/{email}.
@@ -1574,34 +1617,49 @@
                     updateInventoryStats();
                     showToast(`Đã cập nhật tổng máy MT90 thành ${totalMt90}`);
                 }
+            } else if (type === 'scan') {
+                const input = prompt('Nhập TỔNG SỐ LƯỢNG Súng Scan:', totalScan);
+                if (input !== null && input.trim() !== '' && !isNaN(input) && parseInt(input, 10) >= 0) {
+                    totalScan = parseInt(input, 10);
+                    localStorage.setItem('totalScan', totalScan);
+                    updateInventoryStats();
+                    showToast(`Đã cập nhật tổng Súng Scan thành ${totalScan}`);
+                }
             }
         };
 
         function updateInventoryStats() {
             document.getElementById('mt93TotalText').innerText = totalMt93;
             document.getElementById('mt90TotalText').innerText = totalMt90;
+            document.getElementById('scanTotalText').innerText = totalScan;
 
             let borrowedMt93 = 0;
             let borrowedMt90 = 0;
+            let borrowedScan = 0;
 
             unreturnedCache.forEach(item => {
                 const devType = detectDeviceType(item.pdaCode);
 
                 if (devType === 'Máy mới') borrowedMt93++;
                 else if (devType === 'Máy cũ') borrowedMt90++;
+                else if (devType === 'Súng Scan') borrowedScan++;
             });
 
             const availMt93 = Math.max(0, totalMt93 - borrowedMt93);
             const availMt90 = Math.max(0, totalMt90 - borrowedMt90);
+            const availScan = Math.max(0, totalScan - borrowedScan);
 
             document.getElementById('mt93AvailableText').innerText = availMt93;
             document.getElementById('mt90AvailableText').innerText = availMt90;
+            document.getElementById('scanAvailableText').innerText = availScan;
 
             const pctMt93 = totalMt93 > 0 ? (availMt93 / totalMt93) * 100 : 0;
             const pctMt90 = totalMt90 > 0 ? (availMt90 / totalMt90) * 100 : 0;
+            const pctScan = totalScan > 0 ? (availScan / totalScan) * 100 : 0;
 
             document.getElementById('mt93ProgressBar').style.width = `${pctMt93}%`;
             document.getElementById('mt90ProgressBar').style.width = `${pctMt90}%`;
+            document.getElementById('scanProgressBar').style.width = `${pctScan}%`;
         }
 
         function setupVietnameseDetector(inputElement) {
@@ -2510,89 +2568,141 @@
 
 
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[char]);
+        }
+
         function renderPivotTable(unreturnedList) {
             const container = document.getElementById('pivotContainer');
-            document.getElementById('pivotTotalPdas').innerText = unreturnedList.length;
+            const totalElement = document.getElementById('pivotTotalPdas');
+            totalElement.innerText = unreturnedList.length;
 
-            if (unreturnedList.length === 0) {
+            if (!unreturnedList.length) {
                 container.innerHTML = `
-                    <div class="col-span-full text-center py-10 text-gray-400">
-                        <i class="fa-solid fa-box-open text-3xl mb-1"></i>
-                        <p class="font-bold text-xs">Hiện không có máy PDA/Súng Scan nào chưa trả!</p>
-                    </div>
-                `;
+                    <div class="text-center py-10 text-gray-400">
+                        <i class="fa-solid fa-box-open text-3xl mb-2"></i>
+                        <p class="font-bold text-xs">Hiện không có PDA / Súng Scan nào chưa trả.</p>
+                    </div>`;
                 return;
             }
 
-            const pivotData = {};
-
+            const employeeMap = new Map();
             unreturnedList.forEach(item => {
-                const sup = item.supervisor || 'Chưa phân công Sup';
-                const opsId = item.opsId || '';
+                const supervisor = String(item.supervisor || 'Chưa phân công Sup').trim();
+                const team = String(item.team || 'Chưa phân công Team').trim();
+                const opsId = String(item.opsId || 'Chưa có OPS ID').trim();
+                const key = [supervisor, team, opsId].join('\u0000');
 
-                if (!pivotData[sup]) pivotData[sup] = {};
-
-                if (!pivotData[sup][opsId]) {
-                    pivotData[sup][opsId] = {
-                        empName: item.empName,
+                if (!employeeMap.has(key)) {
+                    employeeMap.set(key, {
+                        supervisor,
+                        team,
                         opsId,
-                        team: item.team,
-                        items: []
-                    };
+                        empName: item.empName || 'Chưa có họ tên',
+                        counts: { new: 0, old: 0, scan: 0 },
+                        total: 0
+                    });
                 }
 
-                pivotData[sup][opsId].items.push(item);
+                const row = employeeMap.get(key);
+                const deviceType = detectDeviceType(item.pdaCode);
+                if (deviceType === 'Máy mới') row.counts.new++;
+                else if (deviceType === 'Máy cũ') row.counts.old++;
+                else if (deviceType === 'Súng Scan') row.counts.scan++;
+                row.total++;
             });
 
-            let html = '';
+            const rows = Array.from(employeeMap.values()).sort((a, b) =>
+                a.supervisor.localeCompare(b.supervisor, 'vi') ||
+                a.team.localeCompare(b.team, 'vi') ||
+                a.empName.localeCompare(b.empName, 'vi') ||
+                a.opsId.localeCompare(b.opsId, 'vi')
+            );
 
-            for (const [supName, employees] of Object.entries(pivotData)) {
-                let supTotalPda = 0;
-                let empRows = '';
+            const supervisorGroups = new Map();
+            rows.forEach(row => {
+                if (!supervisorGroups.has(row.supervisor)) supervisorGroups.set(row.supervisor, []);
+                supervisorGroups.get(row.supervisor).push(row);
+            });
 
-                for (const [opsId, emp] of Object.entries(employees)) {
-                    const count = emp.items.length;
-                    supTotalPda += count;
+            const grand = { new: 0, old: 0, scan: 0, total: 0 };
+            let bodyHtml = '';
 
-                    empRows += `
-                        <tr onclick="openEmpDetailsModal('${opsId}')" class="hover:bg-purple-50/60 cursor-pointer transition-all border-b border-gray-100">
-                            <td class="p-2">
-                                <div class="font-bold text-gray-800 text-xs">${emp.empName || ''}</div>
-                                <div class="text-[11px] font-bold text-gray-400">${emp.opsId}</div>
+            for (const [supervisor, employees] of supervisorGroups) {
+                const subtotal = { new: 0, old: 0, scan: 0, total: 0 };
+
+                employees.forEach(emp => {
+                    subtotal.new += emp.counts.new;
+                    subtotal.old += emp.counts.old;
+                    subtotal.scan += emp.counts.scan;
+                    subtotal.total += emp.total;
+
+                    bodyHtml += `
+                        <tr data-pivot-opsid="${escapeHtml(emp.opsId)}" class="pivot-employee-row hover:bg-orange-50 cursor-pointer border-b border-slate-100">
+                            <td class="px-3 py-2.5 text-slate-700">${escapeHtml(emp.supervisor)}</td>
+                            <td class="px-3 py-2.5 text-slate-700">${escapeHtml(emp.team)}</td>
+                            <td class="px-3 py-2.5">
+                                <span class="block font-extrabold text-slate-800">${escapeHtml(emp.empName)}</span>
+                                <span class="block text-[10px] font-bold text-slate-400">${escapeHtml(emp.opsId)}</span>
                             </td>
-                            <td class="p-2 text-right font-bold">
-                                <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs hover:bg-purple-200">${count} thiết bị</span>
-                            </td>
-                        </tr>
-                    `;
-                }
+                            <td class="px-3 py-2.5 text-center font-bold text-emerald-700">${emp.counts.new || '–'}</td>
+                            <td class="px-3 py-2.5 text-center font-bold text-blue-700">${emp.counts.old || '–'}</td>
+                            <td class="px-3 py-2.5 text-center font-bold text-purple-700">${emp.counts.scan || '–'}</td>
+                            <td class="px-3 py-2.5 text-center font-black text-slate-900">${emp.total}</td>
+                        </tr>`;
+                });
 
-                html += `
-                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
-                        <div class="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-3 py-2 flex justify-between items-center">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-user-tie text-orange-400 text-xs"></i>
-                                <span class="font-bold text-xs">${supName}</span>
-                            </div>
-                            <span class="bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded-full text-xs">${supTotalPda} Thiết Bị</span>
-                        </div>
+                grand.new += subtotal.new;
+                grand.old += subtotal.old;
+                grand.scan += subtotal.scan;
+                grand.total += subtotal.total;
 
-                        <div class="p-1.5">
-                            <table class="w-full text-left border-collapse">
-                                <thead class="text-xs text-gray-400 uppercase font-bold border-b">
-                                    <tr>
-                                        <th class="p-1.5">Nhân viên</th>
-                                        <th class="p-1.5 text-right">Số lượng</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${empRows}</tbody>
-                            </table>
-                        </div>
-                    </div>
-                `;
+                bodyHtml += `
+                    <tr class="bg-purple-50 border-b-2 border-purple-200 font-extrabold">
+                        <td colspan="3" class="px-3 py-2.5 text-purple-900">Tổng Supervisor: ${escapeHtml(supervisor)}</td>
+                        <td class="px-3 py-2.5 text-center text-emerald-800">${subtotal.new}</td>
+                        <td class="px-3 py-2.5 text-center text-blue-800">${subtotal.old}</td>
+                        <td class="px-3 py-2.5 text-center text-purple-800">${subtotal.scan}</td>
+                        <td class="px-3 py-2.5 text-center text-purple-950">${subtotal.total}</td>
+                    </tr>`;
             }
 
-            container.innerHTML = html;
+            bodyHtml += `
+                <tr class="bg-slate-900 text-white font-black">
+                    <td colspan="3" class="px-3 py-3 uppercase tracking-wide">Tổng cộng toàn bộ</td>
+                    <td class="px-3 py-3 text-center">${grand.new}</td>
+                    <td class="px-3 py-3 text-center">${grand.old}</td>
+                    <td class="px-3 py-3 text-center">${grand.scan}</td>
+                    <td class="px-3 py-3 text-center text-orange-300">${grand.total}</td>
+                </tr>`;
+
+            container.innerHTML = `
+                <table class="min-w-[980px] w-full border-collapse text-xs text-left">
+                    <thead class="sticky top-0 z-10 bg-slate-800 text-white uppercase shadow-sm">
+                        <tr>
+                            <th class="px-3 py-3">Supervisor</th>
+                            <th class="px-3 py-3">Team</th>
+                            <th class="px-3 py-3">Họ tên</th>
+                            <th class="px-3 py-3 text-center">Máy mới</th>
+                            <th class="px-3 py-3 text-center">Máy cũ</th>
+                            <th class="px-3 py-3 text-center">Súng Scan</th>
+                            <th class="px-3 py-3 text-center">Tổng cộng</th>
+                        </tr>
+                    </thead>
+                    <tbody>${bodyHtml}</tbody>
+                </table>
+                <p class="px-3 py-2 text-[10px] text-slate-500 bg-slate-50 border-t border-slate-200">Nhấp vào dòng nhân viên để xem danh sách mã thiết bị đang giữ. Các dòng tím là tổng theo Supervisor; dòng cuối là tổng toàn hệ thống.</p>`;
+
+            container.onclick = function(event) {
+                const row = event.target.closest('tr[data-pivot-opsid]');
+                if (row) window.openEmpDetailsModal(row.dataset.pivotOpsid);
+            };
         }
 
         window.openEmpDetailsModal = function(opsId) {
@@ -2736,7 +2846,20 @@
                 return;
             }
 
-            copyTextToClipboard(currentModalPdaCodes.join(', '));
+            copyTextToClipboard(currentModalPdaCodes.join('\n'));
+        };
+
+        window.copyAllUnreturnedPdaCodes = function() {
+            const codes = currentUnreturnedView
+                .map(item => String(item.pdaCode || '').trim())
+                .filter(Boolean);
+
+            if (!codes.length) {
+                showToast('Không có mã PDA chưa trả để sao chép!', 'warning');
+                return;
+            }
+
+            copyTextToClipboard([...new Set(codes)].join('\n'));
         };
 
         window.copySinglePdaCode = function(code) {
@@ -2748,6 +2871,7 @@
         };
 
         function renderUnreturned(list) {
+            currentUnreturnedView = Array.isArray(list) ? list.slice() : [];
             const fullTbody = document.getElementById('unreturnedFullTable');
             const miniTbody = document.getElementById('unreturnedMiniTable');
 
@@ -3292,6 +3416,199 @@
                     }
                 };
 
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // ============================================================
+        // NHẬP DANH SÁCH MÃ PDA BẰNG EXCEL / CSV
+        // Cột bắt buộc: Mã PDA. Cột Thao tác không bắt buộc (MƯỢN/TRẢ).
+        // Nếu không có Thao tác, tự nhận diện theo danh sách unreturned realtime.
+        // ============================================================
+        function normalizeExcelText(value) {
+            return String(value ?? '')
+                .trim()
+                .toLocaleLowerCase('vi-VN')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .replace(/[^a-z0-9]+/g, ' ')
+                .trim();
+        }
+
+        function classifyImportedAction(value) {
+            const action = normalizeExcelText(value).toUpperCase();
+            if (!action) return '';
+            if (action.includes('TRA') || action.includes('RETURN')) return 'return';
+            if (action.includes('MUON') || action.includes('BORROW') || action.includes('CAP PHAT')) return 'borrow';
+            return '';
+        }
+
+        function findUnreturnedRecordByCode(code) {
+            const normalized = String(code || '').trim().toUpperCase();
+            return unreturnedCache.find(item =>
+                String(item.pdaCode || '').trim().toUpperCase() === normalized
+            );
+        }
+
+        function addImportedPdaToPending(code, requestedAction) {
+            const normalizedCode = String(code || '').trim();
+            if (!normalizedCode) return { added: false, reason: 'empty' };
+
+            const key = normalizedCode.toUpperCase();
+            const existsInBorrow = pendingBorrowPdaList.some(x => String(x).toUpperCase() === key);
+            const existsInReturn = pendingReturnPdaList.some(x => String(x.code).toUpperCase() === key);
+            if (existsInBorrow || existsInReturn) return { added: false, reason: 'duplicate' };
+
+            const activeRecord = findUnreturnedRecordByCode(normalizedCode);
+            const action = requestedAction || (activeRecord ? 'return' : 'borrow');
+
+            if (action === 'return') {
+                if (!activeRecord) return { added: false, reason: 'not-borrowed' };
+                pendingReturnPdaList.push({
+                    code: activeRecord.pdaCode,
+                    originalData: activeRecord
+                });
+                return { added: true, action: 'return' };
+            }
+
+            if (activeRecord) return { added: false, reason: 'already-borrowed' };
+            pendingBorrowPdaList.push(normalizedCode);
+            return { added: true, action: 'borrow' };
+        }
+
+        window.downloadPdaImportTemplate = function() {
+            if (typeof XLSX === 'undefined') {
+                showToast('Thư viện Excel chưa tải xong. Vui lòng thử lại.', 'error');
+                return;
+            }
+
+            const worksheet = XLSX.utils.aoa_to_sheet([
+                ['Mã PDA', 'Thao tác'],
+                ['', '']
+            ]);
+            worksheet['!cols'] = [{ wch: 28 }, { wch: 18 }];
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Nhap ma PDA');
+            XLSX.writeFile(workbook, 'Mau_nhap_ma_muon_tra_PDA.xlsx');
+        };
+
+        const pdaExcelInput = document.getElementById('pdaExcelInput');
+        if (pdaExcelInput) {
+            pdaExcelInput.addEventListener('change', event => {
+                const file = event.target.files && event.target.files[0];
+                if (!file) return;
+
+                if (currentUserRole === 'guest') {
+                    showToast('Tài khoản của bạn chỉ có quyền xem, không thể nhập mã mượn/trả.', 'warning');
+                    pdaExcelInput.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(loadEvent) {
+                    try {
+                        const workbook = XLSX.read(new Uint8Array(loadEvent.target.result), { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        if (!firstSheetName) throw new Error('File không có sheet dữ liệu.');
+
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const rows = XLSX.utils.sheet_to_json(worksheet, {
+                            header: 1,
+                            defval: '',
+                            raw: false
+                        });
+                        if (!rows.length) throw new Error('Sheet không có dữ liệu.');
+
+                        const isCodeHeader = value => {
+                            const h = normalizeExcelText(value);
+                            return ['ma pda', 'pda', 'ma thiet bi', 'ma thiet bi pda', 'device code', 'barcode', 'serial', 'code'].some(x => h === x || h.includes(x));
+                        };
+                        const isActionHeader = value => {
+                            const h = normalizeExcelText(value);
+                            return ['thao tac', 'loai giao dich', 'giao dich', 'hanh dong', 'action', 'transaction', 'type', 'trang thai'].some(x => h === x || h.includes(x));
+                        };
+
+                        let headerIndex = -1;
+                        let codeColumn = -1;
+                        let actionColumn = -1;
+                        for (let i = 0; i < Math.min(rows.length, 10); i++) {
+                            const foundCode = rows[i].findIndex(isCodeHeader);
+                            if (foundCode >= 0) {
+                                headerIndex = i;
+                                codeColumn = foundCode;
+                                actionColumn = rows[i].findIndex(isActionHeader);
+                                break;
+                            }
+                        }
+
+                        const dataRows = headerIndex >= 0 ? rows.slice(headerIndex + 1) : rows;
+                        let addedBorrow = 0;
+                        let addedReturn = 0;
+                        let duplicateCount = 0;
+                        let invalidCount = 0;
+                        let notBorrowedCount = 0;
+                        let alreadyBorrowedCount = 0;
+
+                        dataRows.forEach(row => {
+                            let code = '';
+                            let rawAction = '';
+
+                            if (codeColumn >= 0) {
+                                code = String(row[codeColumn] ?? '').trim();
+                                if (actionColumn >= 0) rawAction = row[actionColumn];
+                            } else {
+                                code = String((row || []).find(value => String(value ?? '').trim() !== '') ?? '').trim();
+                            }
+
+                            // Hỗ trợ file đơn giản 2 cột không có hàng tiêu đề: Mã PDA | MƯỢN/TRẢ.
+                            if (!rawAction && headerIndex < 0 && row.length > 1) rawAction = row[1];
+                            if (!code) return;
+                            if (!/^[A-Za-z0-9._/-]{5,}$/.test(code)) {
+                                invalidCount++;
+                                return;
+                            }
+
+                            const result = addImportedPdaToPending(code, classifyImportedAction(rawAction));
+                            if (result.added && result.action === 'borrow') addedBorrow++;
+                            else if (result.added && result.action === 'return') addedReturn++;
+                            else if (result.reason === 'duplicate') duplicateCount++;
+                            else if (result.reason === 'not-borrowed') notBorrowedCount++;
+                            else if (result.reason === 'already-borrowed') alreadyBorrowedCount++;
+                            else invalidCount++;
+                        });
+
+                        renderPendingList();
+                        const totalAdded = addedBorrow + addedReturn;
+                        if (totalAdded) {
+                            showToast(`Đã nhập ${totalAdded} mã: ${addedBorrow} mã MƯỢN, ${addedReturn} mã TRẢ.`);
+                            setConfirmQrStatus(
+                                addedBorrow > 0 && !selectedEmployee
+                                    ? 'Đã nhập mã. Quét OPS ID nhân viên trước khi xác nhận mượn.'
+                                    : 'Đã thêm mã từ Excel vào danh sách chờ.',
+                                'waiting'
+                            );
+                        } else {
+                            showToast('Không có mã hợp lệ nào được thêm vào danh sách chờ.', 'warning');
+                        }
+
+                        const warnings = [];
+                        if (duplicateCount) warnings.push(`${duplicateCount} trùng danh sách chờ`);
+                        if (notBorrowedCount) warnings.push(`${notBorrowedCount} mã yêu cầu TRẢ nhưng hiện không mượn`);
+                        if (alreadyBorrowedCount) warnings.push(`${alreadyBorrowedCount} mã yêu cầu MƯỢN nhưng đang chưa trả`);
+                        if (invalidCount) warnings.push(`${invalidCount} dòng không hợp lệ`);
+                        if (warnings.length) showToast('Bỏ qua: ' + warnings.join('; '), 'warning');
+                    } catch (error) {
+                        console.error('Lỗi nhập Excel mã PDA:', error);
+                        showToast('Không đọc được file Excel: ' + (error.message || String(error)), 'error');
+                    } finally {
+                        pdaExcelInput.value = '';
+                    }
+                };
+                reader.onerror = function() {
+                    showToast('Không thể đọc file đã chọn.', 'error');
+                    pdaExcelInput.value = '';
+                };
                 reader.readAsArrayBuffer(file);
             });
         }
