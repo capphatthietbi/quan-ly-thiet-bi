@@ -31,6 +31,9 @@
             query,
             where,
             getDocs,
+            orderBy,
+            limit,
+            startAfter,
             writeBatch,
             serverTimestamp
         } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -78,6 +81,9 @@
             query,
             where,
             getDocs,
+            orderBy,
+            limit,
+            startAfter,
             writeBatch,
             serverTimestamp
         };
@@ -1288,6 +1294,14 @@
                         <tbody id="logsTable" class="divide-y divide-gray-100 text-xs"></tbody>
                     </table>
                 </div>
+
+                <div class="mt-3 flex items-center justify-between gap-3 flex-wrap">
+                    <span id="logsPageStatus" class="text-xs text-slate-500 font-semibold">Chưa tải lịch sử</span>
+                    <button id="btnLoadMoreLogs" type="button" onclick="loadMoreLogs()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold" style="display:none">
+                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> Tải thêm lịch sử
+                    </button>
+                </div>
+                <p class="mt-1 text-[10px] text-slate-400">Bộ lọc áp dụng trên các bản ghi đã tải. Bấm “Tải thêm lịch sử” để tìm các giao dịch cũ hơn.</p>
             </div>
 
             <!-- EMPLOYEES -->
@@ -1663,6 +1677,24 @@
 
         // Tránh khởi tạo listener nhiều lần.
         let dataListenersStarted = false;
+
+        // Listener chỉ mở khi cần: Logs, Kho Mã Máy và Admin.
+        let logsListenerUnsubscribe = null;
+        let devicesListenerStarted = false;
+        let devicesListenerUnsubscribe = null;
+        let devicesCacheLoaded = false;
+        let devicesReadyPromise = null;
+        let adminUsersListenerStarted = false;
+        let adminUsersCacheLoaded = false;
+        let adminUsersReadyPromise = null;
+
+        // Logs: realtime 100 bản ghi mới nhất + phân trang lịch sử cũ.
+        const LOGS_PAGE_SIZE = 100;
+        let logsLatestCache = [];
+        let logsOlderCache = [];
+        let logsCursor = null;
+        let logsHasMore = false;
+        let logsLoadingMore = false;
 
         // Tổng số máy; hiện đang lưu cục bộ trên từng trình duyệt.
         let totalMt93 = parseInt(localStorage.getItem('totalMt93'), 10) || 54;
@@ -2425,13 +2457,13 @@
 
             const listenerError = (label) => (error) => {
                 console.error(`Lỗi tải ${label}:`, error);
-
                 showToast(
                     `Không tải được ${label}: ${error.message || error.code || String(error)}`,
                     'error'
                 );
             };
 
+            // Dữ liệu đang mượn cần realtime cho tracker, Pivot và xác nhận trả.
             onSnapshot(
                 collection(db, 'unreturned'),
                 (snapshot) => {
@@ -2444,7 +2476,6 @@
                         });
                     });
 
-                    // Đồng bộ tên/Team/Sup theo Danh sách nhân viên đã tải.
                     syncUnreturnedEmployeeData();
                     refreshUnreturnedFilterOptions();
                     applyUnreturnedFilters();
@@ -2455,36 +2486,7 @@
                 listenerError('danh sách thiết bị chưa trả')
             );
 
-            onSnapshot(
-                collection(db, 'logs'),
-                (snapshot) => {
-                    const logs = [];
-
-                    snapshot.forEach(item => {
-                        const data = item.data();
-
-                        let rawTime = 0;
-
-                        if (data.createdAt && data.createdAt.seconds) {
-                            rawTime = data.createdAt.seconds * 1000;
-                        } else {
-                            rawTime = parseCustomDate(data.timestamp);
-                        }
-
-                        logs.push({
-                            ...data,
-                            _rawTime: rawTime
-                        });
-                    });
-
-                    logs.sort((a, b) => b._rawTime - a._rawTime);
-                    logsCache = logs;
-                    applyLogFilters();
-                    renderInventoryTable();
-                },
-                listenerError('nhật ký mượn trả')
-            );
-
+            // Hồ sơ nhân viên cần cho quét OPS ID và thông tin người mượn.
             onSnapshot(
                 collection(db, 'employees'),
                 (snapshot) => {
@@ -2500,24 +2502,12 @@
                     renderEmployees(employeeCache);
                     updateDropdownOptions(employeeCache);
                     renderMasterOptions();
-
-                    // Hồ sơ nhân viên là nguồn chuẩn: cập nhật các thẻ đang hiển thị
-                    // ngay khi Firestore onSnapshot phát hiện thay đổi.
                     syncUnreturnedEmployeeData();
                 },
                 listenerError('danh sách nhân viên')
             );
 
-            onSnapshot(
-                collection(db, 'devices'),
-                (snapshot) => {
-                    registeredDevicesCache = [];
-                    snapshot.forEach(item => registeredDevicesCache.push({ id: item.id, ...item.data() }));
-                    renderInventoryTable();
-                },
-                listenerError('danh mục mã máy')
-            );
-
+            // Team/Sup được dùng ngay tại màn hình quét OPS ID.
             onSnapshot(
                 collection(db, 'master_options'),
                 (snapshot) => {
@@ -2529,25 +2519,228 @@
                 listenerError('danh mục Team / Supervisor')
             );
 
-            // Chỉ Super Admin được tải danh sách admin.
-            if (currentUserRole === 'superadmin') {
-                onSnapshot(
-                    collection(db, 'admin_users'),
-                    (snapshot) => {
-                        adminUsersCache = [];
+            // Logs, devices và admin_users không tải lúc đăng nhập.
+            // Chúng được khởi tạo khi người dùng mở đúng tab tương ứng.
+        }
 
-                        snapshot.forEach(item => {
-                            adminUsersCache.push({
-                                id: item.id,
-                                ...item.data()
-                            });
+        function startLogsListener() {
+            if (logsListenerUnsubscribe) return;
+
+            const { collection, onSnapshot, query, orderBy, limit } = window.fs;
+            const logsQuery = query(
+                collection(window.db, 'logs'),
+                orderBy('createdAt', 'desc'),
+                limit(LOGS_PAGE_SIZE)
+            );
+
+            logsListenerUnsubscribe = onSnapshot(
+                logsQuery,
+                (snapshot) => {
+                    const previousLatest = logsLatestCache;
+                    const nextLatest = snapshot.docs.map(item => {
+                        const data = item.data();
+                        const rawTime = data.createdAt && typeof data.createdAt.toDate === 'function'
+                            ? data.createdAt.toDate().getTime()
+                            : data.createdAt && Number.isFinite(Number(data.createdAt.seconds))
+                                ? Number(data.createdAt.seconds) * 1000
+                                : parseCustomDate(data.timestamp);
+                        return { id: item.id, ...data, _rawTime: rawTime };
+                    });
+
+                    if (logsOlderCache.length > 0) {
+                        // Khi có log mới, các bản ghi rơi khỏi 100 dòng realtime đầu tiên
+                        // phải được giữ ở cache lịch sử để không tạo khoảng trống khi phân trang.
+                        const nextIds = new Set(nextLatest.map(item => item.id));
+                        const olderById = new Map(logsOlderCache.map(item => [item.id, item]));
+                        previousLatest.forEach(item => {
+                            if (!nextIds.has(item.id) && !olderById.has(item.id)) {
+                                olderById.set(item.id, item);
+                            }
                         });
+                        logsOlderCache = Array.from(olderById.values());
+                    } else {
+                        // Chưa tải trang cũ: cursor luôn bám theo ranh giới mới nhất,
+                        // kể cả khi người dùng rời tab rồi quay lại sau khi có log mới.
+                        logsCursor = snapshot.docs.length
+                            ? snapshot.docs[snapshot.docs.length - 1]
+                            : null;
+                        logsHasMore = snapshot.docs.length === LOGS_PAGE_SIZE;
+                    }
 
-                        renderAdminUsers(adminUsersCache);
-                    },
-                    listenerError('danh sách quyền quản trị')
-                );
+                    logsLatestCache = nextLatest;
+                    mergeLogsCache();
+                    applyLogFilters();
+                    updateLogsPager();
+                },
+                (error) => {
+                    logsListenerUnsubscribe = null;
+                    console.error('Lỗi tải nhật ký mượn trả:', error);
+                    showToast(
+                        'Không tải được nhật ký: ' + (error.message || error.code || String(error)),
+                        'error'
+                    );
+                    updateLogsPager();
+                }
+            );
+        }
+
+        function stopLogsListener() {
+            if (logsListenerUnsubscribe) {
+                logsListenerUnsubscribe();
+                logsListenerUnsubscribe = null;
             }
+        }
+
+        function mergeLogsCache() {
+            const byId = new Map();
+            [...logsOlderCache, ...logsLatestCache].forEach(item => {
+                if (item && item.id) byId.set(item.id, item);
+            });
+            logsCache = Array.from(byId.values()).sort(
+                (a, b) => Number(b._rawTime || 0) - Number(a._rawTime || 0)
+            );
+        }
+
+        function updateLogsPager() {
+            const button = document.getElementById('btnLoadMoreLogs');
+            const status = document.getElementById('logsPageStatus');
+            if (status) {
+                status.textContent = `Đã tải ${logsCache.length} bản ghi`;
+            }
+            if (button) {
+                button.disabled = logsLoadingMore || !logsHasMore;
+                button.style.display = logsHasMore || logsLoadingMore ? '' : 'none';
+                button.innerHTML = logsLoadingMore
+                    ? '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tải...'
+                    : '<i class="fa-solid fa-clock-rotate-left mr-1"></i> Tải thêm lịch sử';
+            }
+        }
+
+        window.loadMoreLogs = async function() {
+            if (logsLoadingMore || !logsHasMore || !logsCursor) return;
+
+            logsLoadingMore = true;
+            updateLogsPager();
+
+            try {
+                const { collection, query, orderBy, startAfter, limit, getDocs } = window.fs;
+                const olderQuery = query(
+                    collection(window.db, 'logs'),
+                    orderBy('createdAt', 'desc'),
+                    startAfter(logsCursor),
+                    limit(LOGS_PAGE_SIZE)
+                );
+
+                const snapshot = await getDocs(olderQuery);
+                const page = snapshot.docs.map(item => {
+                    const data = item.data();
+                    const rawTime = data.createdAt && typeof data.createdAt.toDate === 'function'
+                        ? data.createdAt.toDate().getTime()
+                        : data.createdAt && Number.isFinite(Number(data.createdAt.seconds))
+                            ? Number(data.createdAt.seconds) * 1000
+                            : parseCustomDate(data.timestamp);
+                    return { id: item.id, ...data, _rawTime: rawTime };
+                });
+
+                if (page.length) {
+                    const known = new Map(logsOlderCache.map(item => [item.id, item]));
+                    page.forEach(item => known.set(item.id, item));
+                    logsOlderCache = Array.from(known.values());
+                    logsCursor = snapshot.docs[snapshot.docs.length - 1];
+                }
+
+                logsHasMore = snapshot.docs.length === LOGS_PAGE_SIZE;
+                mergeLogsCache();
+                applyLogFilters();
+
+            } catch (error) {
+                console.error('Lỗi tải thêm lịch sử:', error);
+                showToast(
+                    'Không thể tải thêm lịch sử: ' + (error.message || error.code || String(error)),
+                    'error'
+                );
+            } finally {
+                logsLoadingMore = false;
+                updateLogsPager();
+            }
+        };
+
+        function startDevicesListener() {
+            if (devicesListenerStarted) return;
+            devicesListenerStarted = true;
+
+            const { collection, onSnapshot } = window.fs;
+            devicesReadyPromise = new Promise((resolve, reject) => {
+                devicesListenerUnsubscribe = onSnapshot(
+                    collection(window.db, 'devices'),
+                    (snapshot) => {
+                        registeredDevicesCache = snapshot.docs.map(item => ({
+                            id: item.id,
+                            ...item.data()
+                        }));
+                        devicesCacheLoaded = true;
+                        renderInventoryTable();
+                        resolve(true);
+                    },
+                    (error) => {
+                        devicesListenerStarted = false;
+                        devicesCacheLoaded = false;
+                        console.error('Lỗi tải danh mục mã máy:', error);
+                        showToast(
+                            'Không tải được danh mục mã máy: ' + (error.message || error.code || String(error)),
+                            'error'
+                        );
+                        reject(error);
+                    }
+                );
+            });
+            // Tránh cảnh báo Promise chưa được xử lý khi listener lỗi trước thao tác lưu.
+            devicesReadyPromise.catch(() => {});
+        }
+
+        async function ensureDevicesCacheLoaded() {
+            if (devicesCacheLoaded) return true;
+            startDevicesListener();
+            if (devicesReadyPromise) await devicesReadyPromise;
+            return devicesCacheLoaded;
+        }
+
+        function startAdminUsersListener() {
+            if (adminUsersListenerStarted || currentUserRole !== 'superadmin') return;
+            adminUsersListenerStarted = true;
+
+            const { collection, onSnapshot } = window.fs;
+            adminUsersReadyPromise = new Promise((resolve, reject) => {
+                onSnapshot(
+                    collection(window.db, 'admin_users'),
+                    (snapshot) => {
+                        adminUsersCache = snapshot.docs.map(item => ({
+                            id: item.id,
+                            ...item.data()
+                        }));
+                        adminUsersCacheLoaded = true;
+                        renderAdminUsers(adminUsersCache);
+                        resolve(true);
+                    },
+                    (error) => {
+                        adminUsersListenerStarted = false;
+                        console.error('Lỗi tải danh sách quyền quản trị:', error);
+                        showToast(
+                            'Không tải được danh sách quyền quản trị: ' + (error.message || error.code || String(error)),
+                            'error'
+                        );
+                        reject(error);
+                    }
+                );
+            });
+            adminUsersReadyPromise.catch(() => {});
+        }
+
+        async function ensureAdminUsersCacheLoaded() {
+            if (adminUsersCacheLoaded) return true;
+            startAdminUsersListener();
+            if (adminUsersReadyPromise) await adminUsersReadyPromise;
+            return adminUsersCacheLoaded;
         }
 
         function normalizeOptionKey(value) {
@@ -2937,99 +3130,118 @@
             const finalTeam = overrideTeam || (selectedEmployee ? selectedEmployee.team : '');
             const finalSup = overrideSup || (selectedEmployee ? selectedEmployee.supervisor : '');
 
-                const batch = writeBatch(db);
+                // Kiểm tra trạng thái máy chủ theo nhóm tối đa 30 mã/lần,
+                // thay vì chạy một getDocs riêng cho từng PDA.
+                const requestedBorrowCodes = Array.from(new Set(
+                    pendingBorrowPdaList.map(code => String(code || '').trim()).filter(Boolean)
+                ));
+                const requestedReturnCodes = Array.from(new Set(
+                    pendingReturnPdaList.map(item => String(item.code || '').trim()).filter(Boolean)
+                ));
+                const requestedCodes = Array.from(new Set(
+                    [...requestedBorrowCodes, ...requestedReturnCodes]
+                        .map(code => String(code || '').trim()).filter(Boolean)
+                ));
 
-                if (pendingBorrowPdaList.length > 0) {
-                    for (const borrowPda of pendingBorrowPdaList) {
-                        const qCheck = query(
-                            collection(db, 'unreturned'),
-                            where('pdaCode', '==', borrowPda)
-                        );
-
-                        const snapCheck = await getDocs(qCheck);
-
-                        if (!snapCheck.empty) {
-                            showToast(`Mã ${borrowPda} đang ở trạng thái CHƯA TRẢ! Bỏ qua mã này.`, 'warning');
-                            continue;
+                const activeByCode = new Map();
+                for (let i = 0; i < requestedCodes.length; i += 30) {
+                    const codeChunk = requestedCodes.slice(i, i + 30);
+                    const statusQuery = query(
+                        collection(db, 'unreturned'),
+                        where('pdaCode', 'in', codeChunk)
+                    );
+                    const statusSnapshot = await getDocs(statusQuery);
+                    statusSnapshot.forEach(item => {
+                        const data = item.data();
+                        const key = String(data.pdaCode || '').trim().toUpperCase();
+                        if (key && !activeByCode.has(key)) {
+                            activeByCode.set(key, { id: item.id, ...data });
                         }
-
-                        const pdaType = detectDeviceType(borrowPda);
-                        const unreturnedRef = doc(collection(db, 'unreturned'));
-
-                        batch.set(unreturnedRef, {
-                            pdaCode: borrowPda,
-                            pdaType,
-                            opsId: selectedEmployee.opsId,
-                            empName: selectedEmployee.empName,
-                            team: finalTeam,
-                            supervisor: finalSup,
-                            borrowTime: timeStr,
-                            createdAt: serverTimestamp(),
-                            adminName
-                        });
-
-                        const logRef = doc(collection(db, 'logs'));
-
-                        batch.set(logRef, {
-                            timestamp: timeStr,
-                            createdAt: serverTimestamp(),
-                            pdaCode: borrowPda,
-                            pdaType,
-                            status: 'MƯỢN',
-                            opsId: selectedEmployee.opsId,
-                            empName: selectedEmployee.empName,
-                            details: `Mượn máy từ (${finalTeam} / ${finalSup})`,
-                            adminName
-                        });
-                    }
+                    });
                 }
 
-                if (pendingReturnPdaList.length > 0) {
-                    for (const item of pendingReturnPdaList) {
-                        const returnPda = item.code;
-                        const orig = item.originalData;
+                const batch = writeBatch(db);
 
-                        const q = query(
-                            collection(db, 'unreturned'),
-                            where('pdaCode', '==', returnPda)
-                        );
+                for (const borrowPda of requestedBorrowCodes) {
+                    const key = borrowPda.toUpperCase();
 
-                        const snapshot = await getDocs(q);
-
-                        if (!snapshot.empty) {
-                            const unreturnedDocId = snapshot.docs[0].id;
-
-                            batch.delete(doc(db, 'unreturned', unreturnedDocId));
-
-                            let logOpsId = orig.opsId;
-                            let logEmpName = orig.empName;
-                            let logDetails = 'Người mượn trả';
-
-                            if (
-                                selectedEmployee &&
-                                selectedEmployee.opsId.toLowerCase() !== orig.opsId.toLowerCase()
-                            ) {
-                                logOpsId = selectedEmployee.opsId;
-                                logEmpName = selectedEmployee.empName;
-                                logDetails = `⚠️ TRẢ HỘ cho [${orig.empName} - ${orig.opsId}]`;
-                            }
-
-                            const pdaType = detectDeviceType(returnPda);
-                            const logRef = doc(collection(db, 'logs'));
-
-                            batch.set(logRef, {
-                                timestamp: timeStr,
-                                createdAt: serverTimestamp(),
-                                pdaCode: returnPda,
-                                pdaType,
-                                status: 'TRẢ',
-                                opsId: logOpsId,
-                                empName: logEmpName,
-                                details: logDetails,
-                                adminName
-                            });
-                        }
+                    if (activeByCode.has(key)) {
+                        showToast(`Mã ${borrowPda} đang ở trạng thái CHƯA TRẢ! Bỏ qua mã này.`, 'warning');
+                        continue;
                     }
+
+                    const pdaType = detectDeviceType(borrowPda);
+                    const unreturnedRef = doc(collection(db, 'unreturned'));
+
+                    batch.set(unreturnedRef, {
+                        pdaCode: borrowPda,
+                        pdaType,
+                        opsId: selectedEmployee.opsId,
+                        empName: selectedEmployee.empName,
+                        team: finalTeam,
+                        supervisor: finalSup,
+                        borrowTime: timeStr,
+                        createdAt: serverTimestamp(),
+                        adminName
+                    });
+
+                    const logRef = doc(collection(db, 'logs'));
+                    batch.set(logRef, {
+                        timestamp: timeStr,
+                        createdAt: serverTimestamp(),
+                        pdaCode: borrowPda,
+                        pdaType,
+                        status: 'MƯỢN',
+                        opsId: selectedEmployee.opsId,
+                        empName: selectedEmployee.empName,
+                        details: `Mượn máy từ (${finalTeam} / ${finalSup})`,
+                        adminName
+                    });
+                }
+
+                for (const item of pendingReturnPdaList) {
+                    const returnPda = String(item.code || '').trim();
+                    const key = returnPda.toUpperCase();
+                    const currentRecord = activeByCode.get(key);
+
+                    // Dùng kết quả truy vấn mới nhất trên Firestore, không dùng cache cũ
+                    // làm căn cứ ghi nhận giao dịch trả.
+                    if (!currentRecord) {
+                        showToast(`Mã ${returnPda} không còn trong danh sách đang mượn. Bỏ qua mã này.`, 'warning');
+                        continue;
+                    }
+
+                    const unreturnedDocId = currentRecord.id;
+                    const orig = currentRecord;
+                    batch.delete(doc(db, 'unreturned', unreturnedDocId));
+
+                    let logOpsId = orig.opsId || '';
+                    let logEmpName = orig.empName || '';
+                    let logDetails = 'Người mượn trả';
+
+                    if (
+                        selectedEmployee &&
+                        String(selectedEmployee.opsId || '').toLowerCase() !== String(orig.opsId || '').toLowerCase()
+                    ) {
+                        logOpsId = selectedEmployee.opsId;
+                        logEmpName = selectedEmployee.empName;
+                        logDetails = `⚠️ TRẢ HỘ cho [${orig.empName || ''} - ${orig.opsId || ''}]`;
+                    }
+
+                    const pdaType = detectDeviceType(returnPda);
+                    const logRef = doc(collection(db, 'logs'));
+
+                    batch.set(logRef, {
+                        timestamp: timeStr,
+                        createdAt: serverTimestamp(),
+                        pdaCode: returnPda,
+                        pdaType,
+                        status: 'TRẢ',
+                        opsId: logOpsId,
+                        empName: logEmpName,
+                        details: logDetails,
+                        adminName
+                    });
                 }
 
                 await batch.commit();
@@ -3680,8 +3892,9 @@
 
             const countNode = document.getElementById('logsFilterCount');
             if (countNode) {
-                countNode.textContent = `Hiển thị ${filtered.length}/${logsCache.length} lịch sử`;
+                countNode.textContent = `Hiển thị ${filtered.length}/${logsCache.length} bản ghi đã tải`;
             }
+            updateLogsPager();
         }
 
         function renderLogs(logs) {
@@ -3892,16 +4105,28 @@
             if (!code) return;
 
             try {
+                await ensureDevicesCacheLoaded();
                 const { collection, query, where, getDocs, addDoc, updateDoc, doc, serverTimestamp } = window.fs;
                 const db = window.db;
-                const result = await getDocs(query(collection(db, 'devices'), where('pdaCode', '==', code)));
+                const cached = registeredDevicesCache.find(
+                    item => String(item.pdaCode || item.deviceCode || item.serial || '').trim().toUpperCase() === code
+                );
+                let existingId = cached?.id || null;
+
+                // Nếu chưa có trong cache, hỏi máy chủ để tránh tạo trùng mã vừa được
+                // một quản trị viên khác thêm ở thiết bị khác.
+                if (!existingId) {
+                    const result = await getDocs(query(collection(db, 'devices'), where('pdaCode', '==', code)));
+                    if (!result.empty) existingId = result.docs[0].id;
+                }
+
                 const payload = { pdaCode: code, deviceType, updatedAt: serverTimestamp(), updatedBy: currentAdminDisplayName };
-                if (result.empty) {
+                if (existingId) {
+                    await updateDoc(doc(db, 'devices', existingId), payload);
+                    showToast(`Đã cập nhật mã máy ${code}.`);
+                } else {
                     await addDoc(collection(db, 'devices'), { ...payload, createdAt: serverTimestamp() });
                     showToast(`Đã thêm mã máy ${code} vào danh mục kho.`);
-                } else {
-                    await updateDoc(doc(db, 'devices', result.docs[0].id), payload);
-                    showToast(`Đã cập nhật mã máy ${code}.`);
                 }
                 document.getElementById('deviceForm').reset();
                 document.getElementById('deviceTypeInput').value = 'Máy mới';
@@ -3941,15 +4166,35 @@
 
         async function saveDeviceRecordsBulk(items) {
             if (currentUserRole === 'guest') throw new Error('Tài khoản chỉ xem, không có quyền nhập mã máy.');
-            const { collection, getDocs, writeBatch, doc, serverTimestamp } = window.fs;
+            const { collection, query, where, getDocs, writeBatch, doc, serverTimestamp } = window.fs;
             const db = window.db;
-            const existingSnapshot = await getDocs(collection(db, 'devices'));
+            await ensureDevicesCacheLoaded();
+
+            // Tận dụng cache realtime để nhận diện các mã đã biết.
             const existingByCode = new Map();
-            existingSnapshot.forEach(item => {
-                const data = item.data();
-                const code = String(data.pdaCode || '').trim().toUpperCase();
-                if (code) existingByCode.set(code, item.id);
+            registeredDevicesCache.forEach(item => {
+                const code = String(item.pdaCode || item.deviceCode || item.serial || '').trim().toUpperCase();
+                if (code && item.id) existingByCode.set(code, item.id);
             });
+
+            // Chỉ kiểm tra các mã chưa có trong cache, theo nhóm tối đa 30 mã.
+            // Cách này tránh tải toàn bộ danh mục devices mỗi lần nhập Excel.
+            const normalizedCodes = Array.from(new Set(
+                items.map(item => String(item.pdaCode || '').trim().toUpperCase()).filter(Boolean)
+            ));
+            const unknownCodes = normalizedCodes.filter(code => !existingByCode.has(code));
+
+            for (let i = 0; i < unknownCodes.length; i += 30) {
+                const codeChunk = unknownCodes.slice(i, i + 30);
+                const existingSnapshot = await getDocs(query(
+                    collection(db, 'devices'),
+                    where('pdaCode', 'in', codeChunk)
+                ));
+                existingSnapshot.forEach(item => {
+                    const code = String(item.data().pdaCode || '').trim().toUpperCase();
+                    if (code) existingByCode.set(code, item.id);
+                });
+            }
 
             let batch = writeBatch(db);
             let operationCount = 0;
@@ -4079,8 +4324,19 @@
             if (!cleanName) throw new Error('Tên danh mục không được để trống.');
             const { collection, query, where, getDocs, addDoc, updateDoc, doc } = window.fs;
             const db = window.db;
-            const snapshot = await getDocs(query(collection(db, 'master_options'), where('type', '==', type)));
-            const matching = snapshot.docs.find(item => normalizeOptionKey(item.data().name) === normalizeOptionKey(cleanName));
+            let matching = masterOptionsCache.find(item =>
+                item.type === type && normalizeOptionKey(item.name) === normalizeOptionKey(cleanName)
+            );
+
+            // Cache miss thì xác minh trên server trước khi tạo mới.
+            if (!matching) {
+                const snapshot = await getDocs(query(collection(db, 'master_options'), where('type', '==', type)));
+                const found = snapshot.docs.find(item =>
+                    normalizeOptionKey(item.data().name) === normalizeOptionKey(cleanName)
+                );
+                if (found) matching = { id: found.id, ...found.data() };
+            }
+
             const payload = { type, name: cleanName, active, updatedAt: new Date().toISOString(), updatedBy: currentAdminDisplayName };
             if (matching) {
                 await updateDoc(doc(db, 'master_options', matching.id), payload);
@@ -4413,19 +4669,31 @@
             const supervisor = cleanOptionString(document.getElementById('empSup').value);
 
             try {
-                const q = query(collection(db, 'employees'), where('opsId', '==', opsId));
-                const querySnapshot = await getDocs(q);
+                // Hồ sơ đã có trong Listener cache thì cập nhật trực tiếp.
+                let existingEmployee = employeeCache.find(
+                    item => String(item.opsId || '').trim().toLowerCase() === opsId.toLowerCase()
+                );
 
-                if (!querySnapshot.empty) {
-                    const docId = querySnapshot.docs[0].id;
+                // Nếu cache chưa có, xác minh trên máy chủ trước khi tạo mới
+                // để tránh trùng khi một người khác vừa thêm hồ sơ.
+                if (!existingEmployee) {
+                    const q = query(collection(db, 'employees'), where('opsId', '==', opsId));
+                    const querySnapshot = await getDocs(q);
+                    if (!querySnapshot.empty) {
+                        existingEmployee = {
+                            id: querySnapshot.docs[0].id,
+                            ...querySnapshot.docs[0].data()
+                        };
+                    }
+                }
 
-                    await updateDoc(doc(db, 'employees', docId), {
+                if (existingEmployee) {
+                    await updateDoc(doc(db, 'employees', existingEmployee.id), {
                         empName,
                         email,
                         team,
                         supervisor
                     });
-
                     showToast(`Đã cập nhật thông tin cho [${opsId}]!`);
                 } else {
                     await addDoc(collection(db, 'employees'), {
@@ -4435,7 +4703,6 @@
                         team,
                         supervisor
                     });
-
                     showToast(`Đã thêm nhân viên mới [${opsId}]!`);
                 }
 
@@ -4750,6 +5017,17 @@
                 return;
             }
 
+            try {
+                await ensureAdminUsersCacheLoaded();
+            } catch (loadError) {
+                showToast(
+                    'Không thể tải danh sách quản trị để kiểm tra trùng email: ' +
+                    (loadError.message || loadError.code || String(loadError)),
+                    'error'
+                );
+                return;
+            }
+
             const { collection, doc, writeBatch } = window.fs;
             const db = window.db;
 
@@ -4921,6 +5199,15 @@
                 navButton.className =
                     'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold bg-orange-500 text-white transition-all text-sm';
             }
+
+            // Chỉ tải các collection phụ khi người dùng mở đúng chức năng.
+            if (tabName === 'logs') startLogsListener();
+            if (tabName === 'inventory') startDevicesListener();
+            if (tabName === 'admin') startAdminUsersListener();
+
+            // Không duy trì listener Logs khi rời tab, tránh đọc các cập nhật
+            // lịch sử trong lúc người dùng đang làm việc ở màn hình khác.
+            if (tabName !== 'logs') stopLogsListener();
         };
 
         // Khởi tạo bộ lọc danh sách thiết bị chưa trả.
