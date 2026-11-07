@@ -2,8 +2,8 @@
 <html lang="vi" class="h-full" data-view="desktop">
 <head>
     <meta charset="UTF-8">
-<script>if(innerWidth<768&&!/desktop=1/.test(location.search)&&document.documentElement.dataset.view!=="mobile")location.replace("mobile.html");</script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+<script>(function(){var q=matchMedia("(max-width: 767px)");function f(){document.documentElement.dataset.view=q.matches?"mobile":"desktop";}f();q.addEventListener?q.addEventListener("change",f):q.addListener(f);})();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>HỆ THỐNG QUẢN LÝ CẤP PHÁT THIẾT BỊ</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1017,7 +1017,7 @@ html[data-view="mobile"] button{min-height:40px}
                 <span class="text-gray-500 text-xs">Hệ thống cấp phát thiết bị</span>
             </div>
 
-            <div class="hdr-chips"><span id="connChip" class="chip chip-ok">Trực tuyến</span><span id="roleChip" class="chip">Đang xác minh…</span><a id="viewSwitch" class="chip chip-link" href="#"></a><button id="mobLogout" onclick="logout()" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></div>
+            <div class="hdr-chips"><span id="connChip" class="chip chip-ok">Trực tuyến</span><span id="roleChip" class="chip">Đang xác minh…</span><button id="mobLogout" onclick="logout()" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></div>
             <div class="text-right text-gray-600 text-xs">
                 <span id="currentDay" class="font-semibold mr-2">Thứ tư – Ngày 05/08/2026</span>
                 <span id="currentTime" class="font-bold text-orange-600 text-base">15:25:00</span>
@@ -5347,9 +5347,7 @@ html[data-view="mobile"] button{min-height:40px}
  const src=document.getElementById('userRoleBadge'),rc=document.getElementById('roleChip');
  function role(){const t=(src.textContent||'').replace('Role:','').trim();rc.textContent=t;rc.className='chip '+(/Super/i.test(t)?'role-super':/Thực Hiện/i.test(t)?'role-exec':/Khách/i.test(t)?'role-guest':'');}
  new MutationObserver(role).observe(src,{childList:true,characterData:true,subtree:true});role();
- const mob=document.documentElement.dataset.view==='mobile',a=document.getElementById('viewSwitch');
- a.textContent=mob?'Bản máy tính':'Bản điện thoại';a.href=mob?'index.html?desktop=1':'mobile.html';
-})();
+ })();
 </script>
 </body>
 </html>
