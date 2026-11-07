@@ -872,6 +872,65 @@ html[data-view="mobile"] .scanner-main-grid,html[data-view="mobile"] .pivot-tabl
 html[data-view="mobile"] .data-table-scroll{max-height:62vh}
 html[data-view="mobile"] input,html[data-view="mobile"] select,html[data-view="mobile"] textarea{font-size:16px!important;min-height:44px}
 html[data-view="mobile"] button{min-height:40px}
+
+/* ===== PATCH v4: tinh chỉnh bản điện thoại ===== */
+html[data-view="mobile"] body{font-size:14px!important}
+html[data-view="mobile"] aside{padding-bottom:env(safe-area-inset-bottom)}
+html[data-view="mobile"] aside nav button{flex:0 0 auto!important;width:auto!important;min-width:68px;max-width:92px;align-items:center;justify-content:center;white-space:normal!important;text-align:center;line-height:1.15;font-size:12px!important}
+html[data-view="mobile"] body>div.flex-1{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
+html[data-view="mobile"] header{display:grid!important;grid-template-columns:1fr auto;gap:.3rem .5rem;align-items:center}
+html[data-view="mobile"] header>div:first-child{grid-column:1;grid-row:1}
+html[data-view="mobile"] header>div:first-child .text-gray-300{display:none}
+html[data-view="mobile"] header>.hdr-chips{grid-column:1/-1;grid-row:2;flex-wrap:wrap;gap:.4rem}
+html[data-view="mobile"] header>div:last-child{grid-column:2;grid-row:1}
+html[data-view="mobile"] .chip{padding:.15rem .55rem}
+html[data-view="mobile"] #mobLogout{margin-left:auto;min-height:0;padding:.15rem .6rem;line-height:1.4}
+html[data-view="mobile"] .p-4.space-y-4{padding:.5rem!important}
+html[data-view="mobile"] form.grid{grid-template-columns:1fr!important}
+html[data-view="mobile"] form.grid>*{grid-column:auto!important}
+html[data-view="mobile"] body>div.flex-1 .flex.justify-between{flex-wrap:wrap;gap:.5rem}
+html[data-view="mobile"] body>div.flex-1 .w-72{width:100%!important}
+html[data-view="mobile"] .data-table-scroll table{width:max-content;min-width:100%}
+html[data-view="mobile"] .data-table-scroll th,html[data-view="mobile"] .data-table-scroll td{white-space:nowrap!important;padding:.5rem .65rem!important}
+html[data-view="mobile"] .data-table-scroll button{min-height:0}
+html[data-view="mobile"] .pivot-compact-table{table-layout:auto!important;min-width:600px}
+html[data-view="mobile"] .pivot-compact-table col{width:auto!important}
+html[data-view="mobile"] .pivot-compact-table thead th,html[data-view="mobile"] .pivot-compact-table tbody td{overflow-wrap:normal!important;word-break:normal!important}
+
+/* ===== PATCH v5: giảm cỡ chữ bản điện thoại ===== */
+html[data-view="mobile"]{font-size:14px!important}
+html[data-view="mobile"] body{font-size:13px!important}
+html[data-view="mobile"] aside nav button{font-size:11px!important;min-width:64px}
+html[data-view="mobile"] .chip,html[data-view="mobile"] .pending-badge{font-size:11px}
+html[data-view="mobile"] .pivot-compact-table thead th{font-size:11px!important}
+html[data-view="mobile"] .pivot-compact-table tbody td,html[data-view="mobile"] .pivot-compact-table .pivot-subtotal-row td{font-size:12px!important}
+html[data-view="mobile"] .pivot-grand-summary .summary-label{font-size:11px}
+html[data-view="mobile"] .pivot-grand-summary .summary-value{font-size:18px}
+html[data-view="mobile"] .inventory-table th,html[data-view="mobile"] .inventory-table td{font-size:12px!important}
+html[data-view="mobile"] .inv-chip{font-size:12px}
+html[data-view="mobile"] .inv-chip .inv-num{font-size:16px}
+html[data-view="mobile"] .logs-filter-control,html[data-view="mobile"] .inv-toolbar-control{font-size:12px}
+
+/* ===== PATCH v5: giảm cỡ chữ bản điện thoại (sàn 12px) ===== */
+html[data-view="mobile"] body{font-size:13px!important}
+html[data-view="mobile"] .text-sm{font-size:13px!important;line-height:1.35!important}
+html[data-view="mobile"] .text-base,html[data-view="mobile"] h1,html[data-view="mobile"] h2,html[data-view="mobile"] h3,html[data-view="mobile"] h4{font-size:14px!important;line-height:1.35!important}
+html[data-view="mobile"] .text-lg{font-size:15px!important}
+html[data-view="mobile"] .text-xl{font-size:16px!important}
+html[data-view="mobile"] .text-2xl{font-size:18px!important}
+html[data-view="mobile"] .text-3xl,html[data-view="mobile"] .text-4xl{font-size:20px!important}
+html[data-view="mobile"] .font-extrabold,html[data-view="mobile"] .font-black{font-weight:700!important}
+html[data-view="mobile"] input,html[data-view="mobile"] select,html[data-view="mobile"] textarea{font-size:14px!important;min-height:40px}
+html[data-view="mobile"] button{font-size:13px}
+html[data-view="mobile"] .data-table-scroll td{font-size:12.5px!important}
+html[data-view="mobile"] .data-table-scroll th{font-size:12px!important}
+html[data-view="mobile"] .inventory-table th,html[data-view="mobile"] .inventory-table td{font-size:12.5px!important}
+html[data-view="mobile"] .pivot-compact-table tbody td,html[data-view="mobile"] .pivot-compact-table .pivot-subtotal-row td{font-size:12.5px!important}
+html[data-view="mobile"] .pivot-compact-table thead th{font-size:12px!important}
+html[data-view="mobile"] .pivot-grand-summary .summary-value{font-size:18px!important}
+html[data-view="mobile"] .inv-chip{font-size:12.5px}
+html[data-view="mobile"] .inv-chip .inv-num{font-size:16px}
+html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
 </style>
 </head>
 
