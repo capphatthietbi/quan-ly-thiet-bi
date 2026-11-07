@@ -772,6 +772,65 @@
         @media (max-width: 520px) {
             .pivot-grand-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
+
+        /* ===== PATCH v2: PIVOT FONT / OPS ID GỌN / KHO MÃ MÁY ===== */
+        /* 1) Pivot: đồng bộ cỡ chữ với các tab khác (13px thân bảng, 12px tiêu đề cột) */
+        .pivot-table-heading { font-size: 13px; padding: .55rem .75rem; }
+        .pivot-compact-table { font-size: 13px; }
+        .pivot-compact-table thead th { font-size: 12px; padding: .55rem .4rem; }
+        .pivot-compact-table tbody td { font-size: 13px; padding: .5rem .4rem; line-height: 1.3; }
+        .pivot-compact-table tbody td span.block + span.block { font-size: 12px; }
+        .pivot-compact-table .pivot-subtotal-row td { font-size: 13px; padding: .55rem .4rem; }
+        .pivot-grand-summary .summary-label { font-size: 12px; }
+        .pivot-grand-summary .summary-value { font-size: 22px; }
+        @media (max-width: 1100px) {
+            .pivot-tables-grid { grid-template-columns: 1fr; }
+        }
+
+        /* 2) Thu hẹp thẻ OPS ID, nhường chỗ cho thẻ QUÉT THIẾT BỊ (2 : 3 : 5 -> 2 : 2.2 : 5.8) */
+        @media (min-width: 1024px) {
+            .dashboard-three-cards {
+                grid-template-columns: minmax(230px, 2fr) minmax(270px, 2.2fr) minmax(0, 5.8fr) !important;
+            }
+            .dashboard-three-cards > .dashboard-card { grid-column: auto !important; }
+        }
+        .ops-compact { gap: .55rem !important; }
+        .ops-compact #selectedEmpBox {
+            flex: 0 0 auto !important;
+            min-height: 72px !important;
+            padding: .6rem .75rem !important;
+        }
+        .ops-compact #selectedEmpBox > div { flex-wrap: wrap; gap: .4rem; }
+        /* Khoảng trống còn dư được dành cho ảnh thay vì kéo giãn ô nhân viên */
+        .card-depth > .ops-gif-stage,
+        .ops-compact > .ops-gif-stage {
+            flex: 1 1 120px !important;
+            height: auto !important;
+            min-height: 120px !important;
+            max-height: none !important;
+        }
+        .dashboard-three-cards #displayEmpTeam,
+        .dashboard-three-cards #displayEmpSup {
+            font-size: 13px !important;
+            padding: .45rem .4rem !important;
+        }
+        .status-device-block { cursor: pointer; }
+        .status-device-block:hover { box-shadow: 0 0 0 2px rgba(249,115,22,.25); }
+
+        /* 3) Kho mã máy: thanh tổng quan + thanh công cụ gọn, ưu tiên danh sách */
+        .inv-chip {
+            display: inline-flex; align-items: center; gap: .45rem;
+            padding: .35rem .7rem; border-radius: .7rem;
+            border: 1px solid #e2e8f0; background: #fff;
+            font-size: 13px; line-height: 1.2; white-space: nowrap;
+            transition: background .15s, border-color .15s, box-shadow .15s;
+        }
+        .inv-chip:hover { background: #f8fafc; }
+        .inv-chip.is-active { border-color: #0e7490; background: #ecfeff; box-shadow: 0 0 0 2px rgba(14,116,144,.15); }
+        .inv-chip .inv-num { font-size: 18px; font-weight: 900; }
+        .inv-chip .inv-sub { font-size: 12px; font-weight: 700; color: #64748b; }
+        .inv-divider { width: 1px; align-self: stretch; background: #e2e8f0; margin: 0 .25rem; }
+        .inv-toolbar-control { padding: .45rem .65rem; border: 1px solid #cbd5e1; border-radius: .6rem; background: #fff; font-size: 13px; }
 </style>
 </head>
 
@@ -942,7 +1001,7 @@
                             </span>
                         </div>
 
-                        <div class="status-device-block">
+                        <div class="status-device-block" title="Bấm để xem danh sách Máy mới trong Kho mã máy" onclick="if(!event.target.closest('button'))jumpToInventory('Máy mới')">
                             <div class="flex items-start justify-between gap-2">
                                 <span class="font-extrabold text-xs text-slate-700">
                                     MT93
@@ -959,7 +1018,7 @@
                                 <div id="mt93ProgressBar" class="status-progress-bar bg-red-500" style="width:93%"></div>
                             </div>
                         </div>
-<div class="status-device-block">
+<div class="status-device-block" title="Bấm để xem danh sách Máy cũ trong Kho mã máy" onclick="if(!event.target.closest('button'))jumpToInventory('Máy cũ')">
                             <div class="flex items-start justify-between gap-2">
                                 <span class="font-extrabold text-xs text-slate-700">
                                     MT90
@@ -976,7 +1035,7 @@
                                 <div id="mt90ProgressBar" class="status-progress-bar bg-blue-500" style="width:17%"></div>
                             </div>
                         </div>
-                        <div class="status-device-block">
+                        <div class="status-device-block" title="Bấm để xem danh sách Súng Scan trong Kho mã máy" onclick="if(!event.target.closest('button'))jumpToInventory('Súng Scan')">
                             <div class="flex items-start justify-between gap-2">
                                 <span class="font-extrabold text-xs text-slate-700">
                                     Súng Scan
@@ -1402,103 +1461,73 @@
             </div>
 
             <!-- INVENTORY: DANH MỤC MÃ MÁY TRONG KHO -->
-            <div id="tab-inventory" class="tab-content hidden space-y-4">
-                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
-                        <div class="p-4">
-                            <p class="text-sm text-slate-500 font-extrabold uppercase">Tổng số máy</p>
-                            <div id="inventoryTotalCount" class="inventory-stat-number text-slate-900 mt-2">0</div>
-                        </div>
-                        <div class="p-4">
-                            <p class="text-sm text-emerald-700 font-extrabold uppercase">Tổng đang có trong kho</p>
-                            <div id="inventoryAvailableCount" class="inventory-stat-number text-emerald-700 mt-2">0</div>
-                        </div>
-                        <div class="p-4">
-                            <p class="text-sm text-amber-700 font-extrabold uppercase">Tổng đang được mượn</p>
-                            <div id="inventoryBorrowedCount" class="inventory-stat-number text-amber-700 mt-2">0</div>
-                        </div>
-                    </div>
-                    <div class="border-t border-slate-200">
-                        <div class="px-4 py-3 flex flex-wrap items-center justify-between gap-2 bg-slate-50">
-                            <div>
-                                <h2 class="font-extrabold text-slate-900 uppercase">Chi tiết số lượng theo loại thiết bị</h2>
-                                <p class="text-xs text-slate-500 mt-1">Số liệu tách riêng máy mới, máy cũ và súng Scan.</p>
-                            </div>
-                            <span class="text-xs font-bold text-slate-500">Cập nhật realtime</span>
-                        </div>
-                        <div class="data-table-scroll overflow-x-auto">
-                            <table class="w-full text-left border-collapse inventory-breakdown-table">
-                                <thead class="bg-slate-800 text-white text-sm">
-                                    <tr>
-                                        <th class="px-4 py-3">Loại thiết bị</th>
-                                        <th class="px-4 py-3 text-center">Tổng số</th>
-                                        <th class="px-4 py-3 text-center">Đang có trong kho</th>
-                                        <th class="px-4 py-3 text-center">Đang được mượn</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="inventoryBreakdownBody" class="divide-y divide-slate-100">
-                                    <tr><td colspan="4" class="px-4 py-4 text-center text-slate-400">Đang tổng hợp dữ liệu...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-                    <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
-                        <div>
-                            <h2 class="text-base font-extrabold text-slate-900 uppercase">Quản lý danh mục mã máy</h2>
-                            <p class="text-sm text-slate-500 mt-1">Thêm mã máy lẻ hoặc nhập Excel/CSV: chỉ cần dán mã PDA, mỗi dòng 1 mã, không cần tiêu đề. Trạng thái mượn được đối chiếu realtime với giao dịch đang mở.</p>
-                        </div>
-                        <label for="deviceExcelInput" class="px-3 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm cursor-pointer">
-                            <i class="fa-solid fa-file-excel mr-1"></i> Nhập Excel / CSV
-                        </label>
-                        <input id="deviceExcelInput" type="file" accept=".xlsx,.xls,.csv" class="hidden">
+            <div id="tab-inventory" class="tab-content hidden space-y-3">
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-3">
+                    <!-- Hàng 1: số liệu tổng quan, bấm để lọc nhanh -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" data-inv-status="" onclick="setInventoryQuickFilter('status','')" class="inv-chip" title="Hiện tất cả mã máy">
+                            <span class="inv-sub">Tổng</span><span id="inventoryTotalCount" class="inv-num text-slate-900">0</span>
+                        </button>
+                        <button type="button" data-inv-status="Trong kho" onclick="setInventoryQuickFilter('status','Trong kho')" class="inv-chip" title="Chỉ hiện máy đang trong kho">
+                            <span class="inv-sub text-emerald-700">Trong kho</span><span id="inventoryAvailableCount" class="inv-num text-emerald-700">0</span>
+                        </button>
+                        <button type="button" data-inv-status="Đang mượn" onclick="setInventoryQuickFilter('status','Đang mượn')" class="inv-chip" title="Chỉ hiện máy đang được mượn">
+                            <span class="inv-sub text-amber-700">Đang mượn</span><span id="inventoryBorrowedCount" class="inv-num text-amber-700">0</span>
+                        </button>
+                        <span class="inv-divider hidden md:block"></span>
+                        <div id="inventoryTypeChips" class="flex flex-wrap items-center gap-2"></div>
+                        <span class="ml-auto text-xs text-slate-400 font-bold">Cập nhật realtime</span>
                     </div>
 
-                    <form id="deviceForm" onsubmit="saveSingleDevice(event)" class="grid grid-cols-1 md:grid-cols-4 gap-2 items-end">
-                        <div class="md:col-span-2">
-                            <label for="deviceCodeInput" class="block text-sm text-slate-700 mb-1">Mã PDA / Serial</label>
-                            <input id="deviceCodeInput" required type="text" placeholder="Nhập hoặc quét mã máy..." class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:border-cyan-600">
-                        </div>
-                        <div>
-                            <label for="deviceTypeInput" class="block text-sm text-slate-700 mb-1">Loại thiết bị</label>
-                            <select id="deviceTypeInput" class="w-full p-2.5 border border-slate-300 rounded-lg bg-white">
-                                <option value="Máy mới">Máy mới (MT93)</option>
-                                <option value="Máy cũ">Máy cũ (MT90)</option>
-                                <option value="Súng Scan">Súng Scan</option>
-                            </select>
-                        </div>
-                        <div>
-                            <button id="btnSaveDevice" type="submit" class="w-full p-2.5 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-extrabold">
-                                <i class="fa-solid fa-plus mr-1"></i> Thêm mã máy
-                            </button>
-                        </div>
-                    </form>
-
-                    <div class="flex flex-wrap items-center gap-2 mt-4">
-                        <input id="inventorySearch" type="search" placeholder="Tìm mã máy, người mượn, Team, Sup..." class="flex-1 min-w-[220px] p-2.5 border border-slate-300 rounded-lg">
-                        <select id="inventoryStatusFilter" class="p-2.5 border border-slate-300 rounded-lg bg-white">
+                    <!-- Hàng 2: tìm kiếm + bộ lọc + thao tác trên một dòng -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input id="inventorySearch" type="search" placeholder="Tìm mã máy, người mượn, Team, Sup..." class="inv-toolbar-control flex-1 min-w-[220px]">
+                        <select id="inventoryStatusFilter" class="inv-toolbar-control">
                             <option value="">Tất cả trạng thái</option>
                             <option value="Trong kho">Trong kho</option>
                             <option value="Đang mượn">Đang mượn</option>
                         </select>
-                        <select id="inventoryTypeFilter" class="p-2.5 border border-slate-300 rounded-lg bg-white">
+                        <select id="inventoryTypeFilter" class="inv-toolbar-control">
                             <option value="">Tất cả loại máy</option>
                             <option value="Máy mới">Máy mới (MT93)</option>
                             <option value="Máy cũ">Máy cũ (MT90)</option>
                             <option value="Súng Scan">Súng Scan</option>
                         </select>
-                        <span id="inventoryFilterCount" class="text-sm font-extrabold text-slate-500">0 mã máy</span>
+                        <span id="inventoryFilterCount" class="text-sm font-extrabold text-slate-500 whitespace-nowrap">0 mã máy</span>
+                        <button type="button" id="btnToggleAddDevice" onclick="toggleAddDevicePanel()" class="px-3 py-2 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-extrabold text-sm whitespace-nowrap">
+                            <i class="fa-solid fa-plus mr-1"></i> Thêm mã máy
+                        </button>
+                        <label for="deviceExcelInput" title="Chỉ cần dán mã PDA, mỗi dòng 1 mã, không cần tiêu đề" class="px-3 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm cursor-pointer whitespace-nowrap">
+                            <i class="fa-solid fa-file-excel mr-1"></i> Nhập Excel / CSV
+                        </label>
+                        <input id="deviceExcelInput" type="file" accept=".xlsx,.xls,.csv" class="hidden">
                     </div>
+
+                    <!-- Form thêm mã lẻ: ẩn mặc định, bấm "Thêm mã máy" để mở -->
+                    <form id="deviceForm" onsubmit="saveSingleDevice(event)" class="hidden border-t border-slate-100 pt-3 grid grid-cols-1 md:grid-cols-[1fr_220px_auto] gap-2 items-end">
+                        <div id="deviceAddPanel" class="contents">
+                            <div>
+                                <label for="deviceCodeInput" class="block text-sm text-slate-700 mb-1">Mã PDA / Serial</label>
+                                <input id="deviceCodeInput" required type="text" placeholder="Nhập hoặc quét mã máy..." class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:border-cyan-600">
+                            </div>
+                            <div>
+                                <label for="deviceTypeInput" class="block text-sm text-slate-700 mb-1">Loại thiết bị</label>
+                                <select id="deviceTypeInput" class="w-full p-2.5 border border-slate-300 rounded-lg bg-white">
+                                    <option value="Máy mới">Máy mới (MT93)</option>
+                                    <option value="Máy cũ">Máy cũ (MT90)</option>
+                                    <option value="Súng Scan">Súng Scan</option>
+                                </select>
+                            </div>
+                            <button id="btnSaveDevice" type="submit" class="p-2.5 px-5 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-extrabold">
+                                <i class="fa-solid fa-check mr-1"></i> Lưu
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
+                <!-- Danh sách mã máy: nội dung chính -->
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="px-4 py-3 border-b border-slate-200 flex justify-between items-center gap-2">
-                        <h3 class="font-extrabold text-slate-900 uppercase">Danh sách mã máy</h3>
-                        <span class="text-sm text-slate-500">Mã trong kho được đánh dấu màu xanh</span>
-                    </div>
-                    <div class="data-table-scroll overflow-x-auto max-h-[65vh] overflow-y-auto">
+                    <div class="data-table-scroll overflow-x-auto max-h-[74vh] overflow-y-auto">
                         <table class="w-full text-left border-collapse inventory-table">
                             <thead class="bg-slate-900 text-white sticky top-0 z-10">
                                 <tr>
@@ -1507,7 +1536,6 @@
                                     <th>Trạng thái</th>
                                     <th>Người đang mượn</th>
                                     <th>Team / Sup</th>
-                                    <th>Nguồn dữ liệu</th>
                                     <th class="text-center">Thao tác</th>
                                 </tr>
                             </thead>
@@ -3368,11 +3396,11 @@
 
             const tableHeader = `
                 <colgroup>
-                    <col style="width:17%">
+                    <col style="width:16%">
                     <col style="width:13%">
-                    <col style="width:28%">
-                    <col style="width:10%">
-                    <col style="width:10%">
+                    <col style="width:27%">
+                    <col style="width:11%">
+                    <col style="width:11%">
                     <col style="width:11%">
                     <col style="width:11%">
                 </colgroup>
@@ -3462,6 +3490,7 @@
         }
 
         window.openEmpDetailsModal = function(opsId) {
+            try { opsId = decodeURIComponent(String(opsId || '')); } catch (e) { opsId = String(opsId || ''); }
             const modalElement = document.getElementById('empDetailsModal');
             if (modalElement) modalElement.dataset.opsId = String(opsId || '');
 
@@ -4001,13 +4030,21 @@
                     .some(value => String(value || '').toLowerCase().includes(keyword));
             });
 
+            // Đánh dấu chip đang được dùng làm bộ lọc.
+            document.querySelectorAll('[data-inv-status]').forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.invStatus === status);
+            });
+            document.querySelectorAll('[data-inv-type]').forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.invType === type);
+            });
+
             const tbody = document.getElementById('inventoryTable');
             const count = document.getElementById('inventoryFilterCount');
             if (count) count.textContent = `${filtered.length}/${inventoryRowsCache.length} mã máy`;
             if (!tbody) return;
 
             if (!filtered.length) {
-                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold">Chưa có mã máy phù hợp. Hãy thêm mã hoặc nhập danh sách Excel.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold">Chưa có mã máy phù hợp. Hãy thêm mã hoặc nhập danh sách Excel.</td></tr>';
                 return;
             }
 
@@ -4015,8 +4052,9 @@
                 const statusClass = row.status === 'Trong kho'
                     ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
                     : 'bg-amber-100 text-amber-800 border-amber-200';
-                const sourceText = row.source || 'Dữ liệu giao dịch';
-                const personText = row.borrower ? `${escapeHtml(row.borrower)} (${escapeHtml(row.opsId)})` : '—';
+                const personText = row.borrower
+                    ? `<button type="button" onclick="openEmpDetailsModal('${encodeURIComponent(row.opsId)}')" class="text-left font-bold text-cyan-800 hover:underline" title="Xem các máy người này đang giữ">${escapeHtml(row.borrower)} (${escapeHtml(row.opsId)})</button>`
+                    : '—';
                 const teamText = row.team || row.supervisor
                     ? `${escapeHtml(row.team || '—')} / ${escapeHtml(row.supervisor || '—')}`
                     : '—';
@@ -4032,7 +4070,6 @@
                     <td><span class="inline-flex px-2.5 py-1 rounded-full border ${statusClass} font-extrabold">${row.status}</span></td>
                     <td>${personText}</td>
                     <td>${teamText}</td>
-                    <td class="text-slate-500">${escapeHtml(sourceText)}</td>
                     <td class="text-center">${action}</td>
                 </tr>`;
             }).join('');
@@ -4067,32 +4104,48 @@
                 else typeCounts[type].available++;
             });
 
-            const breakdownBody = document.getElementById('inventoryBreakdownBody');
-            if (breakdownBody) {
-                const detailRows = typeOrder.map(type => {
+            // Chip theo loại thiết bị: Kho / Tổng + số đang mượn, bấm để lọc danh sách.
+            const typeChips = document.getElementById('inventoryTypeChips');
+            if (typeChips) {
+                const typeColor = { 'Máy mới': 'text-emerald-700', 'Máy cũ': 'text-blue-700', 'Súng Scan': 'text-purple-700' };
+                typeChips.innerHTML = typeOrder.map(type => {
                     const count = typeCounts[type];
-                    return `
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3">${renderDeviceBadge(type)}</td>
-                            <td class="px-4 py-3 text-center font-extrabold text-slate-900">${count.total}</td>
-                            <td class="px-4 py-3 text-center font-extrabold text-emerald-700">${count.available}</td>
-                            <td class="px-4 py-3 text-center font-extrabold text-amber-700">${count.borrowed}</td>
-                        </tr>
-                    `;
+                    return `<button type="button" data-inv-type="${type}" onclick="setInventoryQuickFilter('type','${type}')" class="inv-chip" title="${type}: ${count.available} trong kho / ${count.total} tổng, ${count.borrowed} đang mượn">
+                        ${renderDeviceBadge(type)}
+                        <span class="inv-num ${typeColor[type]}">${count.available}<span class="inv-sub">/${count.total}</span></span>
+                        <span class="inv-sub">mượn ${count.borrowed}</span>
+                    </button>`;
                 }).join('');
-
-                breakdownBody.innerHTML = detailRows + `
-                    <tr class="bg-slate-50 border-t-2 border-slate-200">
-                        <td class="px-4 py-3 font-extrabold text-slate-900">TỔNG CỘNG</td>
-                        <td class="px-4 py-3 text-center font-black text-slate-900">${total}</td>
-                        <td class="px-4 py-3 text-center font-black text-emerald-700">${available}</td>
-                        <td class="px-4 py-3 text-center font-black text-amber-700">${borrowed}</td>
-                    </tr>
-                `;
             }
 
             applyInventoryFilters();
         }
+
+        // Lọc nhanh từ chip / thẻ Trạng thái kho. Bấm lần nữa để bỏ lọc.
+        window.setInventoryQuickFilter = function(kind, value) {
+            const statusSel = document.getElementById('inventoryStatusFilter');
+            const typeSel = document.getElementById('inventoryTypeFilter');
+            if (kind === 'status' && statusSel) statusSel.value = (statusSel.value === value) ? '' : value;
+            if (kind === 'type' && typeSel) typeSel.value = (typeSel.value === value) ? '' : value;
+            applyInventoryFilters();
+        };
+
+        window.toggleAddDevicePanel = function() {
+            const form = document.getElementById('deviceForm');
+            if (!form) return;
+            form.classList.toggle('hidden');
+            if (!form.classList.contains('hidden')) document.getElementById('deviceCodeInput')?.focus();
+        };
+
+        // Từ thẻ "Trạng thái kho" ở Dashboard nhảy thẳng sang Kho mã máy với bộ lọc loại máy.
+        window.jumpToInventory = function(type) {
+            const typeSel = document.getElementById('inventoryTypeFilter');
+            const statusSel = document.getElementById('inventoryStatusFilter');
+            if (typeSel) typeSel.value = type || '';
+            if (statusSel) statusSel.value = '';
+            window.switchTab('inventory');
+            applyInventoryFilters();
+        };
 
         window.saveSingleDevice = async function(event) {
             event.preventDefault();
