@@ -1072,6 +1072,34 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
         .pr-remove:hover { color: #dc2626; }
         #pendingPdaList .zone-empty-state { min-height: 100%; }
         #pendingPdaList .zone-empty-state p { max-width: 340px; }
+    
+        /* ===== PATCH v4: ANIMATION SVG THAY GIF ===== */
+        .ops-compact > .ops-gif-stage.ops-scene {
+            opacity: 1 !important;
+            background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%) !important;
+            border: 1px solid #fed7aa;
+        }
+        .ops-scene svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+        .ops-float { animation: opsFloat 3.2s ease-in-out infinite; }
+        .ops-bob   { animation: opsBob 3.2s ease-in-out infinite; }
+        .ops-beam  { animation: opsBeam 1.6s ease-in-out infinite; }
+        .ops-laser { animation: opsLaser 1.6s ease-in-out infinite; }
+        .ops-screen-scan { animation: opsScreenScan 2s linear infinite; }
+        .ops-check { transform-box: fill-box; transform-origin: center; animation: opsCheck 3.2s ease-in-out infinite; }
+        .ops-box   { animation: opsBelt 7s linear infinite; }
+        .ops-box-2 { animation-delay: -2.3s; }
+        .ops-box-3 { animation-delay: -4.6s; }
+        @keyframes opsFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes opsBob   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+        @keyframes opsBeam  { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
+        @keyframes opsLaser { 0%,100% { transform: translateY(-4px); opacity: .6; } 50% { transform: translateY(28px); opacity: 1; } }
+        @keyframes opsScreenScan { 0% { transform: translateY(0); } 100% { transform: translateY(95px); } }
+        @keyframes opsCheck { 0%,35% { opacity: 0; transform: scale(.4); } 50%,85% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1); } }
+        @keyframes opsBelt  { from { transform: translateX(-50px); } to { transform: translateX(310px); } }
+        @media (prefers-reduced-motion: reduce) {
+            .ops-scene * { animation: none !important; }
+            .ops-check { opacity: 1; }
+        }
     </style>
 </head>
 
@@ -1369,9 +1397,69 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                             </div>
                         </div>
 
-                        <!-- Ảnh GIF là tài nguyên riêng đặt cùng thư mục với index.html -->
-                        <div class="ops-gif-stage" aria-hidden="true">
-                            <img class="ops-gif-image" src="./ops-id.gif" alt="" draggable="false">
+                        <!-- Animation SVG/CSS thay cho ảnh GIF: nhẹ, nét ở mọi kích thước, không phụ thuộc tệp ngoài -->
+                        <div class="ops-gif-stage ops-scene" aria-hidden="true">
+                            <svg viewBox="0 0 300 440" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="opsBeam" x1="0" y1="1" x2="0" y2="0">
+                                        <stop offset="0" stop-color="#ef4444" stop-opacity=".55"/>
+                                        <stop offset="1" stop-color="#ef4444" stop-opacity="0"/>
+                                    </linearGradient>
+                                    <linearGradient id="opsBody" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0" stop-color="#334155"/>
+                                        <stop offset="1" stop-color="#0f172a"/>
+                                    </linearGradient>
+                                    <clipPath id="opsScreenClip"><rect x="112" y="196" width="76" height="98" rx="6"/></clipPath>
+                                </defs>
+
+                                <circle cx="40" cy="60" r="46" fill="#fdba74" opacity=".25"/>
+                                <circle cx="268" cy="150" r="34" fill="#fb923c" opacity=".18"/>
+                                <circle cx="250" cy="330" r="52" fill="#fdba74" opacity=".2"/>
+
+                                <!-- Kiện hàng + nhãn mã vạch -->
+                                <g class="ops-bob">
+                                    <rect x="92" y="22" width="116" height="84" rx="8" fill="#d6a46b"/>
+                                    <rect x="92" y="22" width="116" height="16" rx="8" fill="#c48f55"/>
+                                    <rect x="141" y="22" width="18" height="84" fill="#e8c28f" opacity=".7"/>
+                                    <rect x="106" y="50" width="88" height="46" rx="4" fill="#ffffff"/>
+                                    <g transform="translate(118 58)" fill="#0f172a"><rect x="0" y="0" width="3" height="26"/><rect x="5" y="0" width="1" height="26"/><rect x="8" y="0" width="2" height="26"/><rect x="12" y="0" width="1" height="26"/><rect x="15" y="0" width="3" height="26"/><rect x="20" y="0" width="1" height="26"/><rect x="23" y="0" width="2" height="26"/><rect x="27" y="0" width="1" height="26"/><rect x="30" y="0" width="3" height="26"/><rect x="35" y="0" width="1" height="26"/><rect x="38" y="0" width="2" height="26"/><rect x="42" y="0" width="1" height="26"/><rect x="45" y="0" width="3" height="26"/><rect x="50" y="0" width="1" height="26"/></g>
+                                    <rect x="106" y="50" width="88" height="46" rx="4" fill="none" stroke="#e2e8f0"/>
+                                </g>
+
+                                <!-- Tia quét -->
+                                <polygon class="ops-beam" points="140,176 160,176 196,98 104,98" fill="url(#opsBeam)"/>
+                                <line class="ops-laser" x1="108" y1="74" x2="192" y2="74" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+
+                                <!-- Máy PDA -->
+                                <g class="ops-float">
+                                    <rect x="98" y="172" width="104" height="196" rx="18" fill="url(#opsBody)"/>
+                                    <rect x="124" y="166" width="52" height="10" rx="5" fill="#f97316"/>
+                                    <rect x="108" y="186" width="84" height="116" rx="9" fill="#0b1220"/>
+                                    <g clip-path="url(#opsScreenClip)">
+                                        <rect x="112" y="196" width="76" height="98" rx="6" fill="#f8fafc"/>
+                                        <rect x="118" y="204" width="40" height="6" rx="3" fill="#cbd5e1"/>
+                                        <rect x="118" y="218" width="64" height="5" rx="2.5" fill="#e2e8f0"/>
+                                        <rect x="118" y="230" width="56" height="5" rx="2.5" fill="#e2e8f0"/>
+                                        <rect x="118" y="242" width="60" height="5" rx="2.5" fill="#e2e8f0"/>
+                                        <rect class="ops-screen-scan" x="112" y="196" width="76" height="3" fill="#ef4444" opacity=".8"/>
+                                    </g>
+                                    <g class="ops-check">
+                                        <circle cx="150" cy="268" r="15" fill="#10b981"/>
+                                        <path d="M142 268 l6 6 l11 -12" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </g>
+                                    <circle cx="124" cy="324" r="8" fill="#475569"/>
+                                    <circle cx="150" cy="324" r="8" fill="#475569"/>
+                                    <circle cx="176" cy="324" r="8" fill="#475569"/>
+                                    <rect x="120" y="342" width="60" height="12" rx="6" fill="#f97316"/>
+                                </g>
+
+                                <!-- Băng chuyền -->
+                                <rect x="0" y="404" width="300" height="10" rx="5" fill="#cbd5e1"/>
+                                <rect x="0" y="414" width="300" height="4" fill="#94a3b8" opacity=".6"/>
+                                <g class="ops-box ops-box-1"><rect x="0" y="380" width="34" height="24" rx="3" fill="#d6a46b"/><rect x="13" y="380" width="8" height="24" fill="#e8c28f" opacity=".75"/></g>
+                                <g class="ops-box ops-box-2"><rect x="0" y="384" width="26" height="20" rx="3" fill="#c48f55"/><rect x="9" y="384" width="8" height="20" fill="#e8c28f" opacity=".75"/></g>
+                                <g class="ops-box ops-box-3"><rect x="0" y="378" width="38" height="26" rx="3" fill="#e0b27c"/><rect x="15" y="378" width="8" height="26" fill="#f1d3a8" opacity=".75"/></g>
+                            </svg>
                         </div>
                     </section>
 
@@ -1400,7 +1488,6 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                                         </div>
                                     </div>
                                     <input type="text" id="borrowPdaInput" placeholder="Quét PDA cấp..." class="w-full p-2.5 border border-emerald-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-emerald-500">
-                                    <p class="text-xs text-emerald-700/80 font-semibold">Quét mã hoặc dán từ Excel, mỗi dòng 1 mã.</p>
                                 </div>
 
                                 <div id="zone-return" class="scanner-zone border-2 border-amber-300 border-dashed rounded-xl p-3 bg-amber-50/80 flex flex-col gap-2">
@@ -1415,7 +1502,6 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                                         </div>
                                     </div>
                                     <input type="text" id="returnPdaInput" placeholder="Quét PDA trả..." class="w-full p-2.5 border border-amber-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-amber-500">
-                                    <p class="text-xs text-amber-700/80 font-semibold">Quét mã hoặc dán từ Excel, mỗi dòng 1 mã.</p>
                                 </div>
                             </div>
 
@@ -3346,12 +3432,7 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                         ? `<span class="zone-note zone-note-ok"><i class="fa-solid fa-user-check mr-1"></i> Người mượn / trả: <b>${escapeHtml(selectedEmployee.empName || '')}</b> (${escapeHtml(selectedEmployee.opsId || '')})</span>`
                         : `<span class="zone-note zone-note-warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Chưa quét OPS ID nhân viên</span>`;
                     bEl.innerHTML = `
-                        ${who}
-                        <span class="zone-stock">Còn kho:
-                            <b class="stock-pill stock-93">MT93 ${txt('mt93AvailableText')}</b>
-                            <b class="stock-pill stock-90">MT90 ${txt('mt90AvailableText')}</b>
-                            <b class="stock-pill stock-scan">Scan ${txt('scanAvailableText')}</b>
-                        </span>`;
+                        ${who}`;
                 }
 
             } catch (e) { console.warn('renderZoneExtras', e); }
