@@ -931,7 +931,57 @@ html[data-view="mobile"] .pivot-grand-summary .summary-value{font-size:18px!impo
 html[data-view="mobile"] .inv-chip{font-size:12.5px}
 html[data-view="mobile"] .inv-chip .inv-num{font-size:16px}
 html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
-</style>
+
+        /* ===== PATCH: DASHBOARD LẤP ĐẦY, KHUNG MƯỢN/TRẢ CÓ NỘI DUNG ===== */
+        #tab-dashboard > .dashboard-three-cards { min-height: 560px; }
+        .scanner-left-column { grid-template-rows: repeat(2, minmax(230px, 1fr)) !important; }
+        .scanner-zone { min-height: 230px !important; }
+        .scanner-zone .pending-badge { position: static !important; display: inline-block; }
+        .scanner-queue {
+            height: auto !important;
+            max-height: none !important;
+            min-height: 260px !important;
+            flex: 1 1 0 !important;
+        }
+        .zone-extras {
+            flex: 1 1 0; min-height: 0;
+            display: flex; flex-direction: column; gap: .4rem;
+            padding: .5rem .6rem; border-radius: .7rem;
+            background: rgba(255,255,255,.75); border: 1px solid rgba(148,163,184,.35);
+        }
+        .zone-extras-green { border-color: rgba(16,185,129,.35); }
+        .zone-extras-amber { border-color: rgba(245,158,11,.4); }
+        .zone-extras-head {
+            display: flex; justify-content: space-between; align-items: center; gap: .5rem;
+            font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .02em; color: #475569;
+        }
+        .zone-chip-wrap {
+            flex: 1 1 0; min-height: 0; overflow-y: auto; align-content: flex-start;
+            display: flex; flex-wrap: wrap; gap: .35rem;
+        }
+        .zone-empty { font-size: 12px; font-style: italic; color: #94a3b8; font-weight: 600; }
+        .zone-chip {
+            display: inline-flex; align-items: center; gap: .3rem;
+            padding: .2rem .55rem; border-radius: .5rem; font-size: 12px; font-weight: 800; line-height: 1.3;
+            border: 1px solid transparent;
+        }
+        .zone-chip-green { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+        .zone-chip-green button { color: #059669; font-size: 14px; line-height: 1; }
+        .zone-chip-green button:hover { color: #dc2626; }
+        .zone-chip-amber { background: #fef3c7; color: #92400e; border-color: #fcd34d; cursor: pointer; transition: background .15s; }
+        .zone-chip-amber:hover:not(:disabled) { background: #fde68a; }
+        .zone-chip-amber.is-picked { background: #e2e8f0; color: #64748b; border-color: #cbd5e1; cursor: default; }
+        .zone-extras-foot { display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; font-size: 12px; }
+        .zone-stock { color: #64748b; font-weight: 700; font-size: 12px; }
+        .zone-note { font-weight: 800; font-size: 12px; }
+        .zone-note-ok { color: #047857; }
+        .zone-note-warn { color: #b45309; }
+        .zone-btn-all {
+            padding: .25rem .6rem; border-radius: .5rem; background: #f59e0b; color: #fff;
+            font-size: 12px; font-weight: 800; box-shadow: 0 1px 2px rgba(0,0,0,.1);
+        }
+        .zone-btn-all:hover { background: #d97706; }
+    </style>
 </head>
 
 <body class="bg-[#f4f6f8] text-gray-800 text-sm flex h-screen overflow-hidden select-none">
@@ -1091,7 +1141,7 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
             <!-- DASHBOARD -->
             <div id="tab-dashboard" class="tab-content flex-1 flex flex-col space-y-4 min-h-0">
                 <!-- 3 THẺ DASHBOARD: TRẠNG THÁI / OPS ID / QUÉT THIẾT BỊ -->
-                <div class="grid grid-cols-10 gap-4 items-stretch dashboard-three-cards">
+                <div class="grid grid-cols-10 gap-4 items-stretch dashboard-three-cards flex-1">
 
                     <!-- THẺ 1: TRẠNG THÁI KHO + QR XÁC NHẬN -->
                     <section class="dashboard-card col-span-10 lg:col-span-2 card-depth rounded-2xl p-3.5 flex flex-col gap-3">
@@ -1220,36 +1270,36 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
 
                         <div class="scanner-main-grid">
                             <div class="scanner-left-column">
-                                <div id="zone-borrow" class="scanner-zone border-2 border-emerald-300 border-dashed rounded-xl p-3 bg-emerald-50/80 flex flex-col justify-between gap-2">
-                                    <div class="flex items-start justify-between gap-2">
-                                        <div class="min-w-0">
-                                            <span class="font-extrabold text-emerald-800 block mb-1 text-xs uppercase"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> 1. MƯỢN MÁY</span>
-                                            <p class="text-xs text-emerald-700/80 font-semibold">Quét mã hoặc chọn Excel: chỉ cần dán mã PDA, mỗi dòng 1 mã (không cần tiêu đề).</p>
-                                        </div>
-                                        <div class="shrink-0">
-                                            <label for="borrowPdaExcelInput" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-emerald-300 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-extrabold cursor-pointer shadow-sm">
+                                <div id="zone-borrow" class="scanner-zone border-2 border-emerald-300 border-dashed rounded-xl p-3 bg-emerald-50/80 flex flex-col gap-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="font-extrabold text-emerald-800 text-xs uppercase"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> 1. MƯỢN MÁY</span>
+                                        <div class="flex items-center gap-2 shrink-0">
+                                            <span class="pending-badge">Chờ cấp: 0</span>
+                                            <label for="borrowPdaExcelInput" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-300 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-extrabold cursor-pointer shadow-sm">
                                                 <i class="fa-regular fa-file-excel"></i> EXCEL
                                             </label>
                                             <input type="file" id="borrowPdaExcelInput" accept=".xlsx,.xls,.csv" class="hidden">
                                         </div>
                                     </div>
+                                    <p class="text-xs text-emerald-700/80 font-semibold">Quét mã hoặc chọn Excel: chỉ cần dán mã PDA, mỗi dòng 1 mã (không cần tiêu đề).</p>
                                     <input type="text" id="borrowPdaInput" placeholder="Quét PDA cấp..." class="w-full p-2.5 border border-emerald-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-emerald-500">
+                                    <div id="borrowExtras" class="zone-extras zone-extras-green"></div>
                                 </div>
 
-                                <div id="zone-return" class="scanner-zone border-2 border-amber-300 border-dashed rounded-xl p-3 bg-amber-50/80 flex flex-col justify-between gap-2">
-                                    <div class="flex items-start justify-between gap-2">
-                                        <div class="min-w-0">
-                                            <span class="font-extrabold text-amber-800 block mb-1 text-xs uppercase"><i class="fa-solid fa-arrow-down-to-bracket mr-1"></i> 2. TRẢ MÁY</span>
-                                            <p class="text-xs text-amber-700/80 font-semibold">Quét mã hoặc chọn Excel: chỉ cần dán mã PDA, mỗi dòng 1 mã (không cần tiêu đề).</p>
-                                        </div>
-                                        <div class="shrink-0">
-                                            <label for="returnPdaExcelInput" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-amber-300 bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-extrabold cursor-pointer shadow-sm">
+                                <div id="zone-return" class="scanner-zone border-2 border-amber-300 border-dashed rounded-xl p-3 bg-amber-50/80 flex flex-col gap-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="font-extrabold text-amber-800 text-xs uppercase"><i class="fa-solid fa-arrow-down-to-bracket mr-1"></i> 2. TRẢ MÁY</span>
+                                        <div class="flex items-center gap-2 shrink-0">
+                                            <span class="pending-badge">Chờ trả: 0</span>
+                                            <label for="returnPdaExcelInput" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-extrabold cursor-pointer shadow-sm">
                                                 <i class="fa-regular fa-file-excel"></i> EXCEL
                                             </label>
                                             <input type="file" id="returnPdaExcelInput" accept=".xlsx,.xls,.csv" class="hidden">
                                         </div>
                                     </div>
+                                    <p class="text-xs text-amber-700/80 font-semibold">Quét mã hoặc chọn Excel: chỉ cần dán mã PDA, mỗi dòng 1 mã (không cần tiêu đề).</p>
                                     <input type="text" id="returnPdaInput" placeholder="Quét PDA trả..." class="w-full p-2.5 border border-amber-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-amber-500">
+                                    <div id="returnExtras" class="zone-extras zone-extras-amber"></div>
                                 </div>
                             </div>
 
@@ -1277,31 +1327,6 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                             </div>
                         </div>
                     </section>
-                </div>
-
-                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex-1 flex flex-col min-h-0">
-                    <div class="flex justify-between items-center mb-3 pb-2 border-b">
-                        <h3 class="font-extrabold text-gray-800 uppercase flex items-center gap-2 text-xs tracking-wide">
-                            <i class="fa-solid fa-list-ul text-orange-500 text-sm"></i> THIẾT BỊ CHƯA TRẢ REALTIME TRACKER
-                        </h3>
-                        <span class="text-xs font-bold text-gray-400">Bấm trả nhanh tại cột thao tác bên dưới</span>
-                    </div>
-
-                    <div class="data-table-scroll overflow-x-auto flex-1 max-h-[320px] overflow-y-auto rounded-xl border border-gray-100">
-                        <table class="w-full text-left border-collapse relative">
-                            <thead class="bg-slate-900 text-white font-bold text-xs uppercase sticky top-0 z-10 shadow-sm">
-                                <tr>
-                                    <th class="p-3">MÃ PDA</th>
-                                    <th class="p-3">LOẠI</th>
-                                    <th class="p-3">NGƯỜI MƯỢN</th>
-                                    <th class="p-3">TEAM / SUPERVISOR</th>
-                                    <th class="p-3">THỜI GIAN MƯỢN</th>
-                                    <th class="p-3 text-right">THAO TÁC</th>
-                                </tr>
-                            </thead>
-                            <tbody id="unreturnedMiniTable" class="divide-y divide-gray-100 text-xs"></tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
 
@@ -2611,6 +2636,7 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                     renderPivotTable(unreturnedCache);
                     updateInventoryStats();
                     renderInventoryTable();
+                    renderZoneExtras();
                 },
                 listenerError('danh sách thiết bị chưa trả')
             );
@@ -3162,8 +3188,119 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                 b.textContent=label+': '+list.length;b.classList.toggle('has',list.length>0);
             });
         }
+
+        // ============================================================
+        // NỘI DUNG PHỤ TRONG KHUNG MƯỢN MÁY / TRẢ MÁY
+        // ============================================================
+        function renderZoneExtras() {
+            try {
+                const bEl = document.getElementById('borrowExtras');
+                const rEl = document.getElementById('returnExtras');
+                const txt = id => (document.getElementById(id)?.textContent || '0').trim();
+
+                if (bEl) {
+                    const chips = pendingBorrowPdaList.map((code, i) => `
+                        <span class="zone-chip zone-chip-green">
+                            ${escapeHtml(code)}
+                            <button type="button" onclick="removePending('borrow', ${i})" title="Bỏ mã này">×</button>
+                        </span>`).join('');
+
+                    const who = selectedEmployee
+                        ? `<span class="zone-note zone-note-ok"><i class="fa-solid fa-user-check mr-1"></i> Người mượn: <b>${escapeHtml(selectedEmployee.empName || '')}</b> (${escapeHtml(selectedEmployee.opsId || '')})</span>`
+                        : `<span class="zone-note zone-note-warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Chưa quét OPS ID người mượn</span>`;
+
+                    bEl.innerHTML = `
+                        <div class="zone-extras-head"><span>Mã chờ cấp</span><span>${pendingBorrowPdaList.length} mã</span></div>
+                        <div class="zone-chip-wrap">${chips || '<span class="zone-empty">Chưa có mã nào. Quét hoặc dán từ Excel để thêm.</span>'}</div>
+                        <div class="zone-extras-foot">
+                            ${who}
+                            <span class="zone-stock">Còn kho: <b>MT93 ${txt('mt93AvailableText')}</b> · <b>MT90 ${txt('mt90AvailableText')}</b> · <b>Scan ${txt('scanAvailableText')}</b></span>
+                        </div>`;
+                }
+
+                if (rEl) {
+                    if (!selectedEmployee) {
+                        rEl.innerHTML = `
+                            <div class="zone-extras-head"><span>Máy nhân viên đang mượn</span><span>${unreturnedCache.length} máy chưa trả toàn kho</span></div>
+                            <div class="zone-chip-wrap"><span class="zone-empty">Quét OPS ID ở thẻ bên trái để xem và trả nhanh các máy nhân viên đang giữ.</span></div>`;
+                    } else {
+                        const myOps = String(selectedEmployee.opsId || '').trim().toLowerCase();
+                        const mine = sortUnreturnedList(
+                            unreturnedCache.filter(it => String(it.opsId || '').trim().toLowerCase() === myOps)
+                        );
+                        const inPending = it => pendingReturnPdaList.some(
+                            x => String(x.code).trim().toLowerCase() === String(it.pdaCode || '').trim().toLowerCase()
+                        );
+                        const waiting = mine.filter(it => !inPending(it)).length;
+                        const chips = mine.map(it => {
+                            const picked = inPending(it);
+                            return `<button type="button" class="zone-chip zone-chip-amber ${picked ? 'is-picked' : ''}" ${picked ? 'disabled' : ''}
+                                onclick="addReturnFromZone('${it.id}')" title="${picked ? 'Đã trong danh sách chờ trả' : 'Bấm để thêm vào danh sách trả'}">
+                                <i class="fa-solid ${picked ? 'fa-check' : 'fa-plus'} mr-1"></i>${escapeHtml(it.pdaCode || '')}
+                            </button>`;
+                        }).join('');
+
+                        rEl.innerHTML = `
+                            <div class="zone-extras-head">
+                                <span>Đang mượn: ${escapeHtml(selectedEmployee.empName || '')}</span>
+                                <span>${mine.length} máy</span>
+                            </div>
+                            <div class="zone-chip-wrap">${chips || '<span class="zone-empty">Nhân viên này không có máy nào đang mượn.</span>'}</div>
+                            <div class="zone-extras-foot">
+                                <span class="zone-stock">Bấm vào mã để thêm vào danh sách trả</span>
+                                ${waiting > 0 ? `<button type="button" class="zone-btn-all" onclick="addAllReturnForEmployee()"><i class="fa-solid fa-list-check mr-1"></i> Chọn tất cả (${waiting})</button>` : ''}
+                            </div>`;
+                    }
+                }
+            } catch (e) { console.warn('renderZoneExtras', e); }
+        }
+
+        window.addReturnFromZone = function (id) {
+            const rec = unreturnedCache.find(x => x.id === id);
+            if (!rec) return;
+            const exists = pendingReturnPdaList.some(
+                x => String(x.code).trim().toLowerCase() === String(rec.pdaCode || '').trim().toLowerCase()
+            );
+            if (exists) { scanFeedback('return', false); return; }
+            pendingReturnPdaList.push({ code: rec.pdaCode, originalData: rec });
+            scanFeedback('return', true);
+            renderPendingList();
+        };
+
+        window.addAllReturnForEmployee = function () {
+            if (!selectedEmployee) return;
+            const myOps = String(selectedEmployee.opsId || '').trim().toLowerCase();
+            let added = 0;
+            sortUnreturnedList(
+                unreturnedCache.filter(it => String(it.opsId || '').trim().toLowerCase() === myOps)
+            ).forEach(rec => {
+                const exists = pendingReturnPdaList.some(
+                    x => String(x.code).trim().toLowerCase() === String(rec.pdaCode || '').trim().toLowerCase()
+                );
+                if (!exists) { pendingReturnPdaList.push({ code: rec.pdaCode, originalData: rec }); added++; }
+            });
+            if (added) { scanFeedback('return', true); renderPendingList(); }
+        };
+
+        // Tự làm mới khi chọn / bỏ chọn nhân viên hoặc số liệu tồn kho đổi.
+        (function setupZoneExtrasObservers() {
+            const attach = () => {
+                const obs = new MutationObserver(() => renderZoneExtras());
+                const emp = document.getElementById('selectedEmpBox');
+                if (emp) obs.observe(emp, { childList: true, subtree: true, characterData: true });
+                ['mt93AvailableText', 'mt90AvailableText', 'scanAvailableText'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) obs.observe(el, { childList: true, subtree: true, characterData: true });
+                });
+                renderZoneExtras();
+            };
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attach);
+            else attach();
+        })();
+
         function renderPendingList() {
             try{updatePendingBadges();}catch(e){}
+            renderZoneExtras();
             const container = document.getElementById('pendingPdaList');
             const totalCount = pendingBorrowPdaList.length + pendingReturnPdaList.length;
 
@@ -3792,12 +3929,69 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
             delete modal.dataset.opsId;
         };
 
+
+        // ============================================================
+        // SẮP XẾP DANH SÁCH CHƯA TRẢ: NGÀY MƯỢN -> HỌ TÊN NGƯỜI MƯỢN
+        // ============================================================
+        // Đổi thành true nếu muốn ngày mới nhất hiển thị trước.
+        const UNRETURNED_SORT_DATE_DESC = false;
+
+        function parseBorrowDate(item) {
+            const m = String(item.borrowTime || '').match(
+                /(\d{1,2}):(\d{2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/
+            );
+            if (m) {
+                const [, hh, mi, ss, dd, mo, yy] = m.map(Number);
+                return {
+                    day: Date.UTC(yy, mo - 1, dd),
+                    full: Date.UTC(yy, mo - 1, dd, hh, mi, ss),
+                    label: `${String(dd).padStart(2, '0')}/${String(mo).padStart(2, '0')}/${yy}`
+                };
+            }
+            // Dự phòng: dùng createdAt của Firestore nếu borrowTime không đọc được.
+            const ms = item.createdAt && typeof item.createdAt.toMillis === 'function'
+                ? item.createdAt.toMillis() : null;
+            if (ms) {
+                const d = new Date(ms);
+                const day = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+                return {
+                    day,
+                    full: ms,
+                    label: `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
+                };
+            }
+            return { day: null, full: null, label: 'Không rõ ngày' };
+        }
+
+        function sortUnreturnedList(list) {
+            const dir = UNRETURNED_SORT_DATE_DESC ? -1 : 1;
+            return list
+                .map(item => ({ item, t: parseBorrowDate(item) }))
+                .sort((x, y) => {
+                    // 1. Ngày mượn (bản ghi không có ngày xếp cuối)
+                    if (x.t.day !== y.t.day) {
+                        if (x.t.day === null) return 1;
+                        if (y.t.day === null) return -1;
+                        return (x.t.day - y.t.day) * dir;
+                    }
+                    // 2. Họ tên người mượn (A -> Z, theo tiếng Việt)
+                    const byName = String(x.item.empName || '').trim()
+                        .localeCompare(String(y.item.empName || '').trim(), 'vi', { sensitivity: 'base' });
+                    if (byName) return byName;
+                    // 3. Cùng tên: gom theo OPS ID, rồi theo giờ mượn, rồi mã PDA
+                    const byOps = String(x.item.opsId || '').localeCompare(String(y.item.opsId || ''), 'en', { numeric: true });
+                    if (byOps) return byOps;
+                    if (x.t.full !== y.t.full) return (x.t.full || 0) - (y.t.full || 0);
+                    return String(x.item.pdaCode || '').localeCompare(String(y.item.pdaCode || ''), 'en', { numeric: true });
+                })
+                .map(x => x.item);
+        }
+
         function renderUnreturned(list) {
-            list = Array.isArray(list) ? list : [];
+            list = Array.isArray(list) ? sortUnreturnedList(Array.isArray(list) ? list : []) : [];
             currentUnreturnedView = list.slice();
             const fullTbody = document.getElementById('unreturnedFullTable');
-            const miniTbody = document.getElementById('unreturnedMiniTable');
-            const countEl = document.getElementById('unreturnedFilterCount');
+                        const countEl = document.getElementById('unreturnedFilterCount');
 
             if (countEl) {
                 countEl.textContent = `${list.length}/${unreturnedCache.length} thiết bị`;
@@ -3805,10 +3999,30 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
 
             const isDisabled = currentUserRole === 'guest';
 
+            const dayCounts = {};
+            list.forEach(item => {
+                const label = parseBorrowDate(item).label;
+                dayCounts[label] = (dayCounts[label] || 0) + 1;
+            });
+            let lastDayLabel = null;
+
             fullTbody.innerHTML = list.length ? list.map(item => {
                 const devType = detectDeviceType(item.pdaCode);
+                const dayLabel = parseBorrowDate(item).label;
+                let groupRow = '';
+                if (dayLabel !== lastDayLabel) {
+                    lastDayLabel = dayLabel;
+                    groupRow = `
+                    <tr class="bg-slate-100">
+                        <td colspan="9" class="px-2.5 py-1.5 text-xs font-extrabold text-slate-700 uppercase tracking-wide">
+                            <i class="fa-regular fa-calendar mr-1 text-orange-500"></i>
+                            Ngày ${dayLabel}
+                            <span class="ml-2 normal-case font-bold text-slate-500">(${dayCounts[dayLabel]} thiết bị)</span>
+                        </td>
+                    </tr>`;
+                }
 
-                return `
+                return groupRow + `
                     <tr class="hover:bg-orange-50/40 border-b border-gray-100">
                         <td class="p-2.5 font-bold text-orange-600">
                             <span class="select-all">${item.pdaCode || ''}</span>
@@ -3839,29 +4053,6 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                 </tr>
             `;
 
-            miniTbody.innerHTML = list.map(item => {
-                const devType = detectDeviceType(item.pdaCode);
-
-                return `
-                    <tr class="hover:bg-gray-50/80 border-b border-gray-100 transition-all">
-                        <td class="p-3 font-extrabold text-orange-600 text-xs">
-                            <span class="select-all">${item.pdaCode || ''}</span>
-                            <button onclick="copySinglePdaCode('${item.pdaCode}')" title="Sao chép" class="text-gray-400 hover:text-orange-600 text-xs">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </td>
-                        <td class="p-3">${renderDeviceBadge(devType)}</td>
-                        <td class="p-3 font-bold text-gray-800 text-xs">${item.empName || ''} <span class="text-gray-500 font-semibold text-xs">(${item.opsId || ''})</span></td>
-                        <td class="p-3 text-gray-700 font-bold text-xs">${item.team || ''} - ${item.supervisor || ''}</td>
-                        <td class="p-3 text-gray-500 text-xs font-semibold">${item.borrowTime || ''}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="returnPdaDirect('${item.id}', '${item.pdaCode}')" ${isDisabled ? 'disabled' : ''} class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm disabled:opacity-50 transition-all">
-                                Nhận Trả
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
         }
 
         // ============================================================
