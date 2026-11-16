@@ -932,55 +932,82 @@ html[data-view="mobile"] .inv-chip{font-size:12.5px}
 html[data-view="mobile"] .inv-chip .inv-num{font-size:16px}
 html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
 
-        /* ===== PATCH: DASHBOARD LẤP ĐẦY, KHUNG MƯỢN/TRẢ CÓ NỘI DUNG ===== */
+        /* ===== PATCH v2: DASHBOARD LẤP ĐẦY, BỐ CỤC QUÉT THIẾT BỊ MỚI ===== */
         #tab-dashboard > .dashboard-three-cards { min-height: 560px; }
-        .scanner-left-column { grid-template-rows: repeat(2, minmax(230px, 1fr)) !important; }
-        .scanner-zone { min-height: 230px !important; }
-        .scanner-zone .pending-badge { position: static !important; display: inline-block; }
-        .scanner-queue {
-            height: auto !important;
-            max-height: none !important;
-            min-height: 260px !important;
-            flex: 1 1 0 !important;
+        .pending-badge { position: static !important; display: inline-block; }
+
+        /* Thẻ 3: 4 hàng - ô quét / thanh thông tin / danh sách + trả nhanh / nút */
+        .scanner-layout { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: .65rem; }
+        .scanner-inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+        .scanner-inputs .scanner-zone { min-height: 0 !important; }
+        .scanner-infobar {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem .9rem;
+            padding: .45rem .75rem; border-radius: .7rem; background: #f8fafc; border: 1px solid #e2e8f0;
         }
-        .zone-extras {
-            flex: 1 1 0; min-height: 0;
-            display: flex; flex-direction: column; gap: .4rem;
-            padding: .5rem .6rem; border-radius: .7rem;
-            background: rgba(255,255,255,.75); border: 1px solid rgba(148,163,184,.35);
-        }
-        .zone-extras-green { border-color: rgba(16,185,129,.35); }
-        .zone-extras-amber { border-color: rgba(245,158,11,.4); }
-        .zone-extras-head {
-            display: flex; justify-content: space-between; align-items: center; gap: .5rem;
+        .scanner-lower { flex: 1 1 0; min-height: 250px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+        .scanner-panel { display: flex; flex-direction: column; gap: .4rem; min-width: 0; min-height: 0; }
+        .scanner-panel-head {
+            display: flex; align-items: center; justify-content: space-between; gap: .5rem; min-height: 1.9rem;
             font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .02em; color: #475569;
+        }
+        .scanner-queue { height: auto !important; max-height: none !important; min-height: 0 !important; flex: 1 1 0 !important; }
+
+        .zone-extras {
+            flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: .4rem;
+            padding: .5rem .6rem; border-radius: .75rem; background: #fffbeb; border: 1px solid rgba(245,158,11,.4);
         }
         .zone-chip-wrap {
             flex: 1 1 0; min-height: 0; overflow-y: auto; align-content: flex-start;
             display: flex; flex-wrap: wrap; gap: .35rem;
         }
-        .zone-empty { font-size: 12px; font-style: italic; color: #94a3b8; font-weight: 600; }
+        .zone-count { font-size: 12px; font-weight: 900; color: #b45309; background: #fef3c7; border-radius: 999px; padding: .05rem .55rem; }
+        .zone-empty-state {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .4rem;
+            text-align: center; color: #94a3b8; padding: .5rem;
+        }
+        .zone-empty-state i { font-size: 26px; color: #fcd34d; }
+        .zone-empty-state p { font-size: 12px; font-weight: 700; line-height: 1.4; max-width: 250px; }
         .zone-chip {
-            display: inline-flex; align-items: center; gap: .3rem;
-            padding: .2rem .55rem; border-radius: .5rem; font-size: 12px; font-weight: 800; line-height: 1.3;
+            display: inline-flex; align-items: center; gap: .35rem;
+            padding: .25rem .6rem; border-radius: .5rem; font-size: 12px; font-weight: 800; line-height: 1.3;
             border: 1px solid transparent;
         }
-        .zone-chip-green { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
-        .zone-chip-green button { color: #059669; font-size: 14px; line-height: 1; }
-        .zone-chip-green button:hover { color: #dc2626; }
         .zone-chip-amber { background: #fef3c7; color: #92400e; border-color: #fcd34d; cursor: pointer; transition: background .15s; }
         .zone-chip-amber:hover:not(:disabled) { background: #fde68a; }
         .zone-chip-amber.is-picked { background: #e2e8f0; color: #64748b; border-color: #cbd5e1; cursor: default; }
-        .zone-extras-foot { display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; font-size: 12px; }
-        .zone-stock { color: #64748b; font-weight: 700; font-size: 12px; }
+        .zone-extras-foot { display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; }
+        .zone-stock { color: #64748b; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
         .zone-note { font-weight: 800; font-size: 12px; }
         .zone-note-ok { color: #047857; }
         .zone-note-warn { color: #b45309; }
+        .stock-pill { padding: .1rem .5rem; border-radius: 999px; font-size: 12px; }
+        .stock-93 { background: #ffedd5; color: #c2410c; }
+        .stock-90 { background: #dbeafe; color: #1d4ed8; }
+        .stock-scan { background: #f3e8ff; color: #7e22ce; }
         .zone-btn-all {
             padding: .25rem .6rem; border-radius: .5rem; background: #f59e0b; color: #fff;
             font-size: 12px; font-weight: 800; box-shadow: 0 1px 2px rgba(0,0,0,.1);
         }
         .zone-btn-all:hover { background: #d97706; }
+
+        /* Thẻ 1: ô thống kê đang mượn, lấp khoảng trống giữa các ô máy và QR */
+        .stat-unreturned {
+            display: flex; flex-direction: column; gap: .3rem; text-align: left; width: 100%;
+            padding: .75rem; border-radius: .9rem; border: 1px solid #fde68a;
+            background: linear-gradient(135deg, #fffbeb, #fff7ed); transition: box-shadow .15s;
+        }
+        .stat-unreturned:hover { box-shadow: 0 0 0 2px rgba(245,158,11,.3); }
+        .stat-unreturned-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+        .stat-unreturned-label { font-size: 12px; font-weight: 900; text-transform: uppercase; color: #92400e; }
+        .stat-unreturned-num { font-size: 26px; line-height: 1; font-weight: 900; color: #ea580c; }
+        .stat-unreturned-sub { font-size: 12px; font-weight: 700; color: #78716c; }
+        .stat-old, .stat-today { font-weight: 900; font-size: 13px; padding: .05rem .5rem; border-radius: 999px; background: #f1f5f9; color: #475569; }
+        .stat-old.has { background: #fee2e2; color: #dc2626; }
+        .stat-today { background: #d1fae5; color: #047857; }
+
+        @media (max-width: 1023px) {
+            .scanner-inputs, .scanner-lower { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 
@@ -1204,6 +1231,22 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                             </div>
                         </div>
 
+                        <!-- Thống kê thiết bị đang mượn (bấm để xem danh sách) -->
+                        <button type="button" onclick="switchTab('unreturned')" class="stat-unreturned" title="Xem danh sách chưa trả">
+                            <span class="stat-unreturned-row">
+                                <span class="stat-unreturned-label"><i class="fa-solid fa-clock-rotate-left mr-1 text-amber-500"></i> Đang mượn</span>
+                                <span class="stat-unreturned-num" id="statUnreturnedTotal">0</span>
+                            </span>
+                            <span class="stat-unreturned-row stat-unreturned-sub">
+                                <span>Mượn từ hôm trước</span>
+                                <span id="statUnreturnedOld" class="stat-old">0</span>
+                            </span>
+                            <span class="stat-unreturned-row stat-unreturned-sub">
+                                <span>Mượn hôm nay</span>
+                                <span id="statUnreturnedToday" class="stat-today">0</span>
+                            </span>
+                        </button>
+
                         <!-- QR xác nhận: quét trực tiếp hoặc bấm nút đều ghi ngay -->
                         <div class="confirm-qr-card mt-auto">
                             <div class="confirm-qr-copy">
@@ -1268,62 +1311,71 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                             </div>
                         </div>
 
-                        <div class="scanner-main-grid">
-                            <div class="scanner-left-column">
+                        <div class="scanner-layout">
+                            <!-- Hàng 1: hai ô quét xếp ngang -->
+                            <div class="scanner-inputs">
                                 <div id="zone-borrow" class="scanner-zone border-2 border-emerald-300 border-dashed rounded-xl p-3 bg-emerald-50/80 flex flex-col gap-2">
                                     <div class="flex items-center justify-between gap-2">
-                                        <span class="font-extrabold text-emerald-800 text-xs uppercase"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> 1. MƯỢN MÁY</span>
-                                        <div class="flex items-center gap-2 shrink-0">
+                                        <span class="font-extrabold text-emerald-800 text-xs uppercase whitespace-nowrap"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> 1. Mượn máy</span>
+                                        <div class="flex items-center gap-1.5 shrink-0">
                                             <span class="pending-badge">Chờ cấp: 0</span>
-                                            <label for="borrowPdaExcelInput" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-300 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-extrabold cursor-pointer shadow-sm">
+                                            <label for="borrowPdaExcelInput" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-emerald-300 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-extrabold cursor-pointer shadow-sm">
                                                 <i class="fa-regular fa-file-excel"></i> EXCEL
                                             </label>
                                             <input type="file" id="borrowPdaExcelInput" accept=".xlsx,.xls,.csv" class="hidden">
                                         </div>
                                     </div>
-                                    <p class="text-xs text-emerald-700/80 font-semibold">Quét mã hoặc chọn Excel: chỉ cần dán mã PDA, mỗi dòng 1 mã (không cần tiêu đề).</p>
                                     <input type="text" id="borrowPdaInput" placeholder="Quét PDA cấp..." class="w-full p-2.5 border border-emerald-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-emerald-500">
-                                    <div id="borrowExtras" class="zone-extras zone-extras-green"></div>
+                                    <p class="text-xs text-emerald-700/80 font-semibold">Quét mã hoặc dán từ Excel, mỗi dòng 1 mã.</p>
                                 </div>
 
                                 <div id="zone-return" class="scanner-zone border-2 border-amber-300 border-dashed rounded-xl p-3 bg-amber-50/80 flex flex-col gap-2">
                                     <div class="flex items-center justify-between gap-2">
-                                        <span class="font-extrabold text-amber-800 text-xs uppercase"><i class="fa-solid fa-arrow-down-to-bracket mr-1"></i> 2. TRẢ MÁY</span>
-                                        <div class="flex items-center gap-2 shrink-0">
+                                        <span class="font-extrabold text-amber-800 text-xs uppercase whitespace-nowrap"><i class="fa-solid fa-arrow-down-to-bracket mr-1"></i> 2. Trả máy</span>
+                                        <div class="flex items-center gap-1.5 shrink-0">
                                             <span class="pending-badge">Chờ trả: 0</span>
-                                            <label for="returnPdaExcelInput" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-extrabold cursor-pointer shadow-sm">
+                                            <label for="returnPdaExcelInput" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-amber-300 bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-extrabold cursor-pointer shadow-sm">
                                                 <i class="fa-regular fa-file-excel"></i> EXCEL
                                             </label>
                                             <input type="file" id="returnPdaExcelInput" accept=".xlsx,.xls,.csv" class="hidden">
                                         </div>
                                     </div>
-                                    <p class="text-xs text-amber-700/80 font-semibold">Quét mã hoặc chọn Excel: chỉ cần dán mã PDA, mỗi dòng 1 mã (không cần tiêu đề).</p>
                                     <input type="text" id="returnPdaInput" placeholder="Quét PDA trả..." class="w-full p-2.5 border border-amber-200 rounded-lg bg-white outline-none font-bold text-xs text-gray-800 focus:border-amber-500">
+                                    <p class="text-xs text-amber-700/80 font-semibold">Quét mã hoặc dán từ Excel, mỗi dòng 1 mã.</p>
+                                </div>
+                            </div>
+
+                            <!-- Hàng 2: thanh thông tin người mượn + tồn kho -->
+                            <div id="borrowExtras" class="scanner-infobar"></div>
+
+                            <!-- Hàng 3: danh sách chờ | trả nhanh -->
+                            <div class="scanner-lower">
+                                <div class="scanner-panel">
+                                    <div class="scanner-panel-head">
+                                        <span><i class="fa-solid fa-list-check mr-1 text-orange-500"></i> Danh sách chờ xác nhận</span>
+                                        <span class="queue-total-highlight">
+                                            <span class="text-xs font-extrabold uppercase text-orange-800">Tổng</span>
+                                            <span id="pendingCount">0</span>
+                                        </span>
+                                    </div>
+                                    <div id="pendingPdaList" class="scanner-queue flex flex-col gap-1.5 p-2.5 border rounded-xl bg-slate-50">
+                                        <span class="text-gray-400 text-xs italic font-medium">Chưa quét mã thiết bị nào...</span>
+                                    </div>
+                                </div>
+
+                                <div class="scanner-panel">
                                     <div id="returnExtras" class="zone-extras zone-extras-amber"></div>
                                 </div>
                             </div>
 
-                            <div class="scanner-right-column">
-                                <div class="flex justify-between items-center gap-2 text-xs font-bold text-gray-600 mb-2">
-                                    <span>Danh sách chờ</span>
-                                    <span class="queue-total-highlight">
-                                        <span class="text-xs font-extrabold uppercase text-orange-800">Tổng</span>
-                                        <span id="pendingCount">0</span>
-                                    </span>
-                                </div>
-
-                                <div id="pendingPdaList" class="scanner-queue flex flex-col gap-1.5 p-2.5 border rounded-xl bg-slate-50">
-                                    <span class="text-gray-400 text-xs italic font-medium">Chưa quét mã thiết bị nào...</span>
-                                </div>
-
-                                <div class="flex gap-2 mt-2">
-                                    <button onclick="clearPendingList()" class="px-3 py-2 rounded-xl border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 text-xs font-extrabold transition-all">
-                                        <i class="fa-solid fa-trash-can mr-1"></i> Xóa
-                                    </button>
-                                    <button id="btnConfirm" onclick="processBatchTransaction()" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-3 px-3 rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-xs uppercase tracking-wide">
-                                        Xác nhận cấp / trả tất cả
-                                    </button>
-                                </div>
+                            <!-- Hàng 4: nút thao tác -->
+                            <div class="flex gap-2">
+                                <button onclick="clearPendingList()" class="px-4 py-3 rounded-xl border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 text-xs font-extrabold transition-all">
+                                    <i class="fa-solid fa-trash-can mr-1"></i> Xóa
+                                </button>
+                                <button id="btnConfirm" onclick="processBatchTransaction()" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-3 px-3 rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-xs uppercase tracking-wide">
+                                    Xác nhận cấp / trả tất cả
+                                </button>
                             </div>
                         </div>
                     </section>
@@ -3198,31 +3250,44 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                 const rEl = document.getElementById('returnExtras');
                 const txt = id => (document.getElementById(id)?.textContent || '0').trim();
 
+                // --- Thống kê thẻ Trạng thái kho ---
+                const now = new Date();
+                const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+                let oldCnt = 0, todayCnt = 0;
+                unreturnedCache.forEach(it => {
+                    const d = parseBorrowDate(it).day;
+                    if (d === null) return;
+                    if (d < todayUtc) oldCnt++; else todayCnt++;
+                });
+                const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+                setTxt('statUnreturnedTotal', unreturnedCache.length);
+                setTxt('statUnreturnedOld', oldCnt);
+                setTxt('statUnreturnedToday', todayCnt);
+                document.getElementById('statUnreturnedOld')?.classList.toggle('has', oldCnt > 0);
+
+                // --- Thanh thông tin: người mượn + tồn kho ---
                 if (bEl) {
-                    const chips = pendingBorrowPdaList.map((code, i) => `
-                        <span class="zone-chip zone-chip-green">
-                            ${escapeHtml(code)}
-                            <button type="button" onclick="removePending('borrow', ${i})" title="Bỏ mã này">×</button>
-                        </span>`).join('');
-
                     const who = selectedEmployee
-                        ? `<span class="zone-note zone-note-ok"><i class="fa-solid fa-user-check mr-1"></i> Người mượn: <b>${escapeHtml(selectedEmployee.empName || '')}</b> (${escapeHtml(selectedEmployee.opsId || '')})</span>`
-                        : `<span class="zone-note zone-note-warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Chưa quét OPS ID người mượn</span>`;
-
+                        ? `<span class="zone-note zone-note-ok"><i class="fa-solid fa-user-check mr-1"></i> Người mượn / trả: <b>${escapeHtml(selectedEmployee.empName || '')}</b> (${escapeHtml(selectedEmployee.opsId || '')})</span>`
+                        : `<span class="zone-note zone-note-warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Chưa quét OPS ID nhân viên</span>`;
                     bEl.innerHTML = `
-                        <div class="zone-extras-head"><span>Mã chờ cấp</span><span>${pendingBorrowPdaList.length} mã</span></div>
-                        <div class="zone-chip-wrap">${chips || '<span class="zone-empty">Chưa có mã nào. Quét hoặc dán từ Excel để thêm.</span>'}</div>
-                        <div class="zone-extras-foot">
-                            ${who}
-                            <span class="zone-stock">Còn kho: <b>MT93 ${txt('mt93AvailableText')}</b> · <b>MT90 ${txt('mt90AvailableText')}</b> · <b>Scan ${txt('scanAvailableText')}</b></span>
-                        </div>`;
+                        ${who}
+                        <span class="zone-stock">Còn kho:
+                            <b class="stock-pill stock-93">MT93 ${txt('mt93AvailableText')}</b>
+                            <b class="stock-pill stock-90">MT90 ${txt('mt90AvailableText')}</b>
+                            <b class="stock-pill stock-scan">Scan ${txt('scanAvailableText')}</b>
+                        </span>`;
                 }
 
+                // --- Panel trả nhanh ---
                 if (rEl) {
                     if (!selectedEmployee) {
                         rEl.innerHTML = `
-                            <div class="zone-extras-head"><span>Máy nhân viên đang mượn</span><span>${unreturnedCache.length} máy chưa trả toàn kho</span></div>
-                            <div class="zone-chip-wrap"><span class="zone-empty">Quét OPS ID ở thẻ bên trái để xem và trả nhanh các máy nhân viên đang giữ.</span></div>`;
+                            <div class="scanner-panel-head"><span><i class="fa-solid fa-bolt mr-1 text-amber-500"></i> Trả nhanh</span></div>
+                            <div class="zone-empty-state">
+                                <i class="fa-solid fa-id-card-clip"></i>
+                                <p>Quét OPS ID ở thẻ bên trái để xem các máy nhân viên đang giữ và trả chỉ với một chạm.</p>
+                            </div>`;
                     } else {
                         const myOps = String(selectedEmployee.opsId || '').trim().toLowerCase();
                         const mine = sortUnreturnedList(
@@ -3236,16 +3301,16 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                             const picked = inPending(it);
                             return `<button type="button" class="zone-chip zone-chip-amber ${picked ? 'is-picked' : ''}" ${picked ? 'disabled' : ''}
                                 onclick="addReturnFromZone('${it.id}')" title="${picked ? 'Đã trong danh sách chờ trả' : 'Bấm để thêm vào danh sách trả'}">
-                                <i class="fa-solid ${picked ? 'fa-check' : 'fa-plus'} mr-1"></i>${escapeHtml(it.pdaCode || '')}
+                                <i class="fa-solid ${picked ? 'fa-check' : 'fa-plus'}"></i>${escapeHtml(it.pdaCode || '')}
                             </button>`;
                         }).join('');
 
                         rEl.innerHTML = `
-                            <div class="zone-extras-head">
-                                <span>Đang mượn: ${escapeHtml(selectedEmployee.empName || '')}</span>
-                                <span>${mine.length} máy</span>
+                            <div class="scanner-panel-head">
+                                <span><i class="fa-solid fa-bolt mr-1 text-amber-500"></i> Trả nhanh · ${escapeHtml(selectedEmployee.empName || '')}</span>
+                                <span class="zone-count">${mine.length} máy</span>
                             </div>
-                            <div class="zone-chip-wrap">${chips || '<span class="zone-empty">Nhân viên này không có máy nào đang mượn.</span>'}</div>
+                            <div class="zone-chip-wrap">${chips || '<div class="zone-empty-state"><i class="fa-solid fa-circle-check"></i><p>Nhân viên này không có máy nào đang mượn.</p></div>'}</div>
                             <div class="zone-extras-foot">
                                 <span class="zone-stock">Bấm vào mã để thêm vào danh sách trả</span>
                                 ${waiting > 0 ? `<button type="button" class="zone-btn-all" onclick="addAllReturnForEmployee()"><i class="fa-solid fa-list-check mr-1"></i> Chọn tất cả (${waiting})</button>` : ''}
