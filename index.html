@@ -566,7 +566,7 @@
         /* QR lớn hơn, theo vùng QR riêng ở cuối thẻ Trạng thái. */
         .confirm-qr-card {
             flex-shrink: 0;
-            min-height: 232px;
+            min-height: 170px;
             padding: .7rem .55rem;
             gap: .5rem;
             overflow: hidden;
@@ -579,16 +579,16 @@
             font-size: 12px !important;
         }
         #confirm-qr {
-            width: 158px !important;
-            height: 158px !important;
-            min-width: 158px !important;
-            min-height: 158px !important;
+            width: 116px !important;
+            height: 116px !important;
+            min-width: 116px !important;
+            min-height: 116px !important;
             padding: 4px !important;
         }
         #confirm-qr img,
         #confirm-qr canvas {
-            width: 150px !important;
-            height: 150px !important;
+            width: 108px !important;
+            height: 108px !important;
             max-width: none !important;
         }
 
@@ -1530,18 +1530,23 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
 
                                 <!-- Admin (trái) -->
                                 <g class="ops-person">
-                                    <rect x="42" y="334" width="14" height="38" rx="4" fill="#334155"/>
-                                    <rect x="58" y="334" width="14" height="38" rx="4" fill="#334155"/>
+                                    <rect x="42" y="334" width="14" height="36" rx="4" fill="#334155"/>
+                                    <rect x="58" y="334" width="14" height="36" rx="4" fill="#334155"/>
+                                    <rect x="38" y="366" width="20" height="7" rx="3.5" fill="#1e293b"/>
+                                    <rect x="54" y="366" width="20" height="7" rx="3.5" fill="#1e293b"/>
                                     <rect x="34" y="250" width="44" height="90" rx="16" fill="#f97316"/>
                                     <rect x="46" y="256" width="20" height="5" rx="2.5" fill="#fff" opacity=".55"/>
-                                    <circle cx="56" cy="230" r="17" fill="#fcd9b6"/>
-                                    <path d="M39 228 a17 17 0 0 1 34 0 q-17 -9 -34 0z" fill="#1e293b"/>
+                                    <rect x="50" y="243" width="12" height="9" rx="3" fill="#e9b98f"/>
+                                    <circle cx="56" cy="229" r="18" fill="#fcd9b6"/>
+                                    <path d="M38 228 a18 18 0 0 1 36 0 q-6 -7 -18 -7 q-12 0 -18 7z" fill="#1e293b"/>
+                                    <circle cx="47" cy="237" r="2.6" fill="#fca5a5" opacity=".55"/><circle cx="65" cy="237" r="2.6" fill="#fca5a5" opacity=".55"/>
                                     <circle class="eye" cx="51" cy="233" r="1.7" fill="#1e293b"/><circle class="eye" cx="62" cy="233" r="1.7" fill="#1e293b"/>
                                     <path d="M51 239 q5 4 10 0" fill="none" stroke="#1e293b" stroke-width="1.6" stroke-linecap="round"/>
+                                    <path d="M46 256 h20" stroke="#fed7aa" stroke-width="2" stroke-linecap="round"/>
                                 </g>
 
                                 <!-- Tay + súng scan (tay có độ dài cố định, xoay quanh vai; không kéo giãn) -->
-                                <g transform="translate(70 262)">
+                                <g transform="translate(74 262)">
                                     <g class="ops-arm">
                                         <rect x="0" y="-6" width="26" height="12" rx="6" fill="#ea580c"/>
                                         <rect x="22" y="-3.5" width="28" height="7" rx="3.5" fill="#fcd9b6"/>
@@ -1580,16 +1585,21 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
 
                                 <!-- Ops (phải) -->
                                 <g class="ops-person ops-person-2">
-                                    <rect x="234" y="334" width="14" height="38" rx="4" fill="#334155"/>
-                                    <rect x="254" y="334" width="14" height="38" rx="4" fill="#334155"/>
+                                    <rect x="234" y="334" width="14" height="36" rx="4" fill="#334155"/>
+                                    <rect x="254" y="334" width="14" height="36" rx="4" fill="#334155"/>
+                                    <rect x="230" y="366" width="20" height="7" rx="3.5" fill="#1e293b"/>
+                                    <rect x="250" y="366" width="20" height="7" rx="3.5" fill="#1e293b"/>
                                     <rect x="228" y="250" width="46" height="90" rx="16" fill="#0ea5e9"/>
                                     <rect x="220" y="272" width="16" height="10" rx="5" fill="#0284c7"/>
                                     <circle cx="219" cy="277" r="6" fill="#fcd9b6"/>
                                     <g class="ops-head">
-                                        <circle cx="251" cy="230" r="17" fill="#fcd9b6"/>
-                                        <path d="M234 229 a17 17 0 0 1 34 -1 q-5 -9 -17 -9 q-12 0 -17 10z" fill="#78350f"/>
+                                        <rect x="245" y="243" width="12" height="9" rx="3" fill="#e9b98f"/>
+                                        <circle cx="251" cy="229" r="18" fill="#fcd9b6"/>
+                                        <path d="M233 228 a18 18 0 0 1 36 -1 q-6 -8 -18 -8 q-12 0 -18 9z" fill="#78350f"/>
+                                        <circle cx="242" cy="237" r="2.6" fill="#fca5a5" opacity=".55"/><circle cx="260" cy="237" r="2.6" fill="#fca5a5" opacity=".55"/>
                                         <circle class="eye" cx="246" cy="233" r="1.7" fill="#1e293b"/><circle class="eye" cx="257" cy="233" r="1.7" fill="#1e293b"/>
                                         <path d="M246 239 q5 4 10 0" fill="none" stroke="#1e293b" stroke-width="1.6" stroke-linecap="round"/>
+                                        <path d="M245 256 h12" stroke="#7dd3fc" stroke-width="2" stroke-linecap="round"/>
                                     </g>
                                 </g>
 
