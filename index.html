@@ -1008,6 +1008,70 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
         @media (max-width: 1023px) {
             .scanner-inputs, .scanner-lower { grid-template-columns: 1fr; }
         }
+    
+        /* ===== PATCH v3: QR lớn, thống kê theo loại, danh sách chờ full-width ===== */
+        #tab-dashboard .confirm-qr-card {
+            flex: 1 1 auto; min-height: 0 !important;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: .5rem; padding: .8rem .6rem;
+        }
+        #tab-dashboard .confirm-qr-card #confirm-qr {
+            width: min(100%, 280px) !important; height: auto !important;
+            min-width: 0 !important; min-height: 0 !important;
+            aspect-ratio: 1 / 1; padding: 9px !important;
+        }
+        #tab-dashboard .confirm-qr-card #confirm-qr img,
+        #tab-dashboard .confirm-qr-card #confirm-qr canvas {
+            width: 100% !important; height: 100% !important; max-width: none !important;
+        }
+
+        .scanner-lower { grid-template-columns: minmax(0, 1fr) !important; }
+
+        .stat-unreturned-num { display: inline-flex; align-items: baseline; gap: .25rem; }
+        .stat-unreturned-num small { font-size: 12px; font-weight: 800; color: #a16207; }
+        .stat-type-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .4rem; margin: .2rem 0; }
+        .stat-type {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .05rem;
+            padding: .45rem .2rem; border-radius: .7rem; border: 1px solid transparent; text-align: center;
+        }
+        .stat-type b { font-size: 24px; line-height: 1.05; font-weight: 900; }
+        .stat-type em { font-style: normal; font-size: 12px; font-weight: 800; }
+        .stat-type i { font-style: normal; font-size: 11px; font-weight: 700; opacity: .7; }
+        .stat-type-new  { background: #ffedd5; border-color: #fdba74; color: #c2410c; }
+        .stat-type-old  { background: #dbeafe; border-color: #93c5fd; color: #1d4ed8; }
+        .stat-type-scan { background: #f3e8ff; border-color: #d8b4fe; color: #7e22ce; }
+        .stat-unreturned-sub { padding-top: .1rem; }
+
+        /* Danh sách chờ: mỗi dòng 1 thiết bị kèm nhân viên / OPS ID / Team / Sup */
+        .scanner-queue { padding: 0 !important; gap: 0 !important; overflow-y: auto; background: #fff !important; }
+        .pending-row {
+            display: grid; align-items: center; gap: .75rem;
+            grid-template-columns: 70px minmax(0, 1.5fr) minmax(0, 1.2fr) minmax(0, 1.4fr) 30px;
+            padding: .55rem .75rem; border-bottom: 1px solid #f1f5f9;
+        }
+        .pending-row-head {
+            position: sticky; top: 0; z-index: 2; background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+            font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .03em; color: #64748b;
+            padding-top: .45rem; padding-bottom: .45rem;
+        }
+        .pending-row-borrow { background: rgba(236,253,245,.55); }
+        .pending-row-return { background: rgba(255,251,235,.7); }
+        .pending-row-borrow:hover { background: #d1fae5; }
+        .pending-row-return:hover { background: #fef3c7; }
+        .pr-tag { font-style: normal; font-size: 11px; font-weight: 900; padding: .15rem .55rem; border-radius: 999px; color: #fff; }
+        .pr-tag-borrow { background: #10b981; }
+        .pr-tag-return { background: #f59e0b; }
+        .pr-cell { display: flex; flex-direction: column; align-items: flex-start; gap: .1rem; min-width: 0; }
+        .pr-cell b { font-size: 13px; font-weight: 800; color: #1e293b; overflow-wrap: anywhere; line-height: 1.25; }
+        .pr-cell small { font-size: 12px; font-weight: 700; color: #64748b; line-height: 1.25; }
+        .pr-cell .pr-code { color: #c2410c; }
+        .pr-warn { color: #dc2626 !important; }
+        .pr-time { color: #94a3b8 !important; }
+        .pr-muted { color: #94a3b8; }
+        .pr-remove { font-size: 20px; font-weight: 900; line-height: 1; color: #94a3b8; justify-self: center; }
+        .pr-remove:hover { color: #dc2626; }
+        #pendingPdaList .zone-empty-state { min-height: 100%; }
+        #pendingPdaList .zone-empty-state p { max-width: 340px; }
     </style>
 </head>
 
@@ -1231,19 +1295,29 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                             </div>
                         </div>
 
-                        <!-- Thống kê thiết bị đang mượn (bấm để xem danh sách) -->
+                        <!-- Thống kê thiết bị đang mượn theo loại (bấm để xem danh sách) -->
                         <button type="button" onclick="switchTab('unreturned')" class="stat-unreturned" title="Xem danh sách chưa trả">
                             <span class="stat-unreturned-row">
                                 <span class="stat-unreturned-label"><i class="fa-solid fa-clock-rotate-left mr-1 text-amber-500"></i> Đang mượn</span>
-                                <span class="stat-unreturned-num" id="statUnreturnedTotal">0</span>
+                                <span class="stat-unreturned-num"><span id="statUnreturnedTotal">0</span><small> máy</small></span>
+                            </span>
+                            <span class="stat-type-grid">
+                                <span class="stat-type stat-type-new">
+                                    <b id="statUnreturnedNew">0</b>
+                                    <em>Máy mới</em><i>MT93</i>
+                                </span>
+                                <span class="stat-type stat-type-old">
+                                    <b id="statUnreturnedOldDev">0</b>
+                                    <em>Máy cũ</em><i>MT90</i>
+                                </span>
+                                <span class="stat-type stat-type-scan">
+                                    <b id="statUnreturnedScan">0</b>
+                                    <em>Súng Scan</em><i>Quét mã</i>
+                                </span>
                             </span>
                             <span class="stat-unreturned-row stat-unreturned-sub">
-                                <span>Mượn từ hôm trước</span>
-                                <span id="statUnreturnedOld" class="stat-old">0</span>
-                            </span>
-                            <span class="stat-unreturned-row stat-unreturned-sub">
-                                <span>Mượn hôm nay</span>
-                                <span id="statUnreturnedToday" class="stat-today">0</span>
+                                <span>Từ hôm trước <span id="statUnreturnedOld" class="stat-old">0</span></span>
+                                <span>Hôm nay <span id="statUnreturnedToday" class="stat-today">0</span></span>
                             </span>
                         </button>
 
@@ -1348,7 +1422,7 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                             <!-- Hàng 2: thanh thông tin người mượn + tồn kho -->
                             <div id="borrowExtras" class="scanner-infobar"></div>
 
-                            <!-- Hàng 3: danh sách chờ | trả nhanh -->
+                            <!-- Hàng 3: danh sách chờ xác nhận (full chiều rộng) -->
                             <div class="scanner-lower">
                                 <div class="scanner-panel">
                                     <div class="scanner-panel-head">
@@ -1363,9 +1437,6 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                                     </div>
                                 </div>
 
-                                <div class="scanner-panel">
-                                    <div id="returnExtras" class="zone-extras zone-extras-amber"></div>
-                                </div>
                             </div>
 
                             <!-- Hàng 4: nút thao tác -->
@@ -2362,8 +2433,8 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
 
             new QRCode(holder, {
                 text: CONFIRM_QR_TOKEN,
-                width: 150,
-                height: 150,
+                width: 360,
+                height: 360,
                 colorDark: '#0f172a',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.M
@@ -3247,20 +3318,24 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
         function renderZoneExtras() {
             try {
                 const bEl = document.getElementById('borrowExtras');
-                const rEl = document.getElementById('returnExtras');
                 const txt = id => (document.getElementById(id)?.textContent || '0').trim();
 
                 // --- Thống kê thẻ Trạng thái kho ---
                 const now = new Date();
                 const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-                let oldCnt = 0, todayCnt = 0;
+                let oldCnt = 0, todayCnt = 0, cNew = 0, cOld = 0, cScan = 0;
                 unreturnedCache.forEach(it => {
+                    const t = detectDeviceType(it.pdaCode);
+                    if (t === 'Súng Scan') cScan++; else if (t === 'Máy cũ') cOld++; else cNew++;
                     const d = parseBorrowDate(it).day;
                     if (d === null) return;
                     if (d < todayUtc) oldCnt++; else todayCnt++;
                 });
                 const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
                 setTxt('statUnreturnedTotal', unreturnedCache.length);
+                setTxt('statUnreturnedNew', cNew);
+                setTxt('statUnreturnedOldDev', cOld);
+                setTxt('statUnreturnedScan', cScan);
                 setTxt('statUnreturnedOld', oldCnt);
                 setTxt('statUnreturnedToday', todayCnt);
                 document.getElementById('statUnreturnedOld')?.classList.toggle('has', oldCnt > 0);
@@ -3279,73 +3354,8 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                         </span>`;
                 }
 
-                // --- Panel trả nhanh ---
-                if (rEl) {
-                    if (!selectedEmployee) {
-                        rEl.innerHTML = `
-                            <div class="scanner-panel-head"><span><i class="fa-solid fa-bolt mr-1 text-amber-500"></i> Trả nhanh</span></div>
-                            <div class="zone-empty-state">
-                                <i class="fa-solid fa-id-card-clip"></i>
-                                <p>Quét OPS ID ở thẻ bên trái để xem các máy nhân viên đang giữ và trả chỉ với một chạm.</p>
-                            </div>`;
-                    } else {
-                        const myOps = String(selectedEmployee.opsId || '').trim().toLowerCase();
-                        const mine = sortUnreturnedList(
-                            unreturnedCache.filter(it => String(it.opsId || '').trim().toLowerCase() === myOps)
-                        );
-                        const inPending = it => pendingReturnPdaList.some(
-                            x => String(x.code).trim().toLowerCase() === String(it.pdaCode || '').trim().toLowerCase()
-                        );
-                        const waiting = mine.filter(it => !inPending(it)).length;
-                        const chips = mine.map(it => {
-                            const picked = inPending(it);
-                            return `<button type="button" class="zone-chip zone-chip-amber ${picked ? 'is-picked' : ''}" ${picked ? 'disabled' : ''}
-                                onclick="addReturnFromZone('${it.id}')" title="${picked ? 'Đã trong danh sách chờ trả' : 'Bấm để thêm vào danh sách trả'}">
-                                <i class="fa-solid ${picked ? 'fa-check' : 'fa-plus'}"></i>${escapeHtml(it.pdaCode || '')}
-                            </button>`;
-                        }).join('');
-
-                        rEl.innerHTML = `
-                            <div class="scanner-panel-head">
-                                <span><i class="fa-solid fa-bolt mr-1 text-amber-500"></i> Trả nhanh · ${escapeHtml(selectedEmployee.empName || '')}</span>
-                                <span class="zone-count">${mine.length} máy</span>
-                            </div>
-                            <div class="zone-chip-wrap">${chips || '<div class="zone-empty-state"><i class="fa-solid fa-circle-check"></i><p>Nhân viên này không có máy nào đang mượn.</p></div>'}</div>
-                            <div class="zone-extras-foot">
-                                <span class="zone-stock">Bấm vào mã để thêm vào danh sách trả</span>
-                                ${waiting > 0 ? `<button type="button" class="zone-btn-all" onclick="addAllReturnForEmployee()"><i class="fa-solid fa-list-check mr-1"></i> Chọn tất cả (${waiting})</button>` : ''}
-                            </div>`;
-                    }
-                }
             } catch (e) { console.warn('renderZoneExtras', e); }
         }
-
-        window.addReturnFromZone = function (id) {
-            const rec = unreturnedCache.find(x => x.id === id);
-            if (!rec) return;
-            const exists = pendingReturnPdaList.some(
-                x => String(x.code).trim().toLowerCase() === String(rec.pdaCode || '').trim().toLowerCase()
-            );
-            if (exists) { scanFeedback('return', false); return; }
-            pendingReturnPdaList.push({ code: rec.pdaCode, originalData: rec });
-            scanFeedback('return', true);
-            renderPendingList();
-        };
-
-        window.addAllReturnForEmployee = function () {
-            if (!selectedEmployee) return;
-            const myOps = String(selectedEmployee.opsId || '').trim().toLowerCase();
-            let added = 0;
-            sortUnreturnedList(
-                unreturnedCache.filter(it => String(it.opsId || '').trim().toLowerCase() === myOps)
-            ).forEach(rec => {
-                const exists = pendingReturnPdaList.some(
-                    x => String(x.code).trim().toLowerCase() === String(rec.pdaCode || '').trim().toLowerCase()
-                );
-                if (!exists) { pendingReturnPdaList.push({ code: rec.pdaCode, originalData: rec }); added++; }
-            });
-            if (added) { scanFeedback('return', true); renderPendingList(); }
-        };
 
         // Tự làm mới khi chọn / bỏ chọn nhân viên hoặc số liệu tồn kho đổi.
         (function setupZoneExtrasObservers() {
@@ -3356,6 +3366,9 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                 ['mt93AvailableText', 'mt90AvailableText', 'scanAvailableText'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) obs.observe(el, { childList: true, subtree: true, characterData: true });
+                });
+                ['displayEmpTeam', 'displayEmpSup'].forEach(id => {
+                    document.getElementById(id)?.addEventListener('change', () => renderPendingList());
                 });
                 renderZoneExtras();
             };
@@ -3372,47 +3385,58 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
             document.getElementById('pendingCount').innerText = totalCount;
 
             if (totalCount === 0) {
-                container.innerHTML =
-                    '<span class="text-gray-400 text-xs italic font-medium">Chưa quét mã PDA nào...</span>';
+                container.innerHTML = `
+                    <div class="zone-empty-state">
+                        <i class="fa-solid fa-barcode"></i>
+                        <p>Chưa quét mã PDA nào. Mã quét ở ô Mượn / Trả sẽ hiện tại đây kèm thông tin nhân viên.</p>
+                    </div>`;
                 return;
             }
 
-            let html = '';
+            const selVal = id => String(document.getElementById(id)?.value || '').trim();
+            const borrowTeam = selVal('displayEmpTeam') || (selectedEmployee && selectedEmployee.team) || '';
+            const borrowSup = selVal('displayEmpSup') || (selectedEmployee && selectedEmployee.supervisor) || '';
+            const dash = '<span class="pr-muted">—</span>';
+
+            let html = `
+                <div class="pending-row pending-row-head">
+                    <span>Loại</span><span>Mã thiết bị</span><span>Nhân viên</span><span>Team / Supervisor</span><span></span>
+                </div>`;
 
             pendingBorrowPdaList.forEach((code, index) => {
                 const devType = detectDeviceType(code);
-
+                const empCell = selectedEmployee
+                    ? `<b>${escapeHtml(selectedEmployee.empName || '')}</b><small>${escapeHtml(selectedEmployee.opsId || '')}</small>`
+                    : `<b class="pr-warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Chưa chọn nhân viên</b><small>Quét OPS ID ở thẻ bên trái</small>`;
                 html += `
-                    <div class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1.5 rounded-lg flex justify-between items-center">
-                        <span>[MƯỢN] ${code}
-                            <span class="text-xs bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded ml-1">${devType}</span>
-                        </span>
-                        <button onclick="removePending('borrow', ${index})" class="text-emerald-600 hover:text-red-600 font-extrabold text-sm ml-2">×</button>
-                    </div>
-                `;
+                    <div class="pending-row pending-row-borrow">
+                        <span><em class="pr-tag pr-tag-borrow">MƯỢN</em></span>
+                        <span class="pr-cell"><b class="pr-code">${escapeHtml(code)}</b>${renderDeviceBadge(devType)}</span>
+                        <span class="pr-cell">${empCell}</span>
+                        <span class="pr-cell"><b>${borrowTeam ? escapeHtml(borrowTeam) : dash}</b><small>${borrowSup ? escapeHtml(borrowSup) : '—'}</small></span>
+                        <button type="button" onclick="removePending('borrow', ${index})" class="pr-remove" title="Bỏ mã này">×</button>
+                    </div>`;
             });
 
             pendingReturnPdaList.forEach((item, index) => {
-                let extraInfo =
-                    `Người trả: <b class="text-amber-900">${item.originalData.empName} (${item.originalData.opsId})</b>`;
-
+                const od = item.originalData || {};
+                const devType = detectDeviceType(item.code);
+                let sub = od.borrowTime ? `Mượn: ${escapeHtml(od.borrowTime)}` : escapeHtml(od.opsId || '');
+                let proxy = '';
                 if (
                     selectedEmployee &&
-                    selectedEmployee.opsId.toLowerCase() !== item.originalData.opsId.toLowerCase()
+                    String(selectedEmployee.opsId || '').toLowerCase() !== String(od.opsId || '').toLowerCase()
                 ) {
-                    extraInfo =
-                        `<span class="text-red-600 font-bold">[TRẢ HỘ]</span> bởi ${selectedEmployee.empName} ➔ cho ${item.originalData.empName}`;
+                    proxy = `<small class="pr-warn">TRẢ HỘ bởi ${escapeHtml(selectedEmployee.empName || '')}</small>`;
                 }
-
                 html += `
-                    <div class="bg-amber-100 text-amber-900 text-xs px-2.5 py-1.5 rounded-lg flex justify-between items-center border border-amber-200">
-                        <div>
-                            <span class="font-bold text-amber-800">[TRẢ] ${item.code}</span>
-                            <span class="ml-1.5 text-gray-600 text-xs">${extraInfo}</span>
-                        </div>
-                        <button onclick="removePending('return', ${index})" class="text-amber-700 hover:text-red-600 font-extrabold text-sm ml-2">×</button>
-                    </div>
-                `;
+                    <div class="pending-row pending-row-return">
+                        <span><em class="pr-tag pr-tag-return">TRẢ</em></span>
+                        <span class="pr-cell"><b class="pr-code">${escapeHtml(item.code)}</b>${renderDeviceBadge(devType)}</span>
+                        <span class="pr-cell"><b>${escapeHtml(od.empName || '')}</b><small>${escapeHtml(od.opsId || '')}</small>${proxy}</span>
+                        <span class="pr-cell"><b>${od.team ? escapeHtml(od.team) : dash}</b><small>${escapeHtml(od.supervisor || '—')}</small><small class="pr-time">${sub}</small></span>
+                        <button type="button" onclick="removePending('return', ${index})" class="pr-remove" title="Bỏ mã này">×</button>
+                    </div>`;
             });
 
             container.innerHTML = html;
