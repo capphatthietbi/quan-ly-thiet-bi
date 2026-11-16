@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
 <script>(function(){var q=matchMedia("(max-width: 767px)");function f(){document.documentElement.dataset.view=q.matches?"mobile":"desktop";}f();q.addEventListener?q.addEventListener("change",f):q.addListener(f);})();</script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>HỆ THỐNG QUẢN LÝ CẤP PHÁT THIẾT BỊ</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -120,6 +120,24 @@
 
         .fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-brands {
             font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+        }
+
+        /* Khóa tỷ lệ 100%: lớp phủ cảnh báo khi trình duyệt vẫn bị thu phóng */
+        #zoomLockOverlay {
+            position: fixed; inset: 0; z-index: 99999; display: none;
+            align-items: center; justify-content: center; padding: 1.5rem;
+            background: rgba(15, 23, 42, .78); backdrop-filter: blur(4px);
+        }
+        #zoomLockOverlay.show { display: flex; }
+        #zoomLockOverlay .zl-box {
+            max-width: 420px; background: #fff; border-radius: 1rem; padding: 1.4rem 1.5rem;
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,.3);
+        }
+        #zoomLockOverlay .zl-title { font-weight: 900; font-size: 1.05rem; color: #c2410c; margin-bottom: .5rem; }
+        #zoomLockOverlay .zl-text { font-weight: 600; font-size: .9rem; color: #475569; line-height: 1.5; }
+        #zoomLockOverlay kbd {
+            display: inline-block; padding: .05rem .4rem; border: 1px solid #cbd5e1;
+            border-bottom-width: 2px; border-radius: .35rem; font-weight: 800; background: #f8fafc;
         }
 
         @keyframes slideInRight {
@@ -6164,6 +6182,55 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
     });
 
     if (reduce) { setStep(1); } else { runDemo(); }
+})();
+</script>
+<div id="zoomLockOverlay" role="alertdialog" aria-live="assertive">
+    <div class="zl-box">
+        <div class="zl-title">Vui lòng đặt lại tỷ lệ 100%</div>
+        <div class="zl-text">Màn hình đang được phóng to hoặc thu nhỏ, một số chức năng sẽ không hiển thị đúng.<br>Nhấn <kbd>Ctrl</kbd> + <kbd>0</kbd> (Mac: <kbd>⌘</kbd> + <kbd>0</kbd>) để quay lại 100%.</div>
+    </div>
+</div>
+<script>
+(function () {
+    // 1) Chặn thu phóng bằng bàn phím và con lăn chuột (Ctrl/⌘ + +, -, 0, wheel)
+    document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '_', '0', 'Add', 'Subtract'].indexOf(e.key) !== -1) {
+            e.preventDefault();
+        }
+    }, true);
+    document.addEventListener('wheel', function (e) {
+        if (e.ctrlKey || e.metaKey) e.preventDefault();
+    }, { passive: false, capture: true });
+
+    // 2) Chặn chụm/kéo bằng cảm ứng và zoom của Safari
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (ev) {
+        document.addEventListener(ev, function (e) { e.preventDefault(); }, { passive: false });
+    });
+    document.addEventListener('touchmove', function (e) {
+        if (e.touches && e.touches.length > 1) e.preventDefault();
+    }, { passive: false });
+    var lastTouchEnd = 0;
+    document.addEventListener('touchend', function (e) {
+        var now = Date.now();
+        if (now - lastTouchEnd <= 300) e.preventDefault();
+        lastTouchEnd = now;
+    }, { passive: false });
+
+    // 3) Phát hiện mức thu phóng còn lại (menu trình duyệt, chụm trên mobile) và nhắc đặt lại 100%
+    var overlay = document.getElementById('zoomLockOverlay');
+    var baseDpr = window.devicePixelRatio || 1;
+    function isZoomed() {
+        var vv = window.visualViewport;
+        if (vv && Math.abs(vv.scale - 1) > 0.01) return true;
+        var dpr = window.devicePixelRatio || 1;
+        return Math.abs(dpr - baseDpr) > 0.01;
+    }
+    function check() {
+        overlay.classList.toggle('show', isZoomed());
+    }
+    window.addEventListener('resize', check);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', check);
+    check();
 })();
 </script>
 </body>
