@@ -1034,14 +1034,14 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
             gap: .5rem; padding: .8rem .6rem;
         }
         #tab-dashboard .confirm-qr-card #confirm-qr {
-            width: 72px !important; height: 72px !important;
-            min-width: 72px !important; min-height: 72px !important;
-            max-width: 72px !important; max-height: 72px !important;
-            padding: 3px !important;
+            width: 200px !important; height: 200px !important;
+            min-width: 200px !important; min-height: 200px !important;
+            max-width: 200px !important; max-height: 200px !important;
+            padding: 5px !important;
         }
         #tab-dashboard .confirm-qr-card #confirm-qr img,
         #tab-dashboard .confirm-qr-card #confirm-qr canvas {
-            width: 66px !important; height: 66px !important; max-width: 66px !important;
+            width: 190px !important; height: 190px !important; max-width: 190px !important;
         }
 
         .scanner-lower { grid-template-columns: minmax(0, 1fr) !important; }
@@ -1219,17 +1219,17 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
         /* Khóa kích thước QR xác nhận: nhỏ gọn, đồng nhất ở mọi chiều rộng màn hình */
         .confirm-qr-card { min-height: 0 !important; }
         #confirm-qr {
-            width: 72px !important;
-            height: 72px !important;
-            min-width: 72px !important;
-            min-height: 72px !important;
-            padding: 3px !important;
+            width: 200px !important;
+            height: 200px !important;
+            min-width: 200px !important;
+            min-height: 200px !important;
+            padding: 5px !important;
         }
         #confirm-qr img,
         #confirm-qr canvas {
-            width: 66px !important;
-            height: 66px !important;
-            max-width: 66px !important;
+            width: 190px !important;
+            height: 190px !important;
+            max-width: 190px !important;
         }
     </style>
 </head>
@@ -2820,8 +2820,8 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
 
             new QRCode(holder, {
                 text: CONFIRM_QR_TOKEN,
-                width: 200,
-                height: 200,
+                width: 300,
+                height: 300,
                 colorDark: '#0f172a',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.M
