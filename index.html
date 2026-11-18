@@ -1215,6 +1215,21 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
         @media (prefers-reduced-motion: reduce) {
             .ops-scene *, .ops-scene { animation: none !important; transition: none !important; }
         }
+        /* Khóa kích thước QR xác nhận: nhỏ gọn, đồng nhất ở mọi chiều rộng màn hình */
+        .confirm-qr-card { min-height: 0 !important; }
+        #confirm-qr {
+            width: 96px !important;
+            height: 96px !important;
+            min-width: 96px !important;
+            min-height: 96px !important;
+            padding: 4px !important;
+        }
+        #confirm-qr img,
+        #confirm-qr canvas {
+            width: 88px !important;
+            height: 88px !important;
+            max-width: 88px !important;
+        }
     </style>
 </head>
 
@@ -2804,8 +2819,8 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
 
             new QRCode(holder, {
                 text: CONFIRM_QR_TOKEN,
-                width: 360,
-                height: 360,
+                width: 200,
+                height: 200,
                 colorDark: '#0f172a',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.M
