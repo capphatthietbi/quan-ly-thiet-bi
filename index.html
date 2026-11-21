@@ -1138,13 +1138,24 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
         .ops-scene .ops-arm {
             transform-box: view-box;
             transform-origin: 0 0;
-            transform: rotate(30deg);
-            transition: transform .55s cubic-bezier(.3, .7, .3, 1);
+            transform: rotate(88deg);
+            transition: transform .6s cubic-bezier(.3, .7, .3, 1);
         }
         .ops-scene[data-step="1"] .ops-arm,
         .ops-scene[data-step="2"] .ops-arm,
         .ops-scene[data-step="8"] .ops-arm,
-        .ops-scene[data-step="9"] .ops-arm { transform: rotate(-2deg); }
+        .ops-scene[data-step="9"] .ops-arm,
+        .ops-scene[data-step="10"] .ops-arm { transform: rotate(9deg); }
+
+        /* Tia laser dài: chỉ khi Admin quét thẻ OPS ID (bước 1, 10) */
+        .ops-scene .beam-far { opacity: 0; transition: opacity .25s ease; }
+        .ops-scene[data-step="1"] .beam-far,
+        .ops-scene[data-step="10"] .beam-far { opacity: 1; animation: opsBeam 1s ease-in-out infinite; }
+        @keyframes opsBeam { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+
+        /* Đuôi tóc đung đưa nhẹ */
+        .ops-scene .ops-pony { transform-box: fill-box; transform-origin: 10% 8%; animation: opsSway 3.4s ease-in-out infinite; }
+        @keyframes opsSway { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(5deg); } }
 
         /* PDA: Admin đưa cho Ops (bước 4), Ops giữ đến bước 7, rồi quay về quầy ở bước 8 */
         .ops-scene .ops-pda { transition: transform .9s cubic-bezier(.45, 0, .25, 1); }
@@ -1538,6 +1549,15 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                         <!-- Kịch bản quy trình: demo tự chạy; khi quét thật sẽ nhảy đúng bước -->
                         <div class="ops-gif-stage ops-scene" id="opsScene" data-step="1" aria-hidden="true">
                             <svg viewBox="0 0 300 440" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="opsSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffdfc4"/><stop offset="1" stop-color="#f1bd95"/></linearGradient>
+                                    <linearGradient id="opsPolo1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fb923c"/><stop offset="1" stop-color="#ea580c"/></linearGradient>
+                                    <linearGradient id="opsPolo2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#0284c7"/></linearGradient>
+                                    <linearGradient id="opsPants" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#46556f"/><stop offset="1" stop-color="#2a374e"/></linearGradient>
+                                    <linearGradient id="opsFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fed7aa"/><stop offset="1" stop-color="#fdba74" stop-opacity=".75"/></linearGradient>
+                                    <linearGradient id="opsCounter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fb923c"/><stop offset="1" stop-color="#f97316"/></linearGradient>
+                                    <linearGradient id="opsBeam" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ef4444" stop-opacity=".85"/><stop offset="1" stop-color="#ef4444" stop-opacity=".12"/></linearGradient>
+                                </defs>
                                 <circle cx="30" cy="110" r="44" fill="#fdba74" opacity=".22"/>
                                 <circle cx="275" cy="400" r="50" fill="#fdba74" opacity=".2"/>
 
@@ -1560,9 +1580,13 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                                 <circle class="dot" cx="260.0" cy="67" r="4.5"/>
 
                                 <!-- Sàn + quầy Admin + QR xác nhận -->
-                                <rect x="0" y="372" width="300" height="68" fill="#fed7aa" opacity=".65"/>
+                                <rect x="0" y="372" width="300" height="68" fill="url(#opsFloor)"/>
+                                <rect x="0" y="372" width="300" height="2" fill="#fdba74" opacity=".8"/>
+                                <ellipse cx="150" cy="375" rx="64" ry="4.5" fill="#9a3412" opacity=".14"/>
                                 <rect x="96" y="288" width="108" height="9" rx="4" fill="#c2410c"/>
-                                <rect x="100" y="297" width="100" height="75" fill="#fb923c"/>
+                                <rect x="99" y="289" width="102" height="2.4" rx="1.2" fill="#ffffff" opacity=".25"/>
+                                <rect x="100" y="297" width="100" height="75" fill="url(#opsCounter)"/>
+                                <rect x="100" y="297" width="100" height="6" fill="#9a3412" opacity=".16"/>
                                 <text x="150" y="368" text-anchor="middle" font-size="10" fill="#ffffff">Khu vực Admin</text>
                                 <g class="qr-wrap">
                                     <rect class="qr-glow" x="121" y="311" width="50" height="50" rx="6" fill="none" stroke="#10b981" stroke-width="3"/>
@@ -1581,42 +1605,63 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                                 </g>
 
                                 <!-- Admin (trái) -->
+                                <ellipse cx="56" cy="374" rx="34" ry="4.5" fill="#9a3412" opacity=".16"/>
                                 <g class="ops-person">
-                                    <rect x="43" y="326" width="12" height="42" rx="5.5" fill="#334155"/>
-                                    <rect x="57" y="326" width="12" height="42" rx="5.5" fill="#334155"/>
-                                    <rect x="38" y="364" width="19" height="8" rx="4" fill="#1e293b"/>
-                                    <rect x="55" y="364" width="19" height="8" rx="4" fill="#1e293b"/>
-                                    <path d="M34 268 Q34 248 56 248 Q78 248 78 268 L80 330 Q80 338 72 338 L40 338 Q32 338 32 330 Z" fill="#f97316"/>
-                                    <path d="M32 322 H80 V330 Q80 338 72 338 H40 Q32 338 32 330 Z" fill="#c2410c" opacity=".28"/>
-                                    <path d="M46 248 L56 264 L66 248 Z" fill="#fff7ed"/>
-                                    <rect x="62" y="274" width="11" height="8" rx="2" fill="#ffffff" opacity=".92"/>
-                                    <rect x="64" y="277" width="7" height="1.6" rx=".8" fill="#f97316"/>
-                                    <rect x="50" y="238" width="12" height="13" rx="5" fill="#e9b98f"/>
-                                    <circle cx="36.5" cy="228" r="4" fill="#fcd9b6"/>
-                                    <circle cx="75.5" cy="228" r="4" fill="#fcd9b6"/>
-                                    <circle cx="56" cy="226" r="18" fill="#fcd9b6"/>
-                                    <path d="M37.5 226 Q36 202 56 202 Q76 202 74.5 226 Q72 213 62 211 Q52 215 45 218 Q40 220 37.5 226 Z" fill="#1e293b"/>
-                                    <path d="M46 222 q4 -2 8 0 M58 222 q4 -2 8 0" fill="none" stroke="#1e293b" stroke-width="1.3" stroke-linecap="round"/>
-                                    <circle class="eye" cx="50" cy="228" r="2" fill="#1e293b"/><circle class="eye" cx="62" cy="228" r="2" fill="#1e293b"/>
-                                    <circle cx="50.7" cy="227.2" r=".6" fill="#ffffff"/><circle cx="62.7" cy="227.2" r=".6" fill="#ffffff"/>
-                                    <circle cx="46" cy="235" r="2.8" fill="#fca5a5" opacity=".55"/><circle cx="66" cy="235" r="2.8" fill="#fca5a5" opacity=".55"/>
-                                    <path d="M51 238 q5 4 10 0" fill="none" stroke="#9a3412" stroke-width="1.5" stroke-linecap="round"/>
+                                    <g transform="translate(40 262) rotate(5)">
+                                        <rect x="-4.3" y="14" width="8.6" height="27" rx="4.3" fill="#efbd94"/>
+                                        <circle cx="0" cy="43" r="5" fill="#f5c7a1"/>
+                                        <rect x="-6" y="-5" width="12" height="25" rx="6" fill="url(#opsPolo1)"/>
+                                    </g>
+                                    <rect x="41" y="310" width="30" height="12" rx="3" fill="url(#opsPants)"/>
+                                    <path d="M43 316 H55 L54.2 361 Q54.2 363 52.2 363 H45.8 Q43.8 363 43.8 361 Z" fill="url(#opsPants)"/>
+                                    <path d="M57 316 H69 L68.2 361 Q68.2 363 66.2 363 H59.8 Q57.8 363 57.8 361 Z" fill="url(#opsPants)"/>
+                                    <path d="M37 372 Q37 365.5 43 364.5 L55 364.5 L55 372 Z" fill="#1e293b"/>
+                                    <path d="M57 364.5 L69 364.5 Q75 365.5 75 372 L57 372 Z" fill="#1e293b"/>
+                                    <rect x="37" y="369.8" width="18" height="2.4" rx="1.2" fill="#e2e8f0"/>
+                                    <rect x="57" y="369.8" width="18" height="2.4" rx="1.2" fill="#e2e8f0"/>
+                                    <path d="M38 266 Q38 251 52 249 L60 249 Q74 251 74 266 L73 314 Q73 318 69 318 L43 318 Q39 318 39 314 Z" fill="url(#opsPolo1)"/>
+                                    <path d="M64 252 Q74 254 74 266 L73 314 Q73 318 69 318 L63 318 Z" fill="#9a3412" opacity=".13"/>
+                                    <path d="M39.5 311 H72.5" stroke="#c2410c" stroke-width="1" opacity=".3"/>
+                                    <path d="M47 249 Q56 245.5 65 249 L56 262 Z" fill="#fff7ed"/>
+                                    <path d="M56 262 V282" stroke="#c2410c" stroke-width="1" opacity=".45"/>
+                                    <circle cx="56" cy="268" r="1" fill="#c2410c" opacity=".6"/><circle cx="56" cy="275" r="1" fill="#c2410c" opacity=".6"/>
+                                    <rect x="61.5" y="271" width="11" height="7.5" rx="1.8" fill="#ffffff" opacity=".95"/>
+                                    <rect x="63.5" y="273.8" width="7" height="1.6" rx=".8" fill="#f97316"/>
+                                    <rect x="51" y="236" width="10" height="15" rx="4" fill="#e6b088"/>
+                                    <path d="M51 243 Q56 248.5 61 243 V239 H51 Z" fill="#c98c64" opacity=".5"/>
+                                    <circle cx="41" cy="226" r="3.2" fill="#f5c7a1"/><circle cx="71" cy="226" r="3.2" fill="#f5c7a1"/>
+                                    <circle cx="41.2" cy="226.2" r="1.4" fill="#e3a47c"/><circle cx="70.8" cy="226.2" r="1.4" fill="#e3a47c"/>
+                                    <ellipse cx="56" cy="224" rx="14.5" ry="16.5" fill="url(#opsSkin)"/>
+                                    <path d="M41 224 Q38 205 54 201 Q71 199 72 220 Q72.5 224 71.5 227 Q70.5 215 63 212.5 Q55 215.5 48 216.5 Q43 218 41.5 227 Z" fill="#1f2937"/>
+                                    <path d="M47 207.5 Q55 203 64 205.5" stroke="#52627a" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".85"/>
+                                    <path d="M46.5 220.6 q3.6 -2.2 7.2 -.6 M58.3 220 q3.6 -1.6 7.2 .6" stroke="#1f2937" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+                                    <ellipse class="eye" cx="50.5" cy="225.6" rx="1.9" ry="2.3" fill="#1e293b"/><ellipse class="eye" cx="61.5" cy="225.6" rx="1.9" ry="2.3" fill="#1e293b"/>
+                                    <circle cx="51.1" cy="224.8" r=".65" fill="#ffffff"/><circle cx="62.1" cy="224.8" r=".65" fill="#ffffff"/>
+                                    <path d="M56 227.5 q-1.8 3.8 .5 5" stroke="#d29a72" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                                    <circle cx="46.2" cy="231" r="2.6" fill="#fca5a5" opacity=".38"/><circle cx="65.8" cy="231" r="2.6" fill="#fca5a5" opacity=".38"/>
+                                    <path d="M51.5 235.4 q4.5 4 9 0" stroke="#9a3412" stroke-width="1.5" fill="none" stroke-linecap="round"/>
                                 </g>
 
                                 <!-- Tay + súng scan (tay có độ dài cố định, xoay quanh vai; không kéo giãn) -->
                                 <g transform="translate(74 262)">
                                     <g class="ops-arm">
-                                        <rect x="0" y="-6" width="26" height="12" rx="6" fill="#ea580c"/>
-                                        <rect x="22" y="-3.5" width="28" height="7" rx="3.5" fill="#fcd9b6"/>
-                                        <circle cx="50" cy="0" r="5.5" fill="#fcd9b6"/>
-                                        <g transform="translate(50 -6)">
-                                            <rect x="4" y="10" width="9" height="20" rx="3" fill="#581c87"/>
-                                            <rect x="0" y="0" width="24" height="12" rx="3" fill="#7e22ce"/>
-                                            <rect x="22" y="-3" width="12" height="18" rx="3" fill="#a855f7"/>
-                                            <circle cx="8" cy="20" r="6" fill="#fcd9b6"/>
+                                        <path d="M22 -4 L42 -3.3 Q45 -3.1 45 0 Q45 3.1 42 3.3 L22 4 Z" fill="#efbd94"/>
+                                        <path d="M-3 -6.8 Q10 -7.4 22.5 -5.8 Q25 0 22.5 5.8 Q10 7.4 -3 6.8 Q-7.5 0 -3 -6.8 Z" fill="url(#opsPolo1)"/>
+                                        <path d="M20 -5.9 Q22.5 0 20 5.9" stroke="#c2410c" stroke-width="1.3" fill="none" opacity=".4"/>
+                                        <g transform="translate(36 -19.5)">
+                                            <path d="M3.5 9 H12.5 L11.6 30 Q11.5 32 9.6 32 H6.4 Q4.4 32 4.4 30 Z" fill="#581c87"/>
+                                            <rect x="0" y="0" width="21" height="11" rx="4" fill="#7e22ce"/>
+                                            <rect x="2" y="1.4" width="17" height="2.6" rx="1.3" fill="#ffffff" opacity=".2"/>
+                                            <rect x="19" y="-3" width="11" height="17" rx="4" fill="#a855f7"/>
+                                            <rect x="27" y="0" width="3.2" height="11" rx="1.6" fill="#f3e8ff"/>
+                                            <path d="M12.5 11 q1.8 4.5 5 4.5" stroke="#3b0764" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                                            <rect x="2" y="13.5" width="13" height="12.5" rx="6" fill="#f5c7a1"/>
+                                            <path d="M4.2 17.8 H13 M4.2 21.6 H13" stroke="#d9a07a" stroke-width=".8" opacity=".75"/>
+                                            <ellipse cx="3.8" cy="12.6" rx="3.2" ry="2.3" fill="#f5c7a1"/>
+                                            <path class="beam-far" d="M30.2 5.5 L90 1 L90 10 Z" fill="url(#opsBeam)"/>
                                             <g class="spark">
-                                                <circle cx="36" cy="6" r="6" fill="#c084fc" opacity=".45"/>
-                                                <line x1="34" y1="6" x2="48" y2="6" stroke="#a855f7" stroke-width="3" stroke-linecap="round"/>
+                                                <circle cx="31.5" cy="5.5" r="5.5" fill="#fca5a5" opacity=".6"/>
+                                                <path d="M30.2 5.5 L48 2.5 L48 8.5 Z" fill="#ef4444" opacity=".85"/>
                                             </g>
                                         </g>
                                     </g>
@@ -1642,27 +1687,55 @@ html[data-view="mobile"] .pivot-table-heading{font-size:12.5px}
                                 </g>
 
                                 <!-- Ops (phải) -->
+                                <ellipse cx="251" cy="374" rx="32" ry="4.5" fill="#075985" opacity=".14"/>
                                 <g class="ops-person ops-person-2">
-                                    <rect x="238" y="326" width="12" height="42" rx="5.5" fill="#334155"/>
-                                    <rect x="252" y="326" width="12" height="42" rx="5.5" fill="#334155"/>
-                                    <rect x="233" y="364" width="19" height="8" rx="4" fill="#1e293b"/>
-                                    <rect x="250" y="364" width="19" height="8" rx="4" fill="#1e293b"/>
-                                    <path d="M229 268 Q229 248 251 248 Q273 248 273 268 L275 330 Q275 338 267 338 L235 338 Q227 338 227 330 Z" fill="#0ea5e9"/>
-                                    <path d="M227 322 H275 V330 Q275 338 267 338 H235 Q227 338 227 330 Z" fill="#0369a1" opacity=".28"/>
-                                    <path d="M241 248 L251 264 L261 248 Z" fill="#e0f2fe"/>
-                                    <path d="M236 266 Q228 268 223 276" fill="none" stroke="#0284c7" stroke-width="10" stroke-linecap="round"/>
-                                    <circle cx="221" cy="278" r="5.5" fill="#fcd9b6"/>
+                                    <g transform="translate(265.5 263) rotate(-5)">
+                                        <rect x="-4.3" y="14" width="8.6" height="27" rx="4.3" fill="#efbd94"/>
+                                        <circle cx="0" cy="43" r="5" fill="#f5c7a1"/>
+                                        <rect x="-5.8" y="-5" width="11.6" height="25" rx="5.8" fill="url(#opsPolo2)"/>
+                                    </g>
+                                    <rect x="239" y="310" width="26" height="12" rx="3" fill="url(#opsPants)"/>
+                                    <path d="M240 316 H251 L250.2 361 Q250.2 363 248.2 363 H242.8 Q240.8 363 240.8 361 Z" fill="url(#opsPants)"/>
+                                    <path d="M253 316 H264 L263.2 361 Q263.2 363 261.2 363 H255.8 Q253.8 363 253.8 361 Z" fill="url(#opsPants)"/>
+                                    <path d="M234 372 Q234 365.5 240 364.5 L251 364.5 L251 372 Z" fill="#f8fafc"/>
+                                    <path d="M253 364.5 L264 364.5 Q270 365.5 270 372 L253 372 Z" fill="#f8fafc"/>
+                                    <rect x="234" y="369.6" width="17" height="2.6" rx="1.3" fill="#cbd5e1"/>
+                                    <rect x="253" y="369.6" width="17" height="2.6" rx="1.3" fill="#cbd5e1"/>
+                                    <path d="M236 266 Q236 251 249 249 L253 249 Q266 251 266 266 L265 314 Q265 318 261 318 L240 318 Q237 318 237 314 Z" fill="url(#opsPolo2)"/>
+                                    <path d="M258 252 Q266 254 266 266 L265 314 Q265 318 261 318 L256 318 Z" fill="#075985" opacity=".13"/>
+                                    <path d="M238 311 H264" stroke="#0369a1" stroke-width="1" opacity=".3"/>
+                                    <path d="M244 249 Q251 246 258 249 L251 263 Z" fill="#f0f9ff"/>
+                                    <path d="M245.5 250 L251 288 L256.5 250" stroke="#f97316" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+                                    <rect x="246" y="286" width="10" height="13" rx="1.6" fill="#ffffff" stroke="#cbd5e1" stroke-width=".8"/>
+                                    <rect x="246" y="286" width="10" height="3.6" rx="1.2" fill="#f97316"/>
+                                    <circle cx="251" cy="293.2" r="2" fill="#cbd5e1"/>
+                                    <g transform="translate(240 290) rotate(-148.6)">
+                                        <rect x="0" y="-4.2" width="21" height="8.4" rx="4.2" fill="#efbd94"/>
+                                        <circle cx="22" cy="0" r="5.3" fill="#f5c7a1"/>
+                                        <ellipse cx="22.5" cy="-4.4" rx="3.2" ry="2.1" fill="#f5c7a1"/>
+                                    </g>
+                                    <circle cx="240" cy="290" r="4.6" fill="#efbd94"/>
+                                    <g transform="translate(238 264) rotate(-4)">
+                                        <rect x="-5.5" y="-4" width="11" height="30" rx="5.5" fill="url(#opsPolo2)"/>
+                                    </g>
                                     <g class="ops-head">
-                                        <rect x="245" y="238" width="12" height="13" rx="5" fill="#e9b98f"/>
-                                        <circle cx="231.5" cy="228" r="4" fill="#fcd9b6"/>
-                                        <circle cx="270.5" cy="228" r="4" fill="#fcd9b6"/>
-                                        <circle cx="251" cy="226" r="18" fill="#fcd9b6"/>
-                                        <path d="M232.5 226 Q231 202 251 202 Q271 202 269.5 226 Q267 213 257 211 Q247 215 240 218 Q235 220 232.5 226 Z" fill="#5b3a1e"/>
-                                        <path d="M241 222 q4 -2 8 0 M253 222 q4 -2 8 0" fill="none" stroke="#5b3a1e" stroke-width="1.3" stroke-linecap="round"/>
-                                        <circle class="eye" cx="245" cy="228" r="2" fill="#1e293b"/><circle class="eye" cx="257" cy="228" r="2" fill="#1e293b"/>
-                                        <circle cx="245.7" cy="227.2" r=".6" fill="#ffffff"/><circle cx="257.7" cy="227.2" r=".6" fill="#ffffff"/>
-                                        <circle cx="241" cy="235" r="2.8" fill="#fca5a5" opacity=".55"/><circle cx="261" cy="235" r="2.8" fill="#fca5a5" opacity=".55"/>
-                                        <path d="M246 238 q5 4 10 0" fill="none" stroke="#9a3412" stroke-width="1.5" stroke-linecap="round"/>
+                                        <path class="ops-pony" d="M262 215 Q278 213 277 236 Q276 250 269 255 Q272 243 269 232 Q267 224 261 223 Z" fill="#6b4226"/>
+                                        <circle cx="263" cy="217" r="2.8" fill="#f97316"/>
+                                        <rect x="246" y="236" width="10" height="15" rx="4" fill="#e6b088"/>
+                                        <path d="M246 243 Q251 248.5 256 243 V239 H246 Z" fill="#c98c64" opacity=".5"/>
+                                        <circle cx="237" cy="226" r="3" fill="#f5c7a1"/><circle cx="265" cy="226" r="3" fill="#f5c7a1"/>
+                                        <circle cx="265.4" cy="230.2" r="1" fill="#fbbf24"/>
+                                        <ellipse cx="251" cy="224" rx="14" ry="16.3" fill="url(#opsSkin)"/>
+                                        <path d="M236.5 225 Q233.5 204 250 200.5 Q267.5 199.5 266.5 221 Q266.4 225 265.5 228 Q264 215.5 256 212.5 Q248 216.5 242 218.5 Q238 220.5 236.5 228 Z" fill="#7c4a2d"/>
+                                        <path d="M236.5 224 Q234.5 236 238 245 Q240.5 236 241.5 226 Z" fill="#7c4a2d"/>
+                                        <path d="M243 207 Q250.5 203 259 205" stroke="#b07a52" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".85"/>
+                                        <path d="M242.8 220 q3 -2.4 6 -.6 M253.2 219.4 q3 -1.8 6 .6" stroke="#6b4226" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                                        <ellipse class="eye" cx="245.8" cy="225.6" rx="1.9" ry="2.4" fill="#1e293b"/><ellipse class="eye" cx="256.2" cy="225.6" rx="1.9" ry="2.4" fill="#1e293b"/>
+                                        <path d="M243.2 224 q2.6 -2.2 5.2 0 M253.6 224 q2.6 -2.2 5.2 0" stroke="#1e293b" stroke-width="1" fill="none" stroke-linecap="round"/>
+                                        <circle cx="246.4" cy="224.8" r=".65" fill="#ffffff"/><circle cx="256.8" cy="224.8" r=".65" fill="#ffffff"/>
+                                        <path d="M251 227.5 q-1.7 3.7 .5 4.9" stroke="#d29a72" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+                                        <circle cx="241.6" cy="231" r="2.5" fill="#fca5a5" opacity=".4"/><circle cx="260.4" cy="231" r="2.5" fill="#fca5a5" opacity=".4"/>
+                                        <path d="M246.8 235.3 q4.2 3.8 8.4 0" stroke="#b4474a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
                                     </g>
                                 </g>
 
